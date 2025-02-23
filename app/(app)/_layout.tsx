@@ -11,9 +11,23 @@ export default function AppLayout() {
 	const { colorScheme } = useColorScheme();
 
 	return (
-		<Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
+		<Stack screenOptions={{ headerShown: false }}>
 			<Stack.Screen name="(protected)" />
 			<Stack.Screen name="welcome" />
+			<Stack.Screen
+				name="gemstone/[id]"
+				options={{
+					presentation: "card",
+					headerShown: true,
+					title: "",
+					headerBackTitle: "Back",
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					gestureEnabled: true,
+				}}
+			/>
 			<Stack.Screen
 				name="sign-up"
 				options={{

@@ -208,6 +208,7 @@ export default function AddNewGemstone() {
 					mode="contained"
 					onPress={handleSubmit}
 					loading={createGemstone.isPending}
+					disabled={createGemstone.isPending}
 					style={styles.button}
 				>
 					Add Gemstone
