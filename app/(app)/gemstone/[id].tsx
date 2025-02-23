@@ -7,6 +7,7 @@ import { H3, P } from "@/components/ui/typography";
 import { supabase } from "@/config/supabase";
 import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
+import { useSignedUrls } from "@/hooks/useSignedUrl";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams } from "expo-router";
@@ -21,17 +22,24 @@ import {
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 import { Stack } from "expo-router";
+import { useSupabase } from "@/context/supabase-provider";
 
 export default function GemstoneDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { data: gemstone, isLoading } = useGemstone(id);
 	const updateGemstone = useUpdateGemstone();
+	const { activeOrganization } = useSupabase();
+	const { signedUrls, isLoading: isLoadingUrls } = useSignedUrls(
+		gemstone?.pictures,
+		id,
+	);
+
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<Partial<typeof gemstone>>({});
 	const [uploadingImage, setUploadingImage] = useState(false);
 	const [uploadingCertificate, setUploadingCertificate] = useState(false);
 
-	if (isLoading || !gemstone) {
+	if (isLoading || !gemstone || isLoadingUrls) {
 		return (
 			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" />
@@ -58,15 +66,23 @@ export default function GemstoneDetail() {
 				const formData = new FormData();
 				formData.append("file", file as any);
 
+				const filePath = `${activeOrganization?.id}/${gemstone.id}/${file.name}`;
+
 				const { data, error } = await supabase.storage
-					.from("gemstone-images")
-					.upload(`${gemstone.id}/${file.name}`, formData);
+					.from("gemstone")
+					.upload(filePath, formData);
 
 				if (error) throw error;
 
-				const imageUrl = supabase.storage
-					.from("gemstone-images")
-					.getPublicUrl(data.path).data.publicUrl;
+				// Get a signed URL immediately after upload
+				const { data: signedUrlData } = await supabase.storage
+					.from("gemstone")
+					.createSignedUrl(filePath, 60 * 60);
+
+				const imageUrl =
+					signedUrlData?.signedUrl ||
+					supabase.storage.from("gemstone").getPublicUrl(data.path).data
+						.publicUrl;
 
 				await updateGemstone.mutateAsync({
 					id: gemstone.id,
@@ -99,7 +115,10 @@ export default function GemstoneDetail() {
 
 				const { data, error } = await supabase.storage
 					.from("certificates")
-					.upload(`${gemstone.id}/${file.name}`, formData);
+					.upload(
+						`${activeOrganization?.id}/${gemstone.id}/${file.name}`,
+						formData,
+					);
 
 				if (error) throw error;
 
@@ -177,8 +196,16 @@ export default function GemstoneDetail() {
 					style={styles.imageScroll}
 					contentContainerStyle={styles.imageContainer}
 				>
-					{gemstone.pictures?.map((url: string, index: number) => (
-						<Image key={index} source={{ uri: url }} style={styles.image} />
+					{signedUrls.map((imageSource, index) => (
+						<Image
+							key={index}
+							source={imageSource}
+							style={styles.image}
+							resizeMode="cover"
+							onError={(error) =>
+								console.error("Image loading error:", error.nativeEvent)
+							}
+						/>
 					))}
 					<Button
 						mode="outlined"

@@ -15,11 +15,11 @@ type SupabaseContextProps = {
 	signUp: (email: string, password: string) => Promise<void>;
 	signInWithPassword: (email: string, password: string) => Promise<void>;
 	signOut: () => Promise<void>;
-	fetchGemstones: () => Promise<Tables<"stones">[]>;
 	createGemstone: (
 		gemstone: CreateGemstoneInputType,
 	) => Promise<Tables<"stones">>;
-	fetchUserOrganizations: () => Promise<Tables<"organizations">[]>;
+	activeOrganization: Tables<"organizations"> | null;
+	setActiveOrganization: (organization: Tables<"organizations">) => void;
 };
 
 type SupabaseProviderProps = {
@@ -33,9 +33,9 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	signUp: async () => {},
 	signInWithPassword: async () => {},
 	signOut: async () => {},
-	fetchGemstones: async () => [],
 	createGemstone: async () => new Promise((resolve) => resolve({} as any)),
-	fetchUserOrganizations: async () => [] as Tables<"organizations">[],
+	activeOrganization: null,
+	setActiveOrganization: async () => {},
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -44,6 +44,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const router = useRouter();
 	const segments = useSegments();
 	const [user, setUser] = useState<User | null>(null);
+	const [activeOrganization, setActiveOrganization] =
+		useState<Tables<"organizations"> | null>(null);
 	const [session, setSession] = useState<Session | null>(null);
 	const [initialized, setInitialized] = useState<boolean>(false);
 
@@ -101,6 +103,11 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		return data;
 	};
 
+	useEffect(() => {
+		fetchUserOrganizations();
+		fetchGemstones();
+	}, [user]);
+
 	const fetchUserOrganizations = async () => {
 		const { data: memberships, error: membersError } = await supabase
 			.from("organization_members")
@@ -126,6 +133,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			throw orgsError;
 		}
 
+		setActiveOrganization(organizations);
 		return organizations ? [organizations] : [];
 	};
 
@@ -172,9 +180,9 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				signUp,
 				signInWithPassword,
 				signOut,
-				fetchGemstones,
 				createGemstone,
-				fetchUserOrganizations,
+				activeOrganization,
+				setActiveOrganization,
 			}}
 		>
 			{children}

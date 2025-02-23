@@ -4,19 +4,32 @@ import { Card, Title } from "react-native-paper";
 import { Badge } from "./ui/badge";
 import { P } from "./ui/typography";
 import { router } from "expo-router";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
+import { ActivityIndicator } from "react-native-paper";
 
 const GemstoneCard = ({ gemstone }: { gemstone: Tables<"stones"> }) => {
+	const { signedUrl, isLoading } = useSignedUrl(
+		gemstone.pictures?.[0],
+		gemstone.id,
+	);
+
+	const defaultImage = "https://place-hold.it/300x300.jpg/666/fff/000";
+
 	return (
 		<Pressable onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}>
 			<Card style={styles.card}>
-				<Image
-					source={{
-						uri:
-							gemstone.pictures?.[0] ||
-							"https://place-hold.it/300x300.jpg/666/fff/000",
-					}}
-					style={styles.image}
-				/>
+				{isLoading ? (
+					<View style={[styles.image, styles.loadingContainer]}>
+						<ActivityIndicator size="large" />
+					</View>
+				) : (
+					<Image
+						source={{
+							uri: signedUrl?.uri || defaultImage,
+						}}
+						style={styles.image}
+					/>
+				)}
 				<Card.Content>
 					<Title style={styles.title}>{gemstone.name}</Title>
 					<View style={styles.chipsWrapper}>
@@ -55,6 +68,11 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		borderBottomEndRadius: 0,
 		borderBottomStartRadius: 0,
+	},
+	loadingContainer: {
+		backgroundColor: "#f5f5f5",
+		justifyContent: "center",
+		alignItems: "center",
 	},
 	chipsWrapper: {
 		flexDirection: "row",

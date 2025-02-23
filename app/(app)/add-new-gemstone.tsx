@@ -4,8 +4,8 @@ import {
 	GemstoneShape,
 } from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
+import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
-import { useOrganizations } from "@/hooks/useOrganizations";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
@@ -24,8 +24,7 @@ type ValidationError = {
 };
 
 export default function AddNewGemstone() {
-	const { data: organizations = [], isLoading: isLoadingOrgs } =
-		useOrganizations();
+	const { activeOrganization } = useSupabase();
 	const createGemstone = useCreateGemstone();
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [error, setError] = useState<ValidationError | null>(null);
@@ -77,7 +76,7 @@ export default function AddNewGemstone() {
 	};
 
 	const validateForm = (): ValidationError | null => {
-		if (!organizations.length) {
+		if (!activeOrganization) {
 			return {
 				field: "organization",
 				message: "No organization found. Please join an organization first.",
@@ -119,10 +118,14 @@ export default function AddNewGemstone() {
 			return;
 		}
 
+		if (!activeOrganization) {
+			return;
+		}
+
 		try {
 			await createGemstone.mutateAsync({
 				...formData,
-				organization_id: organizations[0].id,
+				organization_id: activeOrganization.id,
 				pictures: [],
 				weight: formData.weight ? parseFloat(formData.weight) : null,
 				dimensions: Object.values(formData.dimensions).some((v) => v)
@@ -140,15 +143,7 @@ export default function AddNewGemstone() {
 		}
 	};
 
-	if (isLoadingOrgs) {
-		return (
-			<View style={styles.container}>
-				<ActivityIndicator size="large" />
-			</View>
-		);
-	}
-
-	if (!organizations.length) {
+	if (!activeOrganization) {
 		return (
 			<View style={styles.container}>
 				<H3>No organization found. Please join an organization first.</H3>
