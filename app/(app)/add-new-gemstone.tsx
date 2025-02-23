@@ -161,6 +161,7 @@ export default function AddNewGemstone() {
 			<ScrollView style={styles.container}>
 				<TextInput
 					label="Name"
+					mode="outlined"
 					value={formData.name}
 					onChangeText={(value) => updateField("name", value)}
 					style={[styles.input, error?.field === "name" && styles.inputError]}
@@ -170,7 +171,7 @@ export default function AddNewGemstone() {
 				<View style={styles.input}>
 					<Dropdown
 						label="Shape"
-						mode="flat"
+						mode="outlined"
 						hideMenuHeader
 						menuContentStyle={{ top: -50 }}
 						value={formData.shape}
@@ -185,7 +186,7 @@ export default function AddNewGemstone() {
 				<View style={styles.input}>
 					<Dropdown
 						label="Color"
-						mode="flat"
+						mode="outlined"
 						hideMenuHeader
 						menuContentStyle={{ top: -50 }}
 						value={formData.color}
@@ -200,7 +201,7 @@ export default function AddNewGemstone() {
 				<View style={styles.input}>
 					<Dropdown
 						label="Cut"
-						mode="flat"
+						mode="outlined"
 						hideMenuHeader
 						menuContentStyle={{ top: -50 }}
 						value={formData.cut}
@@ -214,6 +215,7 @@ export default function AddNewGemstone() {
 
 				<TextInput
 					label="Weight (carats)"
+					mode="outlined"
 					value={formData.weight}
 					onChangeText={(value) => handleNumericInput(value, "weight")}
 					keyboardType="decimal-pad"
@@ -223,6 +225,7 @@ export default function AddNewGemstone() {
 
 				<TextInput
 					label="Identification"
+					mode="outlined"
 					value={formData.identification}
 					onChangeText={(value) => updateField("identification", value)}
 					style={styles.input}
@@ -231,29 +234,33 @@ export default function AddNewGemstone() {
 				<View style={styles.dimensionsContainer}>
 					<TextInput
 						label="Length"
+						mode="outlined"
 						value={formData.dimensions.length}
 						onChangeText={(value) => handleDimensionInput(value, "length")}
 						keyboardType="decimal-pad"
-						style={[styles.input, styles.dimensionInput]}
+						style={styles.dimensionInput}
 					/>
 					<TextInput
 						label="Width"
+						mode="outlined"
 						value={formData.dimensions.width}
 						onChangeText={(value) => handleDimensionInput(value, "width")}
 						keyboardType="decimal-pad"
-						style={[styles.input, styles.dimensionInput]}
+						style={styles.dimensionInput}
 					/>
 					<TextInput
 						label="Height"
+						mode="outlined"
 						value={formData.dimensions.height}
 						onChangeText={(value) => handleDimensionInput(value, "height")}
 						keyboardType="decimal-pad"
-						style={[styles.input, styles.dimensionInput]}
+						style={styles.dimensionInput}
 					/>
 				</View>
 
 				<TextInput
 					label="Comments"
+					mode="outlined"
 					value={formData.comment}
 					onChangeText={(value) => updateField("comment", value)}
 					multiline
@@ -312,10 +319,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		marginBottom: 16,
+		gap: 16,
 	},
 	dimensionInput: {
 		flex: 1,
-		marginHorizontal: 4,
 	},
 	button: {
 		marginTop: 8,
