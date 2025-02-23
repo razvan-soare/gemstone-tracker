@@ -3,6 +3,8 @@ import { useRouter, useSegments, SplashScreen } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { supabase } from "@/config/supabase";
+import { Tables } from "@/lib/database.types";
+import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,6 +15,11 @@ type SupabaseContextProps = {
 	signUp: (email: string, password: string) => Promise<void>;
 	signInWithPassword: (email: string, password: string) => Promise<void>;
 	signOut: () => Promise<void>;
+	fetchGemstones: () => Promise<Tables<"stones">[]>;
+	createGemstone: (
+		gemstone: CreateGemstoneInputType,
+	) => Promise<Tables<"stones">>;
+	fetchUserOrganizations: () => Promise<Tables<"organizations">[]>;
 };
 
 type SupabaseProviderProps = {
@@ -26,6 +33,9 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	signUp: async () => {},
 	signInWithPassword: async () => {},
 	signOut: async () => {},
+	fetchGemstones: async () => [],
+	createGemstone: async () => new Promise((resolve) => resolve({} as any)),
+	fetchUserOrganizations: async () => [] as Tables<"organizations">[],
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -62,6 +72,61 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		if (error) {
 			throw error;
 		}
+	};
+
+	const fetchGemstones = async () => {
+		const { data, error } = await supabase
+			.from("stones")
+			.select("*")
+			.order("created_at", { ascending: false });
+
+		if (error) {
+			throw error;
+		}
+
+		return data;
+	};
+
+	const createGemstone = async (gemstone: CreateGemstoneInputType) => {
+		const { data, error } = await supabase
+			.from("stones")
+			.insert(gemstone)
+			.select()
+			.single();
+
+		if (error) {
+			throw error;
+		}
+
+		return data;
+	};
+
+	const fetchUserOrganizations = async () => {
+		const { data: memberships, error: membersError } = await supabase
+			.from("organization_members")
+			.select("organization_id")
+			.eq("user_id", user?.id)
+			.limit(1);
+
+		if (membersError) {
+			throw membersError;
+		}
+
+		if (!memberships?.length) {
+			return [];
+		}
+
+		const { data: organizations, error: orgsError } = await supabase
+			.from("organizations")
+			.select("*")
+			.eq("id", memberships[0].organization_id)
+			.single();
+
+		if (orgsError) {
+			throw orgsError;
+		}
+
+		return organizations ? [organizations] : [];
 	};
 
 	useEffect(() => {
@@ -107,6 +172,9 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				signUp,
 				signInWithPassword,
 				signOut,
+				fetchGemstones,
+				createGemstone,
+				fetchUserOrganizations,
 			}}
 		>
 			{children}
