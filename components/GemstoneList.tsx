@@ -13,15 +13,23 @@ export type ViewSettings = {
 	columnsCount: 1 | 2 | 3;
 };
 
+type GemstoneListProps = {
+	gemstones: Tables<"stones">[];
+	isLoading: boolean;
+	viewSettings: ViewSettings;
+	onLoadMore: () => void;
+	hasNextPage: boolean;
+	isFetchingNextPage: boolean;
+};
+
 const GemstoneList = ({
 	gemstones,
 	isLoading,
 	viewSettings,
-}: {
-	gemstones: Tables<"stones">[];
-	isLoading: boolean;
-	viewSettings: ViewSettings;
-}) => {
+	onLoadMore,
+	hasNextPage,
+	isFetchingNextPage,
+}: GemstoneListProps) => {
 	const windowWidth = Dimensions.get("window").width;
 	const padding = 16;
 	const spacing = 16;
@@ -30,13 +38,23 @@ const GemstoneList = ({
 		(availableWidth - spacing * (viewSettings.columnsCount - 1)) /
 		viewSettings.columnsCount;
 
-	if (isLoading) {
+	if (isLoading && !isFetchingNextPage) {
 		return (
 			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" />
 			</View>
 		);
 	}
+
+	const renderFooter = () => {
+		if (!hasNextPage) return null;
+
+		return (
+			<View style={styles.footer}>
+				<ActivityIndicator size="small" />
+			</View>
+		);
+	};
 
 	return (
 		<FlatList
@@ -55,12 +73,19 @@ const GemstoneList = ({
 			keyExtractor={(item) => item.id}
 			contentContainerStyle={styles.listContainer}
 			numColumns={viewSettings.columnsCount}
-			key={viewSettings.columnsCount} // Force re-render when columns change
+			key={viewSettings.columnsCount}
+			onEndReached={() => {
+				if (hasNextPage && !isFetchingNextPage) {
+					onLoadMore();
+				}
+			}}
+			onEndReachedThreshold={0.5}
 			ListEmptyComponent={() => (
 				<View style={styles.emptyContainer}>
 					<Text>No gemstones found</Text>
 				</View>
 			)}
+			ListFooterComponent={renderFooter}
 		/>
 	);
 };
@@ -79,6 +104,10 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		padding: 20,
+	},
+	footer: {
+		padding: 16,
+		alignItems: "center",
 	},
 });
 

@@ -16,15 +16,13 @@ export default function Home() {
 		columnsCount: 2,
 	});
 
-	const { data: gemstones = [], isLoading } = useGemstones();
+	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+		useGemstones({
+			search: searchQuery,
+			shape: filterShape,
+		});
 
-	const filteredGemstones = gemstones
-		.filter((gem) => gem.name.toLowerCase().includes(searchQuery.toLowerCase()))
-		.filter((gem) =>
-			filterShape
-				? gem.shape?.toLowerCase() === filterShape.toLowerCase()
-				: true,
-		);
+	const gemstones = data?.pages.flatMap((page) => page.items) ?? [];
 
 	return (
 		<PaperProvider>
@@ -43,9 +41,12 @@ export default function Home() {
 				</View>
 
 				<GemstoneList
-					gemstones={filteredGemstones}
+					gemstones={gemstones}
 					isLoading={isLoading}
 					viewSettings={viewSettings}
+					onLoadMore={fetchNextPage}
+					hasNextPage={!!hasNextPage}
+					isFetchingNextPage={isFetchingNextPage}
 				/>
 				<FAB
 					icon="plus"
