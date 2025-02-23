@@ -1,5 +1,6 @@
 import { supabase } from "@/config/supabase";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { parseSearchQuery } from "@/utils/searchParser";
 
 type GemstoneFilters = {
 	search?: string;
@@ -7,6 +8,19 @@ type GemstoneFilters = {
 };
 
 const ITEMS_PER_PAGE = 20;
+
+const buildSearchQuery = (term: string) => {
+	const isNumber = !Number.isNaN(Number(term));
+	if (isNumber) {
+		return `weight.eq.${Number(term).toFixed(2)}`;
+	}
+	return (
+		`name.ilike.%${term}%,` +
+		`shape.ilike.%${term}%,` +
+		`color.ilike.%${term}%,` +
+		`cut.ilike.%${term}%`
+	);
+};
 
 export const useGemstones = (filters: GemstoneFilters = {}) => {
 	return useInfiniteQuery({
@@ -22,13 +36,16 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 
 			// Add search filter if provided
 			if (filters.search) {
-				query = query.or(
-					`name.ilike.%${filters.search}%,` +
-						`shape.ilike.%${filters.search}%,` +
-						`color.ilike.%${filters.search}%,` +
-						`cut.ilike.%${filters.search}%` +
-						`weight.ilike.%${filters.search}%`,
-				);
+				const queryInput = parseSearchQuery(filters.search);
+				if (queryInput.type === "AND") {
+					for (const clause of queryInput.terms) {
+						query = query.or(buildSearchQuery(clause));
+					}
+				} else if (queryInput.type === "OR") {
+					query = query.or(queryInput.terms.map(buildSearchQuery).join(","));
+				} else {
+					query = query.or(buildSearchQuery(queryInput.terms[0]));
+				}
 			}
 
 			// Add shape filter if provided
@@ -36,6 +53,7 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 				query = query.eq("shape", filters.shape);
 			}
 
+			console.log("🟥", query);
 			const { data, error, count } = await query;
 
 			if (error) {
