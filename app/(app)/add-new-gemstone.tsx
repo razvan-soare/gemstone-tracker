@@ -1,20 +1,15 @@
+import {
+	GemstoneColor,
+	GemstoneCut,
+	GemstoneShape,
+} from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
 import { useOrganizations } from "@/hooks/useOrganizations";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import {
-	Button,
-	TextInput,
-	SegmentedButtons,
-	PaperProvider,
-} from "react-native-paper";
-import {
-	GemstoneShape,
-	GemstoneColor,
-	GemstoneCut,
-} from "@/app/types/gemstone";
+import { Button, PaperProvider, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 
 export default function AddNewGemstone() {

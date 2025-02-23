@@ -20,7 +20,7 @@ const FilterButton = ({
 	};
 
 	return (
-		<View style={styles.container}>
+		<View>
 			<Menu
 				visible={visible}
 				onDismiss={closeMenu}
@@ -41,10 +41,6 @@ const FilterButton = ({
 };
 
 const styles = StyleSheet.create({
-	container: {
-		paddingHorizontal: 16,
-		marginBottom: 16,
-	},
 	button: {
 		width: "100%",
 	},
