@@ -4,7 +4,6 @@ import { parseSearchQuery } from "@/utils/searchParser";
 
 type GemstoneFilters = {
 	search?: string;
-	shape?: string;
 };
 
 const ITEMS_PER_PAGE = 20;
@@ -48,12 +47,6 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 				}
 			}
 
-			// Add shape filter if provided
-			if (filters.shape) {
-				query = query.eq("shape", filters.shape);
-			}
-
-			console.log("🟥", query);
 			const { data, error, count } = await query;
 
 			if (error) {

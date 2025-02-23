@@ -3,7 +3,6 @@ import { useState } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { FAB, PaperProvider } from "react-native-paper";
 
-import FilterButton from "@/components/FilterButton";
 import GemstoneList, { ViewSettings } from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
 import ViewSettingsButton from "@/components/ViewSettingsButton";
@@ -11,7 +10,7 @@ import { useGemstones } from "@/hooks/useGemstones";
 
 export default function Home() {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [filterShape, setFilterShape] = useState("");
+
 	const [viewSettings, setViewSettings] = useState<ViewSettings>({
 		columnsCount: 2,
 	});
@@ -19,7 +18,6 @@ export default function Home() {
 	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useGemstones({
 			search: searchQuery,
-			shape: filterShape,
 		});
 
 	const gemstones = data?.pages.flatMap((page) => page.items) ?? [];
@@ -36,7 +34,7 @@ export default function Home() {
 					/>
 				</View>
 				<View style={styles.headerButtons}>
-					<FilterButton setFilterShape={setFilterShape} />
+					<View></View>
 					<ViewSettingsButton setViewSettings={setViewSettings} />
 				</View>
 
