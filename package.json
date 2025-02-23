@@ -12,6 +12,8 @@
 	"dependencies": {
 		"@hookform/resolvers": "^3.9.1",
 		"@react-native-async-storage/async-storage": "1.23.1",
+		"@rn-primitives/slot": "^1.1.0",
+		"@rn-primitives/types": "^1.1.0",
 		"@supabase/supabase-js": "^2.46.1",
 		"@tanstack/react-query": "^5.66.9",
 		"class-variance-authority": "^0.7.0",

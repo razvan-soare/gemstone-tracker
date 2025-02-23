@@ -1,6 +1,7 @@
 import { Tables } from "@/lib/database.types";
 import { Image, StyleSheet, View } from "react-native";
-import { Card, Chip, Title } from "react-native-paper";
+import { Card, Title } from "react-native-paper";
+import { Badge } from "./ui/badge";
 import { P } from "./ui/typography";
 
 const GemstoneCard = ({ gemstone }: { gemstone: Tables<"stones"> }) => {
@@ -17,18 +18,18 @@ const GemstoneCard = ({ gemstone }: { gemstone: Tables<"stones"> }) => {
 			<Card.Content>
 				<Title style={styles.title}>{gemstone.name}</Title>
 				<View style={styles.chipsWrapper}>
-					<Chip mode="outlined">
+					<Badge variant="outline" style={styles.chipBox}>
 						<P style={styles.chip}>{gemstone.shape}</P>
-					</Chip>
-					<Chip mode="outlined">
+					</Badge>
+					<Badge variant="outline" style={styles.chipBox}>
 						<P style={styles.chip}>{gemstone.weight} kt</P>
-					</Chip>
-					<Chip mode="outlined">
+					</Badge>
+					<Badge variant="outline" style={styles.chipBox}>
 						<P style={styles.chip}>{gemstone.color}</P>
-					</Chip>
-					<Chip mode="outlined">
+					</Badge>
+					<Badge variant="outline" style={styles.chipBox}>
 						<P style={styles.chip}>{gemstone.cut}</P>
-					</Chip>
+					</Badge>
 				</View>
 			</Card.Content>
 		</Card>
@@ -56,6 +57,10 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		flexWrap: "wrap",
 		gap: 4,
+	},
+	chipBox: {
+		borderRadius: 6,
+		borderColor: "#555",
 	},
 	chip: {
 		padding: 0,
