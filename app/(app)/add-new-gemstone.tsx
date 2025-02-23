@@ -9,13 +9,26 @@ import { useOrganizations } from "@/hooks/useOrganizations";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import { Button, PaperProvider, TextInput } from "react-native-paper";
+import {
+	Button,
+	PaperProvider,
+	TextInput,
+	Snackbar,
+	MD2Colors,
+} from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
+
+type ValidationError = {
+	field: string;
+	message: string;
+};
 
 export default function AddNewGemstone() {
 	const { data: organizations = [], isLoading: isLoadingOrgs } =
 		useOrganizations();
 	const createGemstone = useCreateGemstone();
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
+	const [error, setError] = useState<ValidationError | null>(null);
 
 	const [formData, setFormData] = useState({
 		name: "",
@@ -63,9 +76,46 @@ export default function AddNewGemstone() {
 		updateDimension(dimension, numericValue);
 	};
 
-	const handleSubmit = async () => {
+	const validateForm = (): ValidationError | null => {
 		if (!organizations.length) {
-			console.error("No organization found");
+			return {
+				field: "organization",
+				message: "No organization found. Please join an organization first.",
+			};
+		}
+
+		if (!formData.name.trim()) {
+			return {
+				field: "name",
+				message: "Name is required",
+			};
+		}
+
+		if (formData.weight && isNaN(parseFloat(formData.weight))) {
+			return {
+				field: "weight",
+				message: "Weight must be a valid number",
+			};
+		}
+
+		const dimensions = Object.entries(formData.dimensions);
+		for (const [key, value] of dimensions) {
+			if (value && isNaN(parseFloat(value))) {
+				return {
+					field: `dimensions.${key}`,
+					message: `${key.charAt(0).toUpperCase() + key.slice(1)} must be a valid number`,
+				};
+			}
+		}
+
+		return null;
+	};
+
+	const handleSubmit = async () => {
+		const validationError = validateForm();
+		if (validationError) {
+			setError(validationError);
+			setSnackbarVisible(true);
 			return;
 		}
 
@@ -81,6 +131,11 @@ export default function AddNewGemstone() {
 			});
 			router.back();
 		} catch (error) {
+			setError({
+				field: "submit",
+				message: "Failed to create gemstone. Please try again later.",
+			});
+			setSnackbarVisible(true);
 			console.error("Error creating gemstone:", error);
 		}
 	};
@@ -108,7 +163,8 @@ export default function AddNewGemstone() {
 					label="Name"
 					value={formData.name}
 					onChangeText={(value) => updateField("name", value)}
-					style={styles.input}
+					style={[styles.input, error?.field === "name" && styles.inputError]}
+					error={error?.field === "name"}
 				/>
 
 				<View style={styles.input}>
@@ -161,7 +217,8 @@ export default function AddNewGemstone() {
 					value={formData.weight}
 					onChangeText={(value) => handleNumericInput(value, "weight")}
 					keyboardType="decimal-pad"
-					style={styles.input}
+					style={[styles.input, error?.field === "weight" && styles.inputError]}
+					error={error?.field === "weight"}
 				/>
 
 				<TextInput
@@ -213,6 +270,25 @@ export default function AddNewGemstone() {
 				>
 					Add Gemstone
 				</Button>
+
+				<Snackbar
+					visible={snackbarVisible}
+					onDismiss={() => {
+						setSnackbarVisible(false);
+						setError(null);
+					}}
+					duration={4000}
+					style={styles.errorSnackbar}
+					action={{
+						label: "Dismiss",
+						onPress: () => {
+							setSnackbarVisible(false);
+							setError(null);
+						},
+					}}
+				>
+					{error?.message || ""}
+				</Snackbar>
 			</ScrollView>
 		</PaperProvider>
 	);
@@ -229,6 +305,9 @@ const styles = StyleSheet.create({
 	input: {
 		marginBottom: 16,
 	},
+	inputError: {
+		borderColor: MD2Colors.red500,
+	},
 	dimensionsContainer: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -241,5 +320,9 @@ const styles = StyleSheet.create({
 	button: {
 		marginTop: 8,
 		marginBottom: 24,
+	},
+
+	errorSnackbar: {
+		backgroundColor: MD2Colors.red800,
 	},
 });
