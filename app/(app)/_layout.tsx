@@ -52,12 +52,13 @@ export default function AppLayout() {
 					gestureEnabled: true,
 				}}
 			/>
+
 			<Stack.Screen
-				name="modal"
+				name="add-new-gemstone"
 				options={{
 					presentation: "modal",
 					headerShown: true,
-					headerTitle: "Modal",
+					headerTitle: "Add New Gemstone",
 					headerStyle: {
 						backgroundColor:
 							colorScheme === "dark"

@@ -1,12 +1,12 @@
-import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
-import { Button, TextInput } from "react-native-paper";
-import { useState } from "react";
+import { H3 } from "@/components/ui/typography";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
 import { useOrganizations } from "@/hooks/useOrganizations";
-import { H1, H3 } from "@/components/ui/typography";
+import { router } from "expo-router";
+import { useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { Button, TextInput } from "react-native-paper";
 
-export default function Modal() {
+export default function AddNewGemstone() {
 	const { data: organizations = [], isLoading: isLoadingOrgs } =
 		useOrganizations();
 	const createGemstone = useCreateGemstone();
@@ -80,8 +80,6 @@ export default function Modal() {
 
 	return (
 		<ScrollView style={styles.container}>
-			<H1 style={styles.title}>Add New Gemstone</H1>
-
 			<TextInput
 				label="Name"
 				value={formData.name}
@@ -169,7 +167,6 @@ export default function Modal() {
 		</ScrollView>
 	);
 }
-
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

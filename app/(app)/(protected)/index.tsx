@@ -1,11 +1,11 @@
-import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
-import { PaperProvider, FAB } from "react-native-paper";
-import { useState } from "react";
 import { router } from "expo-router";
+import { useState } from "react";
+import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
+import { FAB, PaperProvider } from "react-native-paper";
 
-import SearchBar from "@/components/SearchBar";
 import FilterButton from "@/components/FilterButton";
 import GemstoneList from "@/components/GemstoneList";
+import SearchBar from "@/components/SearchBar";
 import { useGemstones } from "@/hooks/useGemstones";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
 				<FAB
 					icon="plus"
 					style={styles.fab}
-					onPress={() => router.push("/(app)/modal")}
+					onPress={() => router.push("/(app)/add-new-gemstone")}
 				/>
 			</SafeAreaView>
 		</PaperProvider>
