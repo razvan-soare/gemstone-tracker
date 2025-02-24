@@ -4,13 +4,12 @@ import {
 	GemstoneShape,
 } from "@/app/types/gemstone";
 import { H3, P } from "@/components/ui/typography";
-import { supabase } from "@/config/supabase";
 import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
-import { useSignedUrls } from "@/hooks/useSignedUrl";
-import * as DocumentPicker from "expo-document-picker";
-import * as ImagePicker from "expo-image-picker";
-import { useLocalSearchParams } from "expo-router";
+
+import { useSupabase } from "@/context/supabase-provider";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Image, Linking, ScrollView, StyleSheet, View } from "react-native";
 import {
@@ -21,122 +20,29 @@ import {
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
-import { Stack } from "expo-router";
-import { useSupabase } from "@/context/supabase-provider";
 
 export default function GemstoneDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { data: gemstone, isLoading } = useGemstone(id);
 	const updateGemstone = useUpdateGemstone();
 	const { activeOrganization } = useSupabase();
-	const { signedUrls, isLoading: isLoadingUrls } = useSignedUrls(
-		gemstone?.pictures,
-		id,
-	);
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<Partial<typeof gemstone>>({});
 	const [uploadingImage, setUploadingImage] = useState(false);
 	const [uploadingCertificate, setUploadingCertificate] = useState(false);
 
-	if (isLoading || !gemstone || isLoadingUrls) {
+	const { uploading, takePhoto, pickImage } = useImageUpload(
+		`${activeOrganization?.id}/${gemstone?.id}`,
+	);
+
+	if (isLoading || !gemstone) {
 		return (
 			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" />
 			</View>
 		);
 	}
-
-	const handleImagePick = async () => {
-		try {
-			setUploadingImage(true);
-			const result = await ImagePicker.launchImageLibraryAsync({
-				mediaTypes: ImagePicker.MediaTypeOptions.Images,
-				allowsEditing: true,
-				quality: 1,
-			});
-
-			if (!result.canceled) {
-				const file = {
-					uri: result.assets[0].uri,
-					name: `gemstone-${Date.now()}.jpg`,
-					type: "image/jpeg",
-				};
-
-				const formData = new FormData();
-				formData.append("file", file as any);
-
-				const filePath = `${activeOrganization?.id}/${gemstone.id}/${file.name}`;
-
-				const { data, error } = await supabase.storage
-					.from("gemstone")
-					.upload(filePath, formData);
-
-				if (error) throw error;
-
-				// Get a signed URL immediately after upload
-				const { data: signedUrlData } = await supabase.storage
-					.from("gemstone")
-					.createSignedUrl(filePath, 60 * 60);
-
-				const imageUrl =
-					signedUrlData?.signedUrl ||
-					supabase.storage.from("gemstone").getPublicUrl(data.path).data
-						.publicUrl;
-
-				await updateGemstone.mutateAsync({
-					id: gemstone.id,
-					pictures: [...(gemstone.pictures || []), imageUrl],
-				});
-			}
-		} catch (error) {
-			console.error("Error uploading image:", error);
-		} finally {
-			setUploadingImage(false);
-		}
-	};
-
-	const handleCertificateUpload = async () => {
-		try {
-			setUploadingCertificate(true);
-			const result = await DocumentPicker.getDocumentAsync({
-				type: "application/pdf",
-			});
-
-			if (result.assets && result.assets.length > 0) {
-				const file = {
-					uri: result.assets[0].uri,
-					name: `certificate-${Date.now()}.pdf`,
-					type: "application/pdf",
-				};
-
-				const formData = new FormData();
-				formData.append("file", file as any);
-
-				const { data, error } = await supabase.storage
-					.from("certificates")
-					.upload(
-						`${activeOrganization?.id}/${gemstone.id}/${file.name}`,
-						formData,
-					);
-
-				if (error) throw error;
-
-				const certificateUrl = supabase.storage
-					.from("certificates")
-					.getPublicUrl(data.path).data.publicUrl;
-
-				await updateGemstone.mutateAsync({
-					id: gemstone.id,
-					certificate_id: certificateUrl,
-				});
-			}
-		} catch (error) {
-			console.error("Error uploading certificate:", error);
-		} finally {
-			setUploadingCertificate(false);
-		}
-	};
 
 	const handleSave = async () => {
 		try {
@@ -196,10 +102,10 @@ export default function GemstoneDetail() {
 					style={styles.imageScroll}
 					contentContainerStyle={styles.imageContainer}
 				>
-					{signedUrls.map((imageSource, index) => (
+					{gemstone?.pictures.map((imageSource: string, index: number) => (
 						<Image
 							key={index}
-							source={imageSource}
+							source={{ uri: imageSource }}
 							style={styles.image}
 							resizeMode="cover"
 							onError={(error) =>
@@ -209,7 +115,7 @@ export default function GemstoneDetail() {
 					))}
 					<Button
 						mode="outlined"
-						onPress={handleImagePick}
+						onPress={pickImage}
 						loading={uploadingImage}
 						style={styles.addImageButton}
 					>
@@ -361,7 +267,7 @@ export default function GemstoneDetail() {
 						) : (
 							<Button
 								mode="outlined"
-								onPress={handleCertificateUpload}
+								onPress={() => {}}
 								loading={uploadingCertificate}
 							>
 								Upload Certificate
