@@ -25,18 +25,19 @@ export const uploadFiles = async ({
 	path: string;
 	pickerResult: ImagePicker.ImagePickerResult;
 }) => {
+	const uploadedFiles: string[] = [];
 	const allUploads = pickerResult.assets?.map(
 		(file: ImagePicker.ImagePickerAsset) => {
 			return new Promise<void>(async (resolve, reject) => {
 				const { data: dataSession } = await supabase.auth.getSession();
 
 				const extension = getFileExtension(file.uri);
-				const filename =
-					// @ts-ignore TODO: check why types are acting up here.
-					file?.name ?? file?.fileName ?? `${Date.now()}.${extension}`;
+				// Ensure filename has no spaces or special characters
+				const safeFilename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${extension}`;
 
-				// Ensure the path starts with organization_id
-				const objectName = `${path}/${filename}`;
+				// Ensure path is properly formatted
+				const cleanPath = path.replace(/^\/+|\/+$/g, ""); // Remove leading/trailing slashes
+				const objectName = `${cleanPath}/${safeFilename}`;
 
 				const blob = await fetch(file.uri).then((res) => res.blob());
 				let upload = new Upload(blob, {
@@ -65,6 +66,9 @@ export const uploadFiles = async ({
 					},
 					onSuccess: function () {
 						console.log("Uploaded %s", upload.options?.metadata?.objectName);
+						if (upload.options?.metadata?.objectName) {
+							uploadedFiles.push(upload.options?.metadata?.objectName);
+						}
 						resolve();
 					},
 				});
@@ -83,7 +87,21 @@ export const uploadFiles = async ({
 		},
 	);
 	if (!allUploads) return;
-	const response = await Promise.allSettled(allUploads);
-	console.log(JSON.stringify({ response }, null, 2));
+	await Promise.allSettled(allUploads);
+
+	const gemstoneId = uploadedFiles[0].split("/")[1];
+	const gemstone = await supabase
+		.from("stones")
+		.select("*")
+		.eq("id", gemstoneId)
+		.single();
+
+	await supabase
+		.from("stones")
+		.update({
+			pictures: [...(gemstone?.data?.pictures ?? []), ...uploadedFiles],
+		})
+		.eq("id", gemstone.data.id);
+
 	return;
 };

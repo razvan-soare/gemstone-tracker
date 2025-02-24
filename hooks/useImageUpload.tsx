@@ -1,4 +1,3 @@
-import { useSupabase } from "@/context/supabase-provider";
 import { uploadFiles } from "@/lib/tus";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
@@ -23,33 +22,47 @@ export const useImageUpload = (path: string) => {
 		return true;
 	};
 
-	const pickImage = async () => {
+	const pickImage = async ({
+		setTempImagePreviews,
+	}: {
+		setTempImagePreviews?: (assets: ImagePicker.ImagePickerAsset[]) => void;
+	}) => {
 		const mediaPermissionGranted = await mediaPermission(
 			"We need your permission to access your media library",
 		);
 		if (!mediaPermissionGranted) return;
 
-		let result = await ImagePicker.launchImageLibraryAsync({
+		const result = await ImagePicker.launchImageLibraryAsync({
 			quality: 1,
 			allowsMultipleSelection: true,
 			selectionLimit: 10,
 			mediaTypes: ["images", "videos", "livePhotos"],
 		});
+		if (setTempImagePreviews) {
+			setTempImagePreviews(result.assets ?? []);
+		}
 		await handleAssetsPicked(result);
 	};
 
-	const takePhoto = async () => {
+	const takePhoto = async ({
+		setTempImagePreviews,
+	}: {
+		setTempImagePreviews?: (assets: ImagePicker.ImagePickerAsset[]) => void;
+	}) => {
 		const cameraPermissionGranted = await cameraPermission(
 			"We need your permission to access your camera",
 		);
 		if (!cameraPermissionGranted) return;
 
-		let result = await ImagePicker.launchCameraAsync({
+		const result = await ImagePicker.launchCameraAsync({
 			allowsEditing: true,
 			quality: 1,
 			aspect: [4, 3],
 			selectionLimit: 10,
 		});
+		if (setTempImagePreviews) {
+			setTempImagePreviews(result.assets ?? []);
+		}
 		await handleAssetsPicked(result);
 	};
 

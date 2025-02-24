@@ -10,7 +10,7 @@ import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Image, Linking, ScrollView, StyleSheet, View } from "react-native";
 import {
 	ActivityIndicator,
@@ -20,21 +20,61 @@ import {
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
+import * as ImagePicker from "expo-image-picker";
+import { supabase } from "@/config/supabase";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function GemstoneDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { data: gemstone, isLoading } = useGemstone(id);
 	const updateGemstone = useUpdateGemstone();
-	const { activeOrganization } = useSupabase();
+	const { activeOrganization, session } = useSupabase();
+	const queryClient = useQueryClient();
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<Partial<typeof gemstone>>({});
-	const [uploadingImage, setUploadingImage] = useState(false);
-	const [uploadingCertificate, setUploadingCertificate] = useState(false);
-
+	const [tempImagePreviews, setTempImagePreviews] = useState<
+		ImagePicker.ImagePickerAsset[]
+	>([]);
+	const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
 	);
+
+	useEffect(() => {
+		const getSignedUrls = async () => {
+			if (!gemstone?.pictures?.length) return;
+
+			const urls: Record<string, string> = {};
+			for (const path of gemstone.pictures) {
+				if (path.startsWith("http")) {
+					urls[path] = path;
+					continue;
+				}
+
+				const { data } = await supabase.storage
+					.from("tus")
+					.createSignedUrl(path, 3600); // URL valid for 1 hour
+				console.log("path", path);
+				if (data?.signedUrl) {
+					urls[path] = data.signedUrl;
+				}
+			}
+			setSignedUrls(urls);
+			setTempImagePreviews([]);
+		};
+
+		getSignedUrls();
+	}, [gemstone?.pictures]);
+
+	const handlePickImage = async () => {
+		await pickImage({
+			setTempImagePreviews,
+		});
+
+		// Invalidate the cache after successful upload
+		await queryClient.invalidateQueries({ queryKey: ["gemstone", id] });
+	};
 
 	if (isLoading || !gemstone) {
 		return (
@@ -102,21 +142,42 @@ export default function GemstoneDetail() {
 					style={styles.imageScroll}
 					contentContainerStyle={styles.imageContainer}
 				>
-					{gemstone?.pictures.map((imageSource: string, index: number) => (
+					{gemstone?.pictures.map((imageSource: string, index: number) => {
+						const imageUrl = signedUrls[imageSource];
+						if (!imageUrl)
+							return (
+								<View>
+									<P>Loading..</P>
+								</View>
+							);
+						return (
+							<Image
+								key={`stored-${index}`}
+								source={{
+									uri: imageUrl,
+								}}
+								style={styles.image}
+								alt="ss"
+								resizeMode="cover"
+								onError={(error) =>
+									console.error("Image loading error:", error.nativeEvent)
+								}
+							/>
+						);
+					})}
+					{tempImagePreviews.map((preview, index) => (
 						<Image
-							key={index}
-							source={{ uri: imageSource }}
-							style={styles.image}
+							key={`preview-${index}`}
+							source={{ uri: preview.uri }}
+							style={[styles.image, { opacity: 0.7 }]}
 							resizeMode="cover"
-							onError={(error) =>
-								console.error("Image loading error:", error.nativeEvent)
-							}
 						/>
 					))}
+
 					<Button
 						mode="outlined"
-						onPress={pickImage}
-						loading={uploadingImage}
+						onPress={handlePickImage}
+						loading={uploading}
 						style={styles.addImageButton}
 					>
 						Add Image
@@ -265,11 +326,7 @@ export default function GemstoneDetail() {
 								View Certificate
 							</Button>
 						) : (
-							<Button
-								mode="outlined"
-								onPress={() => {}}
-								loading={uploadingCertificate}
-							>
+							<Button mode="outlined" onPress={() => {}} loading={false}>
 								Upload Certificate
 							</Button>
 						)}
