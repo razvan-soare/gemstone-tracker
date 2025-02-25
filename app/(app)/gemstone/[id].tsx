@@ -8,6 +8,7 @@ import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { useSupabase } from "@/context/supabase-provider";
+import { getSignedImageUrls, normalizePicture } from "@/lib/imageUtils";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
@@ -36,35 +37,23 @@ export default function GemstoneDetail() {
 	const [tempImagePreviews, setTempImagePreviews] = useState<
 		ImagePicker.ImagePickerAsset[]
 	>([]);
-	const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+	const [signedUrls, setSignedUrls] = useState<
+		Record<string, Record<string, string>>
+	>({});
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
 	);
 
 	useEffect(() => {
-		const getSignedUrls = async () => {
+		const getUrls = async () => {
 			if (!gemstone?.pictures?.length) return;
 
-			const urls: Record<string, string> = {};
-			for (const path of gemstone.pictures) {
-				if (path.startsWith("http")) {
-					urls[path] = path;
-					continue;
-				}
-
-				const { data } = await supabase.storage
-					.from("tus")
-					.createSignedUrl(path, 3600); // URL valid for 1 hour
-				console.log("path", path);
-				if (data?.signedUrl) {
-					urls[path] = data.signedUrl;
-				}
-			}
+			const urls = await getSignedImageUrls(gemstone.pictures);
 			setSignedUrls(urls);
 			setTempImagePreviews([]);
 		};
 
-		getSignedUrls();
+		getUrls();
 	}, [gemstone?.pictures]);
 
 	const handlePickImage = async () => {
@@ -142,29 +131,45 @@ export default function GemstoneDetail() {
 					style={styles.imageScroll}
 					contentContainerStyle={styles.imageContainer}
 				>
-					{gemstone?.pictures.map((imageSource: string, index: number) => {
-						const imageUrl = signedUrls[imageSource];
-						if (!imageUrl)
+					{gemstone?.pictures.map(
+						(
+							imageSource:
+								| string
+								| { original: string; sizes: Record<string, string> },
+							index: number,
+						) => {
+							// Normalize the picture to ensure consistent structure
+							const normalizedPicture = normalizePicture(imageSource);
+
+							// Get the signed URLs for this image
+							const imageUrls = signedUrls[normalizedPicture.original];
+
+							if (!imageUrls)
+								return (
+									<View key={`loading-${index}`}>
+										<P>Loading..</P>
+									</View>
+								);
+
+							// Use medium size for the gallery view
+							const displayUrl = imageUrls.medium || imageUrls.original;
+
 							return (
-								<View>
-									<P>Loading..</P>
-								</View>
+								<Image
+									key={`stored-${index}`}
+									source={{
+										uri: displayUrl,
+									}}
+									style={styles.image}
+									alt="ss"
+									resizeMode="cover"
+									onError={(error) =>
+										console.error("Image loading error:", error.nativeEvent)
+									}
+								/>
 							);
-						return (
-							<Image
-								key={`stored-${index}`}
-								source={{
-									uri: imageUrl,
-								}}
-								style={styles.image}
-								alt="ss"
-								resizeMode="cover"
-								onError={(error) =>
-									console.error("Image loading error:", error.nativeEvent)
-								}
-							/>
-						);
-					})}
+						},
+					)}
 					{tempImagePreviews.map((preview, index) => (
 						<Image
 							key={`preview-${index}`}
