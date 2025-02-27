@@ -7,7 +7,8 @@
 		"web": "expo start --web",
 		"android": "expo start --android",
 		"ios": "expo start --ios",
-		"lint": "eslint . --fix"
+		"lint": "eslint . --fix",
+		"generate:types": "npx supabase gen types typescript --project-id \"\" --schema public > lib/database.types.ts"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.9.1",
@@ -40,6 +41,7 @@
 		"react-dom": "18.3.1",
 		"react-hook-form": "^7.53.2",
 		"react-native": "0.76.1",
+		"react-native-blasted-image": "^1.1.1",
 		"react-native-gesture-handler": "~2.20.2",
 		"react-native-paper": "^5.13.1",
 		"react-native-paper-dropdown": "^2.3.1",
@@ -60,6 +62,7 @@
 		"eslint": "^9.14.0",
 		"eslint-config-universe": "^14.0.0",
 		"prettier": "^3.3.3",
+		"supabase": "^2.15.8",
 		"typescript": "~5.3.3"
 	},
 	"private": true

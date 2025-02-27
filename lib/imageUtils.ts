@@ -1,160 +1,115 @@
 import { supabase } from "@/config/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery } from "@tanstack/react-query";
+import * as FileSystem from "expo-file-system";
+import { Tables } from "./database.types";
+
+// Function to get signed URLs with caching
+export async function getSignedImageUrl(
+	pictureUrl: string,
+): Promise<string | null> {
+	try {
+		// Get signed URL for original
+		const { data: originalData, error: originalError } = await supabase.storage
+			.from("tus")
+			.createSignedUrl(pictureUrl, 60 * 60 * 24); // 24 hours
+
+		if (originalError) throw originalError;
+
+		return originalData.signedUrl;
+	} catch (error) {
+		console.error("Error getting signed URL:", pictureUrl, error);
+		return null;
+	}
+}
 
 /**
- * Normalizes a picture reference to ensure consistent object structure
- * @param picture The picture reference (string or object)
- * @returns A normalized picture object with original and sizes properties
+ * A hook that uses React Query to fetch and cache optimized image sources
+ *
+ * @param imageUrl The original image URL to optimize
+ * @param options Optional React Query options
+ * @returns An object containing the optimized image source and loading state
  */
-export const normalizePicture = (
-	picture: string | { original: string; sizes: Record<string, string> } | any,
-): { original: string; sizes: Record<string, string> } => {
-	// Handle null or undefined
-	if (!picture) {
-		return {
-			original: "",
-			sizes: {
-				original: "",
-				thumbnail: "",
-				medium: "",
-			},
-		};
-	}
+export function useImage(image: Tables<"images">, options = {}) {
+	const queryKey = ["image", image.id];
 
-	// If it's already an object with the right structure, return it
-	if (
-		typeof picture === "object" &&
-		picture !== null &&
-		"original" in picture &&
-		typeof picture.original === "string"
-	) {
-		// Ensure sizes object exists
-		if (!picture.sizes || typeof picture.sizes !== "object") {
-			picture.sizes = {
-				original: picture.original,
-				thumbnail: picture.original,
-				medium: picture.original,
+	const query = useQuery({
+		queryKey,
+		queryFn: async () => {
+			if (!image) return null;
+			return {
+				source: await getOptimizedImageSource({
+					src: image.medium || "",
+					cache: false,
+				}),
+				thumbnail: await getOptimizedImageSource({
+					src: image.thumbnail || "",
+					cache: true,
+				}),
 			};
-		}
-		return picture;
-	}
-
-	// If it's a string that looks like JSON, try to parse it
-	if (
-		typeof picture === "string" &&
-		(picture.startsWith("{") || picture.startsWith("["))
-	) {
-		try {
-			const parsed = JSON.parse(picture);
-			if (typeof parsed === "object" && parsed !== null) {
-				// If it has an original property, use it
-				if ("original" in parsed && typeof parsed.original === "string") {
-					// Ensure sizes object exists
-					if (!parsed.sizes || typeof parsed.sizes !== "object") {
-						parsed.sizes = {
-							original: parsed.original,
-							thumbnail: parsed.original,
-							medium: parsed.original,
-						};
-					}
-					return parsed;
-				}
-
-				// If it doesn't have an original property but has a string property we can use
-				for (const key in parsed) {
-					if (typeof parsed[key] === "string") {
-						return {
-							original: parsed[key],
-							sizes: {
-								original: parsed[key],
-								thumbnail: parsed[key],
-								medium: parsed[key],
-							},
-						};
-					}
-				}
-			}
-		} catch (e) {
-			// If parsing fails, treat it as a simple string path
-		}
-	}
-
-	// For string paths
-	const stringPath = typeof picture === "string" ? picture : "";
-
-	// Otherwise, treat it as a simple string path
-	return {
-		original: stringPath,
-		sizes: {
-			original: stringPath,
-			thumbnail: stringPath,
-			medium: stringPath,
 		},
+		staleTime: 1000 * 60 * 60, // 1 hour
+		enabled: !!image,
+		...options,
+	});
+
+	return {
+		source: query.data?.source,
+		thumbnail: query.data?.thumbnail,
+		isLoading: query.isLoading,
+		isError: query.isError,
+		error: query.error,
+		refetch: query.refetch,
 	};
-};
+}
 
-/**
- * Gets signed URLs for gemstone pictures, handling both old format (string) and new format (object with sizes)
- * @param pictures Array of picture references from the gemstone object
- * @param expiresIn Expiration time in seconds for the signed URLs (default: 3600)
- * @returns A record mapping original paths to their signed URLs (with size variants)
- */
-export const getSignedImageUrls = async (
-	pictures: (string | { original: string; sizes: Record<string, string> })[],
-	expiresIn: number = 3600,
-): Promise<Record<string, Record<string, string>>> => {
-	if (!pictures?.length) return {};
+// Function to cache remote images locally
+export async function cacheImageLocally(remoteUrl: string, localUri?: string) {
+	try {
+		const cacheKey = `image_cache_${remoteUrl.split("/").pop()}`;
 
-	const urls: Record<string, Record<string, string>> = {};
-
-	for (const rawPicture of pictures) {
-		// Normalize the picture to ensure consistent structure
-		const picture = normalizePicture(rawPicture);
-
-		// Process each size
-		const sizeUrls: Record<string, string> = {};
-		for (const [size, path] of Object.entries(picture.sizes)) {
-			if (typeof path === "string" && path.startsWith("http")) {
-				sizeUrls[size] = path;
-				continue;
-			}
-
-			const { data } = await supabase.storage
-				.from("tus")
-				.createSignedUrl(path as string, expiresIn);
-
-			if (data?.signedUrl) {
-				sizeUrls[size] = data.signedUrl;
-			}
+		// If we already have a local URI, store it
+		if (localUri) {
+			await AsyncStorage.setItem(cacheKey, localUri);
+			return localUri;
 		}
-		urls[picture.original] = sizeUrls;
+
+		// Check if we have this image cached
+		const cachedUri = await AsyncStorage.getItem(cacheKey);
+		if (cachedUri) {
+			// Verify the file exists
+			const fileInfo = await FileSystem.getInfoAsync(cachedUri);
+			if (fileInfo.exists) return cachedUri;
+		}
+
+		// Download and cache the file
+		const imageUrl = await getSignedImageUrl(remoteUrl);
+		if (!imageUrl) return null;
+		const fileUri = `${FileSystem.cacheDirectory}${remoteUrl.split("/").pop()}`;
+		await FileSystem.downloadAsync(imageUrl, fileUri);
+		await AsyncStorage.setItem(cacheKey, fileUri);
+		return fileUri;
+	} catch (error) {
+		console.error("Error caching image:", error);
+		return null;
+	}
+}
+
+export async function getOptimizedImageSource({
+	src,
+	cache = false,
+}: {
+	src: string;
+	cache?: boolean;
+}) {
+	if (cache) {
+		const cachedUri = await cacheImageLocally(src);
+		if (cachedUri) return cachedUri;
 	}
 
-	return urls;
-};
+	return await getSignedImageUrl(src);
+}
 
-/**
- * Gets the best image URL to display for a gemstone
- * @param signedUrls Record of signed URLs for pictures
- * @param pictures Array of picture references
- * @param size The desired image size ('thumbnail', 'medium', or 'original')
- * @param defaultImage Fallback image URL if no images are available
- * @returns The URL of the first image at the requested size, or the default image
- */
-export const getGemstoneImageUrl = (
-	signedUrls: Record<string, Record<string, string>>,
-	pictures: (string | { original: string; sizes: Record<string, string> })[],
-	size: "thumbnail" | "medium" | "original" = "medium",
-	defaultImage: string = "https://place-hold.it/300x300.jpg/666/fff/000",
-): string => {
-	if (!pictures?.length) return defaultImage;
-
-	// Get the first picture and normalize it
-	const normalizedPicture = normalizePicture(pictures[0]);
-
-	// Get the signed URLs for this image
-	const imageUrls = signedUrls[normalizedPicture.original];
-	if (!imageUrls) return defaultImage;
-
-	// Return the requested size, falling back to original if not available
-	return imageUrls[size] || imageUrls.original || defaultImage;
+export const getDefaultStoneImage = () => {
+	return "https://fhcuxusbbaodghkiqxhe.supabase.co/storage/v1/object/public/default-stones//a7c5d834ef210a4ea20e73216397a922.webp";
 };

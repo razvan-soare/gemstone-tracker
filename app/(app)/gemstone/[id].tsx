@@ -7,12 +7,16 @@ import { H3, P } from "@/components/ui/typography";
 import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
+import { OptimizedImage } from "@/components/OptimizedImage";
 import { useSupabase } from "@/context/supabase-provider";
-import { getSignedImageUrls, normalizePicture } from "@/lib/imageUtils";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { Tables } from "@/lib/database.types";
+import { getDefaultStoneImage } from "@/lib/imageUtils";
+import { useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
-import { Image, Linking, ScrollView, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { Image, ScrollView, StyleSheet, View } from "react-native";
 import {
 	ActivityIndicator,
 	Button,
@@ -21,9 +25,6 @@ import {
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
-import * as ImagePicker from "expo-image-picker";
-import { supabase } from "@/config/supabase";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function GemstoneDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,28 +34,14 @@ export default function GemstoneDetail() {
 	const queryClient = useQueryClient();
 
 	const [isEditing, setIsEditing] = useState(false);
-	const [formData, setFormData] = useState<Partial<typeof gemstone>>({});
+	const [formData, setFormData] = useState<Partial<Tables<"stones">>>({});
 	const [tempImagePreviews, setTempImagePreviews] = useState<
 		ImagePicker.ImagePickerAsset[]
 	>([]);
-	const [signedUrls, setSignedUrls] = useState<
-		Record<string, Record<string, string>>
-	>({});
+
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
 	);
-
-	useEffect(() => {
-		const getUrls = async () => {
-			if (!gemstone?.pictures?.length) return;
-
-			const urls = await getSignedImageUrls(gemstone.pictures);
-			setSignedUrls(urls);
-			setTempImagePreviews([]);
-		};
-
-		getUrls();
-	}, [gemstone?.pictures]);
 
 	const handlePickImage = async () => {
 		await pickImage({
@@ -63,6 +50,7 @@ export default function GemstoneDetail() {
 
 		// Invalidate the cache after successful upload
 		await queryClient.invalidateQueries({ queryKey: ["gemstone", id] });
+		await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 	};
 
 	if (isLoading || !gemstone) {
@@ -131,45 +119,14 @@ export default function GemstoneDetail() {
 					style={styles.imageScroll}
 					contentContainerStyle={styles.imageContainer}
 				>
-					{gemstone?.pictures.map(
-						(
-							imageSource:
-								| string
-								| { original: string; sizes: Record<string, string> },
-							index: number,
-						) => {
-							// Normalize the picture to ensure consistent structure
-							const normalizedPicture = normalizePicture(imageSource);
-
-							// Get the signed URLs for this image
-							const imageUrls = signedUrls[normalizedPicture.original];
-
-							if (!imageUrls)
-								return (
-									<View key={`loading-${index}`}>
-										<P>Loading..</P>
-									</View>
-								);
-
-							// Use medium size for the gallery view
-							const displayUrl = imageUrls.medium || imageUrls.original;
-
-							return (
-								<Image
-									key={`stored-${index}`}
-									source={{
-										uri: displayUrl,
-									}}
-									style={styles.image}
-									alt="ss"
-									resizeMode="cover"
-									onError={(error) =>
-										console.error("Image loading error:", error.nativeEvent)
-									}
-								/>
-							);
-						},
-					)}
+					{(gemstone.images || []).map((image) => (
+						<OptimizedImage
+							key={image.id}
+							image={image}
+							placeholder={getDefaultStoneImage()}
+							style={styles.image}
+						/>
+					))}
 					{tempImagePreviews.map((preview, index) => (
 						<Image
 							key={`preview-${index}`}
@@ -208,7 +165,7 @@ export default function GemstoneDetail() {
 									mode="outlined"
 									hideMenuHeader
 									menuContentStyle={{ top: -50 }}
-									value={formData.shape}
+									value={formData.shape || undefined}
 									onSelect={(value) =>
 										setFormData((prev) => ({ ...prev, shape: value }))
 									}
@@ -225,7 +182,7 @@ export default function GemstoneDetail() {
 									mode="outlined"
 									hideMenuHeader
 									menuContentStyle={{ top: -50 }}
-									value={formData.color}
+									value={formData.color || undefined}
 									onSelect={(value) =>
 										setFormData((prev) => ({ ...prev, color: value }))
 									}
@@ -242,7 +199,7 @@ export default function GemstoneDetail() {
 									mode="outlined"
 									hideMenuHeader
 									menuContentStyle={{ top: -50 }}
-									value={formData.cut}
+									value={formData.cut || undefined}
 									onSelect={(value) =>
 										setFormData((prev) => ({ ...prev, cut: value }))
 									}
@@ -325,7 +282,7 @@ export default function GemstoneDetail() {
 								mode="contained"
 								onPress={() => {
 									// Open certificate URL
-									Linking.openURL(gemstone.certificate_id);
+									// Linking.openURL(gemstone.certificate_id);
 								}}
 							>
 								View Certificate

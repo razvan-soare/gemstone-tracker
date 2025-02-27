@@ -1,58 +1,23 @@
 import { Tables } from "@/lib/database.types";
-import {
-	getGemstoneImageUrl,
-	getSignedImageUrls,
-	normalizePicture,
-} from "@/lib/imageUtils";
+import { getDefaultStoneImage } from "@/lib/imageUtils";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Card, Title } from "react-native-paper";
+import { OptimizedImage } from "./OptimizedImage";
 import { Badge } from "./ui/badge";
 import { P } from "./ui/typography";
 
-const GemstoneCard = ({ gemstone }: { gemstone: Tables<"stones"> }) => {
-	const defaultImage = "https://place-hold.it/300x300.jpg/666/fff/000";
-	const [signedUrls, setSignedUrls] = useState<
-		Record<string, Record<string, string>>
-	>({});
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		const loadSignedUrls = async () => {
-			if (!gemstone?.pictures?.length) {
-				setLoading(false);
-				return;
-			}
-
-			try {
-				const urls = await getSignedImageUrls(gemstone.pictures);
-				setSignedUrls(urls);
-			} catch (error) {
-				console.error("Error loading signed URLs:", error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadSignedUrls();
-	}, [gemstone?.pictures]);
-
-	// Get the thumbnail image URL for the card (smaller and faster to load)
-	const imageUrl = getGemstoneImageUrl(
-		signedUrls,
-		gemstone?.pictures || [],
-		"thumbnail",
-		defaultImage,
-	);
-
+const GemstoneCard = ({
+	gemstone,
+}: {
+	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
+}) => {
 	return (
 		<Pressable onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}>
 			<Card style={styles.card}>
-				<Image
-					source={{
-						uri: imageUrl,
-					}}
+				<OptimizedImage
+					image={gemstone.images?.[0] || ""}
+					placeholder={getDefaultStoneImage()}
 					style={styles.image}
 				/>
 

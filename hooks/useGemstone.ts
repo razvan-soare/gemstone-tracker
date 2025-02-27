@@ -7,11 +7,12 @@ export const useGemstone = (id: string) => {
 		queryFn: async () => {
 			const { data, error } = await supabase
 				.from("stones")
-				.select("*")
+				.select("*,images:images(*)")
 				.eq("id", id)
 				.single();
 
 			if (error) throw error;
+
 			return data;
 		},
 	});

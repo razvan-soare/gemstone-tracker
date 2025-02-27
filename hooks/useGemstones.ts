@@ -1,6 +1,6 @@
 import { supabase } from "@/config/supabase";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { parseSearchQuery } from "@/utils/searchParser";
+import { parseSearchQuery } from "@/lib/searchParser";
 
 type GemstoneFilters = {
 	search?: string;
@@ -27,7 +27,10 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 		queryFn: async ({ pageParam = 0 }) => {
 			let query = supabase
 				.from("stones")
-				.select("*", { count: "exact" })
+				.select("*, images:images(*)", {
+					count: "exact",
+				})
+				.order("created_at", { ascending: false })
 				.range(
 					pageParam * ITEMS_PER_PAGE,
 					(pageParam + 1) * ITEMS_PER_PAGE - 1,

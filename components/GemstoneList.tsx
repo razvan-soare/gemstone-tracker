@@ -14,7 +14,7 @@ export type ViewSettings = {
 };
 
 type GemstoneListProps = {
-	gemstones: Tables<"stones">[];
+	gemstones: Array<Tables<"stones"> & { images: Tables<"images">[] }>;
 	isLoading: boolean;
 	viewSettings: ViewSettings;
 	onLoadMore: () => void;

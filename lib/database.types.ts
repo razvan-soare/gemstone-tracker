@@ -47,6 +47,51 @@ export type Database = {
           },
         ]
       }
+      images: {
+        Row: {
+          created_at: string
+          id: string
+          medium: string | null
+          organization_id: string | null
+          original: string | null
+          stone_id: string
+          thumbnail: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medium?: string | null
+          organization_id?: string | null
+          original?: string | null
+          stone_id?: string
+          thumbnail?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medium?: string | null
+          organization_id?: string | null
+          original?: string | null
+          stone_id?: string
+          thumbnail?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "images_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "images_stone_id_fkey"
+            columns: ["stone_id"]
+            isOneToOne: false
+            referencedRelation: "stones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string | null

@@ -1,6 +1,10 @@
 import { supabase } from "@/config/supabase";
 import * as ImagePicker from "expo-image-picker";
-import * as ImageManipulator from "expo-image-manipulator";
+import {
+	ImageManipulator,
+	ImageResult,
+	SaveFormat,
+} from "expo-image-manipulator";
 import { Upload } from "tus-js-client";
 
 const getFileExtension = (uri: string): string => {
@@ -19,30 +23,32 @@ const getMimeType = (extension: string): string => {
 
 // Image size configurations
 const IMAGE_SIZES = {
-	thumbnail: { width: 200, height: 200 },
-	medium: { width: 800, height: 800 },
+	thumbnail: { width: 200 },
+	medium: { width: 800 },
 	// Original size is preserved as-is
 };
 
 // Process image into multiple sizes
 const processImage = async (
 	uri: string,
-): Promise<Record<string, ImageManipulator.ImageResult>> => {
-	const results: Record<string, ImageManipulator.ImageResult> = {};
+): Promise<Record<string, ImageResult>> => {
+	const results: Record<string, ImageResult> = {};
 
 	// Create thumbnail version
-	results.thumbnail = await ImageManipulator.manipulateAsync(
-		uri,
-		[{ resize: IMAGE_SIZES.thumbnail }],
-		{ compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
-	);
+	const thumbnailContext = await ImageManipulator.manipulate(uri);
+	thumbnailContext.resize({ width: IMAGE_SIZES.thumbnail.width });
+	const thumbnailImage = await thumbnailContext.renderAsync();
+	results.thumbnail = await thumbnailImage.saveAsync({
+		format: SaveFormat.WEBP,
+	});
 
 	// Create medium version
-	results.medium = await ImageManipulator.manipulateAsync(
-		uri,
-		[{ resize: IMAGE_SIZES.medium }],
-		{ compress: 0.9, format: ImageManipulator.SaveFormat.JPEG },
-	);
+	const mediumContext = await ImageManipulator.manipulate(uri);
+	mediumContext.resize({ width: IMAGE_SIZES.medium.width });
+	const mediumImage = await mediumContext.renderAsync();
+	results.medium = await mediumImage.saveAsync({
+		format: SaveFormat.WEBP,
+	});
 
 	// Original is kept as-is
 	results.original = { uri, width: 0, height: 0 };
@@ -127,8 +133,11 @@ export const uploadFiles = async ({
 	path: string;
 	pickerResult: ImagePicker.ImagePickerResult;
 }) => {
-	const uploadedFiles: { original: string; sizes: Record<string, string> }[] =
-		[];
+	const uploadedFiles: {
+		original: string;
+		thumbnail: string;
+		medium: string;
+	}[] = [];
 
 	if (!pickerResult.assets?.length) return;
 
@@ -168,12 +177,9 @@ export const uploadFiles = async ({
 					const mediumPath = uploadedPaths[1];
 
 					uploadedFiles.push({
+						thumbnail: thumbnailPath,
+						medium: mediumPath,
 						original: originalPath,
-						sizes: {
-							thumbnail: thumbnailPath,
-							medium: mediumPath,
-							original: originalPath,
-						},
 					});
 
 					resolve();
@@ -190,38 +196,29 @@ export const uploadFiles = async ({
 	if (uploadedFiles.length === 0) return;
 
 	const gemstoneId = uploadedFiles[0].original.split("/")[1];
-	const gemstone = await supabase
+
+	const { data: stone } = await supabase
 		.from("stones")
 		.select("*")
 		.eq("id", gemstoneId)
 		.single();
 
-	// Update the database with the new image information
-	// Convert existing pictures to the new format if needed
-	const existingPictures = gemstone?.data?.pictures || [];
-	const formattedExistingPictures = existingPictures.map(
-		(pic: string | { original: string; sizes: Record<string, string> }) => {
-			// Check if it's already in the new format
-			if (typeof pic === "object" && pic.original) {
-				return pic;
-			}
-			// Convert old format to new format
-			return {
-				original: pic,
-				sizes: {
-					original: pic,
-					// Old images don't have other sizes
-				},
-			};
-		},
-	);
+	const { data, error } = await supabase
+		.from("images")
+		.insert(
+			uploadedFiles.map((file) => ({
+				stone_id: gemstoneId,
+				organization_id: stone?.organization_id,
+				original: file.original,
+				thumbnail: file.thumbnail,
+				medium: file.medium,
+			})),
+		)
+		.select()
+		.single();
+	if (error) {
+		throw error;
+	}
 
-	await supabase
-		.from("stones")
-		.update({
-			pictures: [...formattedExistingPictures, ...uploadedFiles],
-		})
-		.eq("id", gemstone.data.id);
-
-	return;
+	return data;
 };

@@ -42,6 +42,9 @@ export const useImageUpload = (path: string) => {
 			setTempImagePreviews(result.assets ?? []);
 		}
 		await handleAssetsPicked(result);
+		if (setTempImagePreviews) {
+			setTempImagePreviews([]);
+		}
 	};
 
 	const takePhoto = async ({
@@ -64,6 +67,9 @@ export const useImageUpload = (path: string) => {
 			setTempImagePreviews(result.assets ?? []);
 		}
 		await handleAssetsPicked(result);
+		if (setTempImagePreviews) {
+			setTempImagePreviews([]);
+		}
 	};
 
 	const handleAssetsPicked = async (results: ImagePicker.ImagePickerResult) => {
