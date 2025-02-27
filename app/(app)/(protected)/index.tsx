@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
 	},
 	headerButtons: {
 		paddingHorizontal: 16,
+		paddingBottom: 8,
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
