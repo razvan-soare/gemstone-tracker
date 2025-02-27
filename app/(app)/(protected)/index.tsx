@@ -6,10 +6,21 @@ import { FAB, PaperProvider } from "react-native-paper";
 import GemstoneList, { ViewSettings } from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
 import ViewSettingsButton from "@/components/ViewSettingsButton";
+import FilterButton from "@/components/FilterButton";
 import { useGemstones } from "@/hooks/useGemstones";
+import {
+	GemstoneColor,
+	GemstoneCut,
+	GemstoneShape,
+} from "@/app/types/gemstone";
 
 export default function Home() {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [filters, setFilters] = useState<{
+		shape?: GemstoneShape;
+		color?: GemstoneColor;
+		cut?: GemstoneCut;
+	}>({});
 
 	const [viewSettings, setViewSettings] = useState<ViewSettings>({
 		columnsCount: 2,
@@ -18,6 +29,7 @@ export default function Home() {
 	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useGemstones({
 			search: searchQuery,
+			...filters,
 		});
 
 	const gemstones = data?.pages.flatMap((page) => page.items) ?? [];
@@ -34,7 +46,7 @@ export default function Home() {
 					/>
 				</View>
 				<View style={styles.headerButtons}>
-					<View></View>
+					<FilterButton filters={filters} onFiltersChange={setFilters} />
 					<ViewSettingsButton setViewSettings={setViewSettings} />
 				</View>
 

@@ -1,9 +1,17 @@
 import { supabase } from "@/config/supabase";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { parseSearchQuery } from "@/lib/searchParser";
+import {
+	GemstoneColor,
+	GemstoneCut,
+	GemstoneShape,
+} from "@/app/types/gemstone";
 
 type GemstoneFilters = {
 	search?: string;
+	shape?: GemstoneShape;
+	color?: GemstoneColor;
+	cut?: GemstoneCut;
 };
 
 const ITEMS_PER_PAGE = 20;
@@ -48,6 +56,21 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 				} else {
 					query = query.or(buildSearchQuery(queryInput.terms[0]));
 				}
+			}
+
+			// Add shape filter if provided
+			if (filters.shape) {
+				query = query.eq("shape", filters.shape);
+			}
+
+			// Add color filter if provided
+			if (filters.color) {
+				query = query.eq("color", filters.color);
+			}
+
+			// Add cut filter if provided
+			if (filters.cut) {
+				query = query.eq("cut", filters.cut);
 			}
 
 			const { data, error, count } = await query;
