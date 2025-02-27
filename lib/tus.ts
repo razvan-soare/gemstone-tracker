@@ -214,8 +214,7 @@ export const uploadFiles = async ({
 				medium: file.medium,
 			})),
 		)
-		.select()
-		.single();
+		.select();
 	if (error) {
 		throw error;
 	}

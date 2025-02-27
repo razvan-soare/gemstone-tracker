@@ -128,18 +128,31 @@ export default function GemstoneDetail() {
 						/>
 					))}
 					{tempImagePreviews.map((preview, index) => (
-						<Image
-							key={`preview-${index}`}
-							source={{ uri: preview.uri }}
-							style={[styles.image, { opacity: 0.7 }]}
-							resizeMode="cover"
-						/>
+						<View key={`preview-${index}`} style={{ position: "relative" }}>
+							<Image
+								source={{ uri: preview.uri }}
+								style={[styles.image, { opacity: 0.7 }]}
+								resizeMode="cover"
+							/>
+							<View
+								style={{
+									position: "absolute",
+									zIndex: 1,
+									display: "flex",
+									justifyContent: "center",
+									alignItems: "center",
+									width: "100%",
+									height: "100%",
+								}}
+							>
+								<ActivityIndicator size="small" color="#0000ff" />
+							</View>
+						</View>
 					))}
 
 					<Button
 						mode="outlined"
 						onPress={handlePickImage}
-						loading={uploading}
 						style={styles.addImageButton}
 					>
 						Add Image
