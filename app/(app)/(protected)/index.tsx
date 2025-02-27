@@ -14,6 +14,8 @@ import SearchBar from "@/components/SearchBar";
 import { colors } from "@/constants/colors";
 import { useGemstones } from "@/hooks/useGemstones";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useSupabase } from "@/context/supabase-provider";
+import { H2 } from "@/components/ui/typography";
 
 export default function Home() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -22,7 +24,7 @@ export default function Home() {
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
 	}>({});
-
+	const { activeOrganization } = useSupabase();
 	const { colorScheme } = useColorScheme();
 
 	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -48,6 +50,10 @@ export default function Home() {
 			<StatusBar
 				barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
 			/>
+
+			<View className="w-full items-center justify-center py-2">
+				<H2>{activeOrganization?.name}'s gemstones</H2>
+			</View>
 
 			<View style={styles.headerButtons}>
 				<SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
