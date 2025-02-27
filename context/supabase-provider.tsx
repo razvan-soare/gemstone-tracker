@@ -1,12 +1,17 @@
 import { Session, User } from "@supabase/supabase-js";
-import { useRouter, useSegments, SplashScreen } from "expo-router";
-import { createContext, useContext, useEffect, useState } from "react";
+import { SplashScreen, useRouter, useSegments } from "expo-router";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { supabase } from "@/config/supabase";
-import { Tables } from "@/lib/database.types";
 import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";
+import { useOrganizationMemberships } from "@/hooks/useOrganizationMemberships";
+import { Tables } from "@/lib/database.types";
 
 SplashScreen.preventAutoHideAsync();
+
+// Storage key for the active organization
+const ACTIVE_ORGANIZATION_KEY = "gemstone_tracker_active_organization";
 
 type SupabaseContextProps = {
 	user: User | null;
@@ -19,7 +24,8 @@ type SupabaseContextProps = {
 		gemstone: CreateGemstoneInputType,
 	) => Promise<Tables<"stones">>;
 	activeOrganization: Tables<"organizations"> | null;
-	setActiveOrganization: (organization: Tables<"organizations">) => void;
+	userOrganizations: Tables<"organizations">[];
+	onSelectOrganization: (organizationId: string) => Promise<void>;
 };
 
 type SupabaseProviderProps = {
@@ -35,7 +41,8 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	signOut: async () => {},
 	createGemstone: async () => new Promise((resolve) => resolve({} as any)),
 	activeOrganization: null,
-	setActiveOrganization: async () => {},
+	userOrganizations: [],
+	onSelectOrganization: async () => {},
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -44,10 +51,70 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const router = useRouter();
 	const segments = useSegments();
 	const [user, setUser] = useState<User | null>(null);
-	const [activeOrganization, setActiveOrganization] =
-		useState<Tables<"organizations"> | null>(null);
 	const [session, setSession] = useState<Session | null>(null);
 	const [initialized, setInitialized] = useState<boolean>(false);
+
+	const { data: organizationMemberships } = useOrganizationMemberships();
+	const [activeOrganization, setActiveOrganization] =
+		useState<Tables<"organizations"> | null>(null);
+
+	// Derive userOrganizations from organizationMemberships
+	const userOrganizations = useMemo(() => {
+		if (!organizationMemberships?.length) return [];
+		return organizationMemberships
+			.map((membership) => membership.organization)
+			.filter((org) => org !== null);
+	}, [organizationMemberships]);
+
+	// Load the active organization from AsyncStorage on initialization
+	useEffect(() => {
+		const loadActiveOrganization = async () => {
+			try {
+				const storedOrgId = await AsyncStorage.getItem(ACTIVE_ORGANIZATION_KEY);
+
+				if (storedOrgId && organizationMemberships?.length) {
+					const storedOrg = organizationMemberships.find(
+						(m) => m.organization_id === storedOrgId,
+					);
+
+					if (storedOrg) {
+						setActiveOrganization(storedOrg.organization);
+						return;
+					}
+				}
+
+				// If no stored organization or it's not found, use default logic
+				if (organizationMemberships?.length && !activeOrganization) {
+					const ownerMembership = organizationMemberships.find(
+						(m) => m.role === "owner",
+					);
+
+					if (ownerMembership) {
+						setActiveOrganization(ownerMembership.organization);
+					}
+				}
+			} catch (error) {
+				console.error("Error loading active organization:", error);
+			}
+		};
+
+		loadActiveOrganization();
+	}, [organizationMemberships]);
+
+	const onSelectOrganization = async (organizationId: string) => {
+		const membership = organizationMemberships?.find(
+			(m) => m.organization_id === organizationId,
+		);
+
+		if (!membership || !membership.organization) return;
+
+		setActiveOrganization(membership.organization);
+		try {
+			await AsyncStorage.setItem(ACTIVE_ORGANIZATION_KEY, organizationId);
+		} catch (error) {
+			console.error("Error saving active organization:", error);
+		}
+	};
 
 	const signUp = async (email: string, password: string) => {
 		const { error } = await supabase.auth.signUp({
@@ -76,19 +143,6 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}
 	};
 
-	const fetchGemstones = async () => {
-		const { data, error } = await supabase
-			.from("stones")
-			.select("*")
-			.order("created_at", { ascending: false });
-
-		if (error) {
-			throw error;
-		}
-
-		return data;
-	};
-
 	const createGemstone = async (gemstone: CreateGemstoneInputType) => {
 		const { data, error } = await supabase
 			.from("stones")
@@ -101,40 +155,6 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}
 
 		return data;
-	};
-
-	useEffect(() => {
-		fetchUserOrganizations();
-		fetchGemstones();
-	}, [user]);
-
-	const fetchUserOrganizations = async () => {
-		const { data: memberships, error: membersError } = await supabase
-			.from("organization_members")
-			.select("organization_id")
-			.eq("user_id", user?.id)
-			.limit(1);
-
-		if (membersError) {
-			throw membersError;
-		}
-
-		if (!memberships?.length) {
-			return [];
-		}
-
-		const { data: organizations, error: orgsError } = await supabase
-			.from("organizations")
-			.select("*")
-			.eq("id", memberships[0].organization_id)
-			.single();
-
-		if (orgsError) {
-			throw orgsError;
-		}
-
-		setActiveOrganization(organizations);
-		return organizations ? [organizations] : [];
 	};
 
 	useEffect(() => {
@@ -182,7 +202,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				signOut,
 				createGemstone,
 				activeOrganization,
-				setActiveOrganization,
+				userOrganizations,
+				onSelectOrganization,
 			}}
 		>
 			{children}

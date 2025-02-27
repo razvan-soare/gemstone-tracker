@@ -9,14 +9,9 @@ import {
 } from "react-native";
 import GemstoneCard from "./GemstoneCard";
 
-export type ViewSettings = {
-	columnsCount: 1 | 2 | 3;
-};
-
 type GemstoneListProps = {
 	gemstones: Array<Tables<"stones"> & { images: Tables<"images">[] }>;
 	isLoading: boolean;
-	viewSettings: ViewSettings;
 	onLoadMore: () => void;
 	hasNextPage: boolean;
 	isFetchingNextPage: boolean;
@@ -25,7 +20,6 @@ type GemstoneListProps = {
 const GemstoneList = ({
 	gemstones,
 	isLoading,
-	viewSettings,
 	onLoadMore,
 	hasNextPage,
 	isFetchingNextPage,
@@ -34,9 +28,7 @@ const GemstoneList = ({
 	const padding = 16;
 	const spacing = 16;
 	const availableWidth = windowWidth - padding * 2;
-	const columnWidth =
-		(availableWidth - spacing * (viewSettings.columnsCount - 1)) /
-		viewSettings.columnsCount;
+	const columnWidth = (availableWidth - spacing) / 2;
 
 	if (isLoading && !isFetchingNextPage) {
 		return (
@@ -72,8 +64,7 @@ const GemstoneList = ({
 			)}
 			keyExtractor={(item) => item.id}
 			contentContainerStyle={styles.listContainer}
-			numColumns={viewSettings.columnsCount}
-			key={viewSettings.columnsCount}
+			numColumns={2}
 			onEndReached={() => {
 				if (hasNextPage && !isFetchingNextPage) {
 					onLoadMore();
