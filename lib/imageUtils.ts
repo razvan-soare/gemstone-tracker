@@ -31,7 +31,7 @@ export async function getSignedImageUrl(
  * @returns An object containing the optimized image source and loading state
  */
 export function useImage(image: Tables<"images">, options = {}) {
-	const queryKey = ["image", image.id];
+	const queryKey = ["image", image?.id];
 
 	const query = useQuery({
 		queryKey,
