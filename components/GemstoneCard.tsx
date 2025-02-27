@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Card, Title } from "react-native-paper";
 import { OptimizedImage } from "./OptimizedImage";
 import { Badge } from "./ui/badge";
-import { P } from "./ui/typography";
+import { Muted, P } from "./ui/typography";
 
 const GemstoneCard = ({
 	gemstone,
@@ -31,7 +31,10 @@ const GemstoneCard = ({
 				</View>
 
 				<Card.Content>
-					<Title style={styles.title}>{gemstone.name}</Title>
+					<View className="flex flex-row items-center gap-4 mb-4">
+						<P className="text-base font-bold">{gemstone.name}</P>
+						<Muted className="font-bold">{gemstone.code}</Muted>
+					</View>
 					<View style={styles.chipsWrapper}>
 						<Badge variant="outline" style={styles.chipBox}>
 							<P style={styles.chip}>{gemstone.shape}</P>
@@ -53,10 +56,6 @@ const GemstoneCard = ({
 };
 
 const styles = StyleSheet.create({
-	title: {
-		fontSize: 16,
-		fontWeight: "bold",
-	},
 	card: {
 		elevation: 4,
 	},

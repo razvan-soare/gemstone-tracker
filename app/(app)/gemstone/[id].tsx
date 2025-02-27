@@ -183,6 +183,9 @@ export default function GemstoneDetail() {
 										weight: gemstone.weight,
 										identification: gemstone.identification,
 										comment: gemstone.comment,
+										code: gemstone.code,
+										buy_price: gemstone.buy_price,
+										sell_price: gemstone.sell_price,
 									});
 									setIsEditing(true);
 								}}
@@ -209,6 +212,15 @@ export default function GemstoneDetail() {
 								value={formData.name}
 								onChangeText={(value) =>
 									setFormData((prev) => ({ ...prev, name: value }))
+								}
+								style={styles.input}
+							/>
+							<TextInput
+								label="Code"
+								mode="outlined"
+								value={formData.code || ""}
+								onChangeText={(value) =>
+									setFormData((prev) => ({ ...prev, code: value }))
 								}
 								style={styles.input}
 							/>
@@ -328,6 +340,10 @@ export default function GemstoneDetail() {
 						</>
 					) : (
 						<>
+							<View style={styles.detailRow}>
+								<P style={styles.label}>Code:</P>
+								<P>{gemstone.code}</P>
+							</View>
 							<View style={styles.detailRow}>
 								<P style={styles.label}>Shape:</P>
 								<P>{gemstone.shape}</P>

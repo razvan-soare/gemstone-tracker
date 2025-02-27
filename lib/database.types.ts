@@ -149,6 +149,7 @@ export type Database = {
         Row: {
           buy_price: number | null
           certificate_id: string | null
+          code: string | null
           color: string | null
           comment: string | null
           created_at: string | null
@@ -169,6 +170,7 @@ export type Database = {
         Insert: {
           buy_price?: number | null
           certificate_id?: string | null
+          code?: string | null
           color?: string | null
           comment?: string | null
           created_at?: string | null
@@ -189,6 +191,7 @@ export type Database = {
         Update: {
           buy_price?: number | null
           certificate_id?: string | null
+          code?: string | null
           color?: string | null
           comment?: string | null
           created_at?: string | null
