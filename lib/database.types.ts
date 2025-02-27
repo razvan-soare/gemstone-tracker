@@ -147,6 +147,7 @@ export type Database = {
       }
       stones: {
         Row: {
+          buy_price: number | null
           certificate_id: string | null
           color: string | null
           comment: string | null
@@ -159,11 +160,14 @@ export type Database = {
           name: string
           organization_id: string | null
           pictures: string[] | null
+          sell_price: number | null
           shape: string | null
+          sold_at: string | null
           updated_at: string | null
           weight: number | null
         }
         Insert: {
+          buy_price?: number | null
           certificate_id?: string | null
           color?: string | null
           comment?: string | null
@@ -176,11 +180,14 @@ export type Database = {
           name: string
           organization_id?: string | null
           pictures?: string[] | null
+          sell_price?: number | null
           shape?: string | null
+          sold_at?: string | null
           updated_at?: string | null
           weight?: number | null
         }
         Update: {
+          buy_price?: number | null
           certificate_id?: string | null
           color?: string | null
           comment?: string | null
@@ -193,7 +200,9 @@ export type Database = {
           name?: string
           organization_id?: string | null
           pictures?: string[] | null
+          sell_price?: number | null
           shape?: string | null
+          sold_at?: string | null
           updated_at?: string | null
           weight?: number | null
         }

@@ -3,7 +3,7 @@ import {
 	GemstoneCut,
 	GemstoneShape,
 } from "@/app/types/gemstone";
-import { H3, P } from "@/components/ui/typography";
+import { P } from "@/components/ui/typography";
 import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
@@ -13,6 +13,7 @@ import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -21,13 +22,14 @@ import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import {
 	ActivityIndicator,
 	Button,
+	Dialog,
 	FAB,
 	IconButton,
 	PaperProvider,
+	Portal,
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
-import { useActionSheet } from "@expo/react-native-action-sheet";
 
 export default function GemstoneDetail() {
 	const { showActionSheetWithOptions } = useActionSheet();
@@ -46,6 +48,8 @@ export default function GemstoneDetail() {
 	const [tempImagePreviews, setTempImagePreviews] = useState<
 		ImagePicker.ImagePickerAsset[]
 	>([]);
+	const [sellDialogVisible, setSellDialogVisible] = useState(false);
+	const [sellPrice, setSellPrice] = useState("");
 
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
@@ -70,7 +74,7 @@ export default function GemstoneDetail() {
 		await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 	};
 
-	const onPress = () => {
+	const onOpenAddPicture = () => {
 		const options = ["Take picture", "Upload picture", "Cancel"];
 		const cancelButtonIndex = 2;
 
@@ -113,6 +117,36 @@ export default function GemstoneDetail() {
 			setIsEditing(false);
 		} catch (error) {
 			console.error("Error updating gemstone:", error);
+		}
+	};
+
+	const onSellStone = () => {
+		setSellDialogVisible(true);
+	};
+
+	const handleSellConfirm = async () => {
+		try {
+			const price = parseFloat(sellPrice);
+			if (isNaN(price) || price <= 0) {
+				// Handle invalid price input
+				return;
+			}
+
+			await updateGemstone.mutateAsync({
+				id: gemstone.id,
+				sell_price: price,
+				sold_at: new Date().toISOString(),
+			});
+
+			// Reset state and close dialog
+			setSellPrice("");
+			setSellDialogVisible(false);
+
+			// Invalidate queries to refresh data
+			await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
+			await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+		} catch (error) {
+			console.error("Error updating gemstone sell price:", error);
 		}
 	};
 
@@ -265,6 +299,32 @@ export default function GemstoneDetail() {
 								numberOfLines={3}
 								style={[styles.input, { height: 100 }]}
 							/>
+							<TextInput
+								label="Buy price"
+								mode="outlined"
+								value={String(formData.buy_price || "")}
+								onChangeText={(value) =>
+									setFormData((prev) => ({
+										...prev,
+										buy_price: value ? parseFloat(value) : null,
+									}))
+								}
+								keyboardType="decimal-pad"
+								style={[styles.input]}
+							/>
+							<TextInput
+								label="Sell price"
+								mode="outlined"
+								value={String(formData.sell_price || "")}
+								onChangeText={(value) =>
+									setFormData((prev) => ({
+										...prev,
+										sell_price: value ? parseFloat(value) : null,
+									}))
+								}
+								keyboardType="decimal-pad"
+								style={[styles.input]}
+							/>
 						</>
 					) : (
 						<>
@@ -292,34 +352,68 @@ export default function GemstoneDetail() {
 								<P style={styles.label}>Comments:</P>
 								<P>{gemstone.comment}</P>
 							</View>
+							<View style={styles.detailRow}>
+								<P style={styles.label}>Buy price:</P>
+								<P>${gemstone.buy_price}</P>
+							</View>
+
+							{gemstone.sell_price && (
+								<View style={styles.detailRow}>
+									<P style={styles.label}>Sell Price:</P>
+									<P>${gemstone.sell_price}</P>
+								</View>
+							)}
+							{gemstone.sold_at && (
+								<View style={styles.detailRow}>
+									<P style={styles.label}>Sold At:</P>
+									<P>{new Date(gemstone.sold_at).toLocaleDateString()}</P>
+								</View>
+							)}
 						</>
 					)}
-
-					{/* <View style={styles.certificateSection}>
-						<H3>Certificate</H3>
-						{gemstone.certificate_id ? (
-							<Button
-								mode="contained"
-								onPress={() => {
-									// Open certificate URL
-									// Linking.openURL(gemstone.certificate_id);
-								}}
-							>
-								View Certificate
-							</Button>
-						) : (
-							<Button mode="outlined" onPress={() => {}} loading={false}>
-								Upload Certificate
-							</Button>
-						)}
-					</View> */}
 				</View>
 			</ScrollView>
+
+			{/* Sell Dialog */}
+			<Portal>
+				<Dialog
+					visible={sellDialogVisible}
+					onDismiss={() => setSellDialogVisible(false)}
+				>
+					<Dialog.Title>Sell Gemstone</Dialog.Title>
+					<Dialog.Content>
+						<TextInput
+							label="Sell Price ($)"
+							value={sellPrice}
+							onChangeText={setSellPrice}
+							keyboardType="decimal-pad"
+							mode="outlined"
+							style={{ marginTop: 10 }}
+						/>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={() => setSellDialogVisible(false)}>Cancel</Button>
+						<Button
+							onPress={handleSellConfirm}
+							loading={updateGemstone.isPending}
+						>
+							Confirm
+						</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
+
 			<FAB
 				icon="plus"
 				style={styles.fab}
-				onPress={onPress}
+				onPress={onOpenAddPicture}
 				loading={uploading}
+			/>
+			<FAB
+				icon="currency-usd"
+				style={styles.fabSell}
+				onPress={onSellStone}
+				loading={updateGemstone.isPending}
 			/>
 		</PaperProvider>
 	);
@@ -376,6 +470,15 @@ const styles = StyleSheet.create({
 		margin: 16,
 		right: 0,
 		bottom: 50,
+		width: 56,
+		height: 56,
+		borderRadius: 100,
+	},
+	fabSell: {
+		position: "absolute",
+		margin: 16,
+		right: 0,
+		bottom: 130,
 		width: 56,
 		height: 56,
 		borderRadius: 100,
