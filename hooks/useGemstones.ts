@@ -6,6 +6,7 @@ import {
 	GemstoneCut,
 	GemstoneShape,
 } from "@/app/types/gemstone";
+import { useSupabase } from "@/context/supabase-provider";
 
 type GemstoneFilters = {
 	search?: string;
@@ -30,14 +31,16 @@ const buildSearchQuery = (term: string) => {
 };
 
 export const useGemstones = (filters: GemstoneFilters = {}) => {
+	const { activeOrganization } = useSupabase();
 	return useInfiniteQuery({
-		queryKey: ["gemstones", filters],
+		queryKey: ["gemstones", activeOrganization, filters],
 		queryFn: async ({ pageParam = 0 }) => {
 			let query = supabase
 				.from("stones")
 				.select("*, images:images(*)", {
 					count: "exact",
 				})
+				.eq("organization_id", activeOrganization?.id || "")
 				.order("created_at", { ascending: false })
 				.range(
 					pageParam * ITEMS_PER_PAGE,

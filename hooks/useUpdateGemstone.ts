@@ -20,8 +20,8 @@ export const useUpdateGemstone = () => {
 			if (error) throw error;
 			return data;
 		},
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ["gemstone", data.id] });
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["gemstone"] });
 			queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 		},
 	});

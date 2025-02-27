@@ -57,7 +57,7 @@ export default function GemstoneDetail() {
 		});
 
 		// Invalidate the cache after successful upload
-		await queryClient.invalidateQueries({ queryKey: ["gemstone", id] });
+		await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
 		await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 	};
 	const handlePickImage = async () => {
@@ -66,7 +66,7 @@ export default function GemstoneDetail() {
 		});
 
 		// Invalidate the cache after successful upload
-		await queryClient.invalidateQueries({ queryKey: ["gemstone", id] });
+		await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
 		await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 	};
 

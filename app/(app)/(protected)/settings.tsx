@@ -15,7 +15,6 @@ export default function Settings() {
 		activeOrganization,
 		userOrganizations,
 		onSelectOrganization,
-		user,
 	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
 

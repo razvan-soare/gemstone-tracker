@@ -7,7 +7,7 @@ import { supabase } from "@/config/supabase";
 import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";
 import { useOrganizationMemberships } from "@/hooks/useOrganizationMemberships";
 import { Tables } from "@/lib/database.types";
-
+import { useQueryClient } from "@tanstack/react-query";
 SplashScreen.preventAutoHideAsync();
 
 // Storage key for the active organization
@@ -53,7 +53,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [session, setSession] = useState<Session | null>(null);
 	const [initialized, setInitialized] = useState<boolean>(false);
-
+	const queryClient = useQueryClient();
 	const { data: organizationMemberships } = useOrganizationMemberships();
 	const [activeOrganization, setActiveOrganization] =
 		useState<Tables<"organizations"> | null>(null);
@@ -114,6 +114,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		} catch (error) {
 			console.error("Error saving active organization:", error);
 		}
+		queryClient.invalidateQueries({ queryKey: ["gemstone"] });
+		queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 	};
 
 	const signUp = async (email: string, password: string) => {
