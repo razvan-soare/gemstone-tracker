@@ -80,6 +80,7 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 
 	const carouselRef = useRef<ICarouselInstance>(null);
 	const progressValue = useSharedValue<number>(0);
+	const [activeIndex, setActiveIndex] = useState(0);
 
 	if (allItems.length === 0) {
 		return (
@@ -112,6 +113,9 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 				scrollAnimationDuration={600}
 				onProgressChange={(progress) => {
 					progressValue.value = progress;
+				}}
+				onSnapToItem={(index) => {
+					setActiveIndex(index);
 				}}
 				customAnimation={(value) => {
 					"worklet";
@@ -182,6 +186,29 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 					</View>
 				)}
 			/>
+
+			{allItems.length > 1 && (
+				<View style={styles.paginationContainer}>
+					{allItems.map((_, index) => (
+						<View
+							key={index}
+							style={[
+								styles.paginationDot,
+								{
+									backgroundColor:
+										activeIndex === index
+											? colorScheme === "dark"
+												? colors.light.primary
+												: colors.dark.primary
+											: colorScheme === "dark"
+												? "rgba(255, 255, 255, 0.3)"
+												: "rgba(0, 0, 0, 0.3)",
+								},
+							]}
+						/>
+					))}
+				</View>
+			)}
 		</View>
 	);
 };
@@ -218,5 +245,19 @@ const styles = StyleSheet.create({
 		display: "flex",
 		justifyContent: "center",
 		alignItems: "center",
+	},
+	paginationContainer: {
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+		position: "absolute",
+		bottom: 10,
+		width: "100%",
+	},
+	paginationDot: {
+		width: 8,
+		height: 8,
+		borderRadius: 4,
+		marginHorizontal: 4,
 	},
 });

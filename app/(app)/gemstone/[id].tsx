@@ -295,7 +295,7 @@ export default function GemstoneDetail() {
 						</>
 					)}
 
-					<View style={styles.certificateSection}>
+					{/* <View style={styles.certificateSection}>
 						<H3>Certificate</H3>
 						{gemstone.certificate_id ? (
 							<Button
@@ -312,7 +312,7 @@ export default function GemstoneDetail() {
 								Upload Certificate
 							</Button>
 						)}
-					</View>
+					</View> */}
 				</View>
 			</ScrollView>
 			<FAB
