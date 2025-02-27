@@ -50,6 +50,21 @@ export default function ProtectedLayout() {
 				}}
 			/>
 			<Tabs.Screen
+				name="buy-list"
+				options={{
+					title: "Buy List",
+					tabBarIcon: ({ focused }) => (
+						<View style={styles.iconContainer}>
+							<Ionicons
+								name={focused ? "list" : "list-outline"}
+								size={24}
+								color={focused ? iconColor : "gray"}
+							/>
+						</View>
+					),
+				}}
+			/>
+			<Tabs.Screen
 				name="settings"
 				options={{
 					title: "Settings",

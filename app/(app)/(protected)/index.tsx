@@ -52,7 +52,7 @@ export default function Home() {
 				barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
 			/>
 
-			<View className="w-full items-center justify-center py-2">
+			<View className="w-full items-center justify-center py-4">
 				<H2>{activeOrganization?.name}'s gemstones</H2>
 			</View>
 

@@ -3,7 +3,7 @@ import { Dropdown } from "react-native-paper-dropdown";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { H1, H2, Muted } from "@/components/ui/typography";
+import { H1, H2, H3, Muted } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 
@@ -36,11 +36,13 @@ export default function Settings() {
 				showsVerticalScrollIndicator={false}
 			>
 				<View className="gap-y-4">
-					<H1>Settings</H1>
+					<View className="w-full items-center justify-center py-4">
+						<H2>Settings</H2>
+					</View>
 
 					{userOrganizations.length > 0 && (
 						<View className="gap-y-2">
-							<H2>Organization</H2>
+							<H3>Organization</H3>
 							<Muted>Select the active organization</Muted>
 							<View style={styles.dropdownContainer}>
 								<Dropdown
@@ -63,7 +65,7 @@ export default function Settings() {
 					)}
 
 					<View className="gap-y-2">
-						<H2>Appearance</H2>
+						<H3>Appearance</H3>
 						<Muted>Change the app's appearance</Muted>
 						<Button
 							className="w-full"
@@ -76,7 +78,7 @@ export default function Settings() {
 					</View>
 
 					<View className="gap-y-2">
-						<H2>Account</H2>
+						<H3>Account</H3>
 						<Muted>Sign out and return to the welcome screen.</Muted>
 						<Button
 							className="w-full"
