@@ -24,6 +24,8 @@ import {
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function GemstoneDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,6 +34,9 @@ export default function GemstoneDetail() {
 	const { activeOrganization, session } = useSupabase();
 	const queryClient = useQueryClient();
 	const screenWidth = Dimensions.get("window").width;
+	const { colorScheme } = useColorScheme();
+	const backgroundColor =
+		colorScheme === "dark" ? colors.dark.background : colors.light.background;
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<Partial<Tables<"stones">>>({});
@@ -113,7 +118,7 @@ export default function GemstoneDetail() {
 						),
 				}}
 			/>
-			<ScrollView style={styles.container}>
+			<ScrollView style={[styles.container, { backgroundColor }]}>
 				<View style={styles.carouselSection}>
 					<GemstoneCarousel
 						images={gemstone.images || []}
@@ -287,7 +292,6 @@ export default function GemstoneDetail() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#fff",
 	},
 	loadingContainer: {
 		flex: 1,

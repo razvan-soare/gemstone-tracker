@@ -1,5 +1,7 @@
 import { Tables } from "@/lib/database.types";
 import { getDefaultStoneImage } from "@/lib/imageUtils";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 import * as ImagePicker from "expo-image-picker";
 import React, { useRef, useState } from "react";
 import { Dimensions, Image, StyleSheet, View } from "react-native";
@@ -65,6 +67,10 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 	width = Dimensions.get("window").width - 30,
 	height = 250,
 }) => {
+	const { colorScheme } = useColorScheme();
+	const backgroundColor =
+		colorScheme === "dark" ? colors.dark.muted : colors.light.muted;
+
 	const allItems: CarouselItem[] = [
 		...images.map((image) => ({ type: "image", data: image }) as ImageItem),
 		...tempImagePreviews.map(
@@ -77,7 +83,7 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 
 	if (allItems.length === 0) {
 		return (
-			<View style={[styles.emptyContainer, { width, height }]}>
+			<View style={[styles.emptyContainer, { width, height, backgroundColor }]}>
 				<OptimizedImage
 					image={null as any}
 					placeholder={getDefaultStoneImage()}
@@ -150,7 +156,7 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 					);
 				}}
 				renderItem={({ item }) => (
-					<View style={styles.itemContainer}>
+					<View style={[styles.itemContainer, { backgroundColor }]}>
 						{item.type === "image" ? (
 							<OptimizedImage
 								key={item.data.id}
@@ -166,7 +172,10 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 									resizeMode="cover"
 								/>
 								<View style={styles.loadingOverlay}>
-									<ActivityIndicator size="small" color="#0000ff" />
+									<ActivityIndicator
+										size="small"
+										color={colorScheme === "dark" ? "#ffffff" : "#0000ff"}
+									/>
 								</View>
 							</View>
 						)}
@@ -182,7 +191,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "#f5f5f5",
 	},
 	image: {
 		width: "100%",
@@ -192,7 +200,6 @@ const styles = StyleSheet.create({
 	emptyContainer: {
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "#f5f5f5",
 		borderRadius: 8,
 	},
 	emptyImage: {

@@ -6,12 +6,16 @@ import { Card, Title } from "react-native-paper";
 import { OptimizedImage } from "./OptimizedImage";
 import { Badge } from "./ui/badge";
 import { P } from "./ui/typography";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 const GemstoneCard = ({
 	gemstone,
 }: {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
 }) => {
+	const { colorScheme } = useColorScheme();
+
 	return (
 		<Pressable onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}>
 			<Card style={styles.card}>
@@ -61,7 +65,6 @@ const styles = StyleSheet.create({
 		borderBottomStartRadius: 0,
 	},
 	loadingContainer: {
-		backgroundColor: "#f5f5f5",
 		justifyContent: "center",
 		alignItems: "center",
 	},

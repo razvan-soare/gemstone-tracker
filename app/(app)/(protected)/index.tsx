@@ -11,6 +11,8 @@ import {
 import FilterButton from "@/components/FilterButton";
 import GemstoneList, { ViewSettings } from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { useGemstones } from "@/hooks/useGemstones";
 
 export default function Home() {
@@ -25,6 +27,8 @@ export default function Home() {
 		columnsCount: 2,
 	});
 
+	const { colorScheme } = useColorScheme();
+
 	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useGemstones({
 			search: searchQuery,
@@ -35,8 +39,20 @@ export default function Home() {
 
 	return (
 		<PaperProvider>
-			<SafeAreaView style={styles.container}>
-				<StatusBar barStyle="dark-content" />
+			<SafeAreaView
+				style={[
+					styles.container,
+					{
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+				]}
+			>
+				<StatusBar
+					barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+				/>
 
 				<View style={styles.headerButtons}>
 					<SearchBar
@@ -67,7 +83,6 @@ export default function Home() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#f5f5f5",
 	},
 	header: {
 		flexDirection: "column",

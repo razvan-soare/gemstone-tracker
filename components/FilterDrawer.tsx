@@ -15,6 +15,8 @@ import {
 	GemstoneCut,
 	GemstoneShape,
 } from "@/app/types/gemstone";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 type FilterDrawerProps = {
 	visible: boolean;
@@ -110,6 +112,10 @@ export default function FilterDrawer({
 	filters,
 	onApplyFilters,
 }: FilterDrawerProps) {
+	const { colorScheme } = useColorScheme();
+	const backgroundColor =
+		colorScheme === "dark" ? colors.dark.background : colors.light.background;
+
 	const [tempFilters, setTempFilters] = React.useState({
 		shape: filters.shape,
 		color: filters.color,
@@ -159,7 +165,7 @@ export default function FilterDrawer({
 			<Modal
 				visible={visible}
 				onDismiss={onDismiss}
-				contentContainerStyle={styles.modalContainer}
+				contentContainerStyle={[styles.modalContainer, { backgroundColor }]}
 			>
 				<View style={styles.header}>
 					<Text variant="titleLarge">Filters</Text>
@@ -244,11 +250,9 @@ export default function FilterDrawer({
 
 const styles = StyleSheet.create({
 	modalContainer: {
-		backgroundColor: "white",
 		margin: 20,
 		borderRadius: 8,
 		display: "flex",
-		flexDirection: "column",
 	},
 	header: {
 		flexDirection: "row",

@@ -1,5 +1,7 @@
 import { Tables } from "@/lib/database.types";
 import { useImage } from "@/lib/imageUtils";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { Image as ExpoImage } from "expo-image";
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
@@ -17,12 +19,25 @@ export function OptimizedImage({
 	alt,
 }: OptimizedImageProps) {
 	const { thumbnail, source, isLoading } = useImage(image);
+	const { colorScheme } = useColorScheme();
+
+	const loadingBackgroundColor =
+		colorScheme === "dark" ? colors.dark.muted : colors.light.muted;
 
 	return (
 		<View style={[styles.container, style]}>
 			{isLoading && (
-				<View style={[styles.loadingContainer, style]}>
-					<ActivityIndicator size="small" color="#0000ff" />
+				<View
+					style={[
+						styles.loadingContainer,
+						style,
+						{ backgroundColor: loadingBackgroundColor },
+					]}
+				>
+					<ActivityIndicator
+						size="small"
+						color={colorScheme === "dark" ? "#ffffff" : "#0000ff"}
+					/>
 				</View>
 			)}
 			{placeholder && !isLoading && !source && !thumbnail && (
@@ -55,7 +70,6 @@ const styles = StyleSheet.create({
 		position: "absolute",
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "#f0f0f0",
 		zIndex: 1,
 	},
 	placeholderImage: {

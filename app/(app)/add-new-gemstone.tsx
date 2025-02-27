@@ -17,6 +17,8 @@ import {
 	MD2Colors,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 type ValidationError = {
 	field: string;
@@ -28,6 +30,9 @@ export default function AddNewGemstone() {
 	const createGemstone = useCreateGemstone();
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [error, setError] = useState<ValidationError | null>(null);
+	const { colorScheme } = useColorScheme();
+	const backgroundColor =
+		colorScheme === "dark" ? colors.dark.background : colors.light.background;
 
 	const [formData, setFormData] = useState({
 		name: "",
@@ -153,7 +158,7 @@ export default function AddNewGemstone() {
 
 	return (
 		<PaperProvider>
-			<ScrollView style={styles.container}>
+			<ScrollView style={[styles.container, { backgroundColor }]}>
 				<TextInput
 					label="Name"
 					mode="outlined"
@@ -274,18 +279,13 @@ export default function AddNewGemstone() {
 				</Button>
 
 				<Snackbar
-					visible={snackbarVisible}
-					onDismiss={() => {
-						setSnackbarVisible(false);
-						setError(null);
-					}}
-					duration={4000}
+					visible={!!error}
+					onDismiss={() => setError(null)}
+					duration={3000}
 					style={styles.errorSnackbar}
-					action={{
-						label: "Dismiss",
-						onPress: () => {
-							setSnackbarVisible(false);
-							setError(null);
+					theme={{
+						colors: {
+							surface: MD2Colors.red800,
 						},
 					}}
 				>
@@ -299,7 +299,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 16,
-		backgroundColor: "#fff",
 	},
 	title: {
 		marginBottom: 20,
