@@ -23,6 +23,7 @@ export default function Home() {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		sold?: boolean;
 	}>({});
 	const { activeOrganization } = useSupabase();
 	const { colorScheme } = useColorScheme();

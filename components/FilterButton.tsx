@@ -15,11 +15,13 @@ type FilterButtonProps = {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		sold?: boolean;
 	}) => void;
 	filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		sold?: boolean;
 	};
 };
 

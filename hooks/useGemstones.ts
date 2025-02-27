@@ -13,6 +13,7 @@ type GemstoneFilters = {
 	shape?: GemstoneShape;
 	color?: GemstoneColor;
 	cut?: GemstoneCut;
+	sold?: boolean;
 };
 
 const ITEMS_PER_PAGE = 20;
@@ -74,6 +75,11 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 			// Add cut filter if provided
 			if (filters.cut) {
 				query = query.eq("cut", filters.cut);
+			}
+
+			// Add sold filter if provided
+			if (filters.sold === true) {
+				query = query.not("sold_at", "is", null);
 			}
 
 			const { data, error, count } = await query;

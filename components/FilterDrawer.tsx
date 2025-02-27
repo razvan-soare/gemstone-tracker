@@ -9,6 +9,7 @@ import {
 	Text,
 	Menu,
 	TextInput,
+	Switch,
 } from "react-native-paper";
 import {
 	GemstoneColor,
@@ -25,11 +26,13 @@ type FilterDrawerProps = {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		sold?: boolean;
 	};
 	onApplyFilters: (filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		sold?: boolean;
 	}) => void;
 };
 
@@ -120,6 +123,7 @@ export default function FilterDrawer({
 		shape: filters.shape,
 		color: filters.color,
 		cut: filters.cut,
+		sold: filters.sold,
 	});
 
 	const handleApply = () => {
@@ -132,6 +136,7 @@ export default function FilterDrawer({
 			shape: undefined,
 			color: undefined,
 			cut: undefined,
+			sold: undefined,
 		});
 	};
 
@@ -141,6 +146,7 @@ export default function FilterDrawer({
 			shape: filters.shape,
 			color: filters.color,
 			cut: filters.cut,
+			sold: filters.sold,
 		});
 	}, [filters]);
 
@@ -224,6 +230,24 @@ export default function FilterDrawer({
 							}
 						/>
 					</View>
+
+					<View style={styles.switchContainer}>
+						<Text variant="titleMedium" style={styles.sectionTitle}>
+							Sold Status
+						</Text>
+						<View style={styles.switchRow}>
+							<Text>Show only sold gemstones</Text>
+							<Switch
+								value={tempFilters.sold === true}
+								onValueChange={(value) =>
+									setTempFilters((prev) => ({
+										...prev,
+										sold: value ? true : undefined,
+									}))
+								}
+							/>
+						</View>
+					</View>
 				</ScrollView>
 
 				<Divider />
@@ -292,5 +316,14 @@ const styles = StyleSheet.create({
 	},
 	menuScrollView: {
 		maxHeight: 300,
+	},
+	switchContainer: {
+		marginBottom: 24,
+	},
+	switchRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginTop: 8,
 	},
 });

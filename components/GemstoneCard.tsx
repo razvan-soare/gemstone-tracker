@@ -12,14 +12,23 @@ const GemstoneCard = ({
 }: {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
 }) => {
+	const isSold = !!gemstone.sold_at;
+
 	return (
 		<Pressable onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}>
-			<Card style={styles.card}>
-				<OptimizedImage
-					image={gemstone.images?.[0] || ""}
-					placeholder={getDefaultStoneImage()}
-					style={styles.image}
-				/>
+			<Card style={[styles.card, isSold && styles.soldCard]}>
+				<View style={styles.imageContainer}>
+					<OptimizedImage
+						image={gemstone.images?.[0] || ""}
+						placeholder={getDefaultStoneImage()}
+						style={styles.image}
+					/>
+					{isSold && (
+						<View style={styles.soldBadge}>
+							<P style={styles.soldBadgeText}>SOLD</P>
+						</View>
+					)}
+				</View>
 
 				<Card.Content>
 					<Title style={styles.title}>{gemstone.name}</Title>
@@ -51,6 +60,13 @@ const styles = StyleSheet.create({
 	card: {
 		elevation: 4,
 	},
+	soldCard: {
+		borderWidth: 2,
+		borderColor: "#4CAF50", // Green color
+	},
+	imageContainer: {
+		position: "relative",
+	},
 	image: {
 		width: "100%",
 		aspectRatio: 1,
@@ -59,6 +75,20 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		borderBottomEndRadius: 0,
 		borderBottomStartRadius: 0,
+	},
+	soldBadge: {
+		position: "absolute",
+		top: 10,
+		right: 10,
+		backgroundColor: "#4CAF50", // Green color
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+	},
+	soldBadgeText: {
+		color: "white",
+		fontWeight: "bold",
+		fontSize: 12,
 	},
 	loadingContainer: {
 		justifyContent: "center",
