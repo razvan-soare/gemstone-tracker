@@ -1187,6 +1187,14 @@
     semver "^7.6.0"
     xml2js "0.6.0"
 
+"@expo/react-native-action-sheet@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@expo/react-native-action-sheet/-/react-native-action-sheet-4.1.1.tgz#a94a11088b8f146ac86b3ae710deef609a922d82"
+  integrity sha512-4KRaba2vhqDRR7ObBj6nrD5uJw8ePoNHdIOMETTpgGTX7StUbrF4j/sfrP1YUyaPEa1P8FXdwG6pB+2WtrJd1A==
+  dependencies:
+    "@types/hoist-non-react-statics" "^3.3.1"
+    hoist-non-react-statics "^3.3.0"
+
 "@expo/rudder-sdk-node@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@expo/rudder-sdk-node/-/rudder-sdk-node-1.1.1.tgz#6aa575f346833eb6290282118766d4919c808c6a"
@@ -2230,6 +2238,14 @@
   resolved "https://registry.yarnpkg.com/@types/hammerjs/-/hammerjs-2.0.46.tgz#381daaca1360ff8a7c8dff63f32e69745b9fb1e1"
   integrity sha512-ynRvcq6wvqexJ9brDMS4BnBLzmr0e14d6ZJTEShTBWKymQiHwlAyGu0ZPEFI2Fh1U53F7tN9ufClWM5KvqkKOw==
 
+"@types/hoist-non-react-statics@^3.3.1":
+  version "3.3.6"
+  resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.6.tgz#6bba74383cdab98e8db4e20ce5b4a6b98caed010"
+  integrity sha512-lPByRJUer/iN/xa4qpyL0qmL11DqNW81iU/IG1S3uvRUq4oKagz8VCxZjiWkumgt66YT3vOdDgZ0o32sGKtCEw==
+  dependencies:
+    "@types/react" "*"
+    hoist-non-react-statics "^3.3.0"
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.6.tgz#7739c232a1fee9b4d3ce8985f314c0c6d33549d7"
@@ -2282,6 +2298,13 @@
   version "15.7.14"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.14.tgz#1433419d73b2a7ebfc6918dcefd2ec0d5cd698f2"
   integrity sha512-gNMvNH49DJ7OJYv+KAKn0Xp45p8PLl6zo2YnvDIbTd4J6MER2BmWN49TG7n9LvkyihINxeKW8+3bfS2yDC9dzQ==
+
+"@types/react@*":
+  version "19.0.10"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-19.0.10.tgz#d0c66dafd862474190fe95ce11a68de69ed2b0eb"
+  integrity sha512-JuRQ9KXLEjaUNjTWpzuR231Z2WpIwczOkBEIvbHNCzQefFIT0L8IqE6NV6ULLyC1SI/i234JnDoMkfg+RjQj2g==
+  dependencies:
+    csstype "^3.0.2"
 
 "@types/react@~18.3.12":
   version "18.3.18"

@@ -8,9 +8,11 @@ import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
+import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { Tables } from "@/lib/database.types";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -19,19 +21,20 @@ import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import {
 	ActivityIndicator,
 	Button,
+	FAB,
 	IconButton,
 	PaperProvider,
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
-import { colors } from "@/constants/colors";
-import { useColorScheme } from "@/lib/useColorScheme";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 export default function GemstoneDetail() {
+	const { showActionSheetWithOptions } = useActionSheet();
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { data: gemstone, isLoading } = useGemstone(id);
 	const updateGemstone = useUpdateGemstone();
-	const { activeOrganization, session } = useSupabase();
+	const { activeOrganization } = useSupabase();
 	const queryClient = useQueryClient();
 	const screenWidth = Dimensions.get("window").width;
 	const { colorScheme } = useColorScheme();
@@ -48,6 +51,15 @@ export default function GemstoneDetail() {
 		`${activeOrganization?.id}/${gemstone?.id}`,
 	);
 
+	const handleTakePhoto = async () => {
+		await takePhoto({
+			setTempImagePreviews,
+		});
+
+		// Invalidate the cache after successful upload
+		await queryClient.invalidateQueries({ queryKey: ["gemstone", id] });
+		await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+	};
 	const handlePickImage = async () => {
 		await pickImage({
 			setTempImagePreviews,
@@ -56,6 +68,32 @@ export default function GemstoneDetail() {
 		// Invalidate the cache after successful upload
 		await queryClient.invalidateQueries({ queryKey: ["gemstone", id] });
 		await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+	};
+
+	const onPress = () => {
+		const options = ["Take picture", "Upload picture", "Cancel"];
+		const cancelButtonIndex = 2;
+
+		showActionSheetWithOptions(
+			{
+				options,
+				cancelButtonIndex,
+			},
+			(selectedIndex: number | undefined) => {
+				switch (selectedIndex) {
+					case 0:
+						handleTakePhoto();
+						break;
+
+					case 1:
+						handlePickImage();
+						break;
+
+					case cancelButtonIndex:
+					// Canceled
+				}
+			},
+		);
 	};
 
 	if (isLoading || !gemstone) {
@@ -126,14 +164,6 @@ export default function GemstoneDetail() {
 						height={200}
 						width={screenWidth}
 					/>
-					<Button
-						mode="outlined"
-						onPress={handlePickImage}
-						style={styles.addImageButton}
-						loading={uploading}
-					>
-						Add Image
-					</Button>
 				</View>
 
 				<View style={styles.detailsContainer}>
@@ -285,6 +315,12 @@ export default function GemstoneDetail() {
 					</View>
 				</View>
 			</ScrollView>
+			<FAB
+				icon="plus"
+				style={styles.fab}
+				onPress={onPress}
+				loading={uploading}
+			/>
 		</PaperProvider>
 	);
 }
@@ -292,6 +328,7 @@ export default function GemstoneDetail() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		position: "relative",
 	},
 	loadingContainer: {
 		flex: 1,
@@ -333,5 +370,14 @@ const styles = StyleSheet.create({
 	certificateSection: {
 		marginTop: 24,
 		gap: 16,
+	},
+	fab: {
+		position: "absolute",
+		margin: 16,
+		right: 0,
+		bottom: 50,
+		width: 56,
+		height: 56,
+		borderRadius: 100,
 	},
 });
