@@ -3,16 +3,15 @@ import { useState } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { FAB, PaperProvider } from "react-native-paper";
 
-import GemstoneList, { ViewSettings } from "@/components/GemstoneList";
-import SearchBar from "@/components/SearchBar";
-import ViewSettingsButton from "@/components/ViewSettingsButton";
-import FilterButton from "@/components/FilterButton";
-import { useGemstones } from "@/hooks/useGemstones";
 import {
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
 } from "@/app/types/gemstone";
+import FilterButton from "@/components/FilterButton";
+import GemstoneList, { ViewSettings } from "@/components/GemstoneList";
+import SearchBar from "@/components/SearchBar";
+import { useGemstones } from "@/hooks/useGemstones";
 
 export default function Home() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -39,15 +38,12 @@ export default function Home() {
 			<SafeAreaView style={styles.container}>
 				<StatusBar barStyle="dark-content" />
 
-				<View>
+				<View style={styles.headerButtons}>
 					<SearchBar
 						searchQuery={searchQuery}
 						setSearchQuery={setSearchQuery}
 					/>
-				</View>
-				<View style={styles.headerButtons}>
 					<FilterButton filters={filters} onFiltersChange={setFilters} />
-					<ViewSettingsButton setViewSettings={setViewSettings} />
 				</View>
 
 				<GemstoneList
@@ -84,6 +80,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
+		gap: 8,
 	},
 	fab: {
 		position: "absolute",

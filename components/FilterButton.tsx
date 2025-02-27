@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Badge, IconButton } from "react-native-paper";
+import { Badge, Button, Icon, IconButton } from "react-native-paper";
 import {
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
 } from "@/app/types/gemstone";
 import FilterDrawer from "./FilterDrawer";
+import { P } from "./ui/typography";
+import { colors } from "@/constants/colors";
 
 type FilterButtonProps = {
 	onFiltersChange: (filters: {
@@ -36,12 +38,9 @@ export default function FilterButton({
 	return (
 		<>
 			<View style={styles.filterButtonContainer}>
-				<IconButton
-					icon="filter-variant"
-					mode="contained-tonal"
-					onPress={showModal}
-					style={styles.filterButton}
-				/>
+				<Button onPress={showModal} mode="text" style={styles.filterButton}>
+					<Icon source="filter-variant" size={24} />
+				</Button>
 				{activeFiltersCount > 0 && (
 					<Badge style={styles.badge} size={18}>
 						{activeFiltersCount}
@@ -65,6 +64,13 @@ const styles = StyleSheet.create({
 	},
 	filterButton: {
 		margin: 0,
+		height: 50,
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		minWidth: 0,
+		width: 50,
+		borderRadius: 100,
 	},
 	badge: {
 		position: "absolute",
