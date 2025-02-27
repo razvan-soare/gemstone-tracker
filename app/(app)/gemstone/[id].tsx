@@ -7,16 +7,15 @@ import { H3, P } from "@/components/ui/typography";
 import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
-import { OptimizedImage } from "@/components/OptimizedImage";
+import { GemstoneCarousel } from "@/components/Carousel";
 import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { Tables } from "@/lib/database.types";
-import { getDefaultStoneImage } from "@/lib/imageUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Image, ScrollView, StyleSheet, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import {
 	ActivityIndicator,
 	Button,
@@ -32,6 +31,7 @@ export default function GemstoneDetail() {
 	const updateGemstone = useUpdateGemstone();
 	const { activeOrganization, session } = useSupabase();
 	const queryClient = useQueryClient();
+	const screenWidth = Dimensions.get("window").width;
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState<Partial<Tables<"stones">>>({});
@@ -114,50 +114,22 @@ export default function GemstoneDetail() {
 				}}
 			/>
 			<ScrollView style={styles.container}>
-				<ScrollView
-					horizontal
-					style={styles.imageScroll}
-					contentContainerStyle={styles.imageContainer}
-				>
-					{(gemstone.images || []).map((image) => (
-						<OptimizedImage
-							key={image.id}
-							image={image}
-							placeholder={getDefaultStoneImage()}
-							style={styles.image}
-						/>
-					))}
-					{tempImagePreviews.map((preview, index) => (
-						<View key={`preview-${index}`} style={{ position: "relative" }}>
-							<Image
-								source={{ uri: preview.uri }}
-								style={[styles.image, { opacity: 0.7 }]}
-								resizeMode="cover"
-							/>
-							<View
-								style={{
-									position: "absolute",
-									zIndex: 1,
-									display: "flex",
-									justifyContent: "center",
-									alignItems: "center",
-									width: "100%",
-									height: "100%",
-								}}
-							>
-								<ActivityIndicator size="small" color="#0000ff" />
-							</View>
-						</View>
-					))}
-
+				<View style={styles.carouselSection}>
+					<GemstoneCarousel
+						images={gemstone.images || []}
+						tempImagePreviews={tempImagePreviews}
+						height={200}
+						width={screenWidth}
+					/>
 					<Button
 						mode="outlined"
 						onPress={handlePickImage}
 						style={styles.addImageButton}
+						loading={uploading}
 					>
 						Add Image
 					</Button>
-				</ScrollView>
+				</View>
 
 				<View style={styles.detailsContainer}>
 					{isEditing ? (
@@ -332,21 +304,13 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		alignItems: "center",
 	},
-	imageScroll: {
-		maxHeight: 200,
-	},
-	imageContainer: {
-		padding: 16,
-		gap: 16,
-	},
-	image: {
-		width: 150,
-		height: 150,
-		borderRadius: 8,
+	carouselSection: {
+		paddingHorizontal: 0,
 	},
 	addImageButton: {
-		height: 150,
-		justifyContent: "center",
+		marginTop: 16,
+		alignSelf: "center",
+		width: "50%",
 	},
 	detailsContainer: {
 		padding: 16,
