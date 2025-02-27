@@ -1,35 +1,13 @@
-import { useEffect, useState } from "react";
-import {
-	SafeAreaView,
-	StyleSheet,
-	View,
-	FlatList,
-	Alert,
-	ScrollView,
-} from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import { Dropdown } from "react-native-paper-dropdown";
-import {
-	Card,
-	TextInput,
-	List,
-	IconButton,
-	Modal,
-	Portal,
-	Divider,
-} from "react-native-paper";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { H1, H2, H3, Muted, P } from "@/components/ui/typography";
-import { useSupabase } from "@/context/supabase-provider";
-import { useColorScheme } from "@/lib/useColorScheme";
+import { H1, H2, Muted } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
-import { Tables } from "@/lib/database.types";
-import {
-	useOrganizationMembers,
-	useRemoveOrganizationMember,
-	useIsOrganizationOwner,
-} from "@/hooks/useOrganizationMembers";
+import { useSupabase } from "@/context/supabase-provider";
+
+import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function Settings() {
 	const {
@@ -40,75 +18,6 @@ export default function Settings() {
 		user,
 	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
-	const [inviteModalVisible, setInviteModalVisible] = useState(false);
-	const [inviteEmail, setInviteEmail] = useState("");
-	const [inviteError, setInviteError] = useState<string | null>(null);
-
-	// Get organization members
-	const { data: organizationMembers = [], isLoading: isLoadingMembers } =
-		useOrganizationMembers(activeOrganization?.id || null);
-
-	// Check if current user is the owner
-	const { data: isOwner = false } = useIsOrganizationOwner(
-		activeOrganization?.id || null,
-	);
-
-	// Mutations for member management
-	const { mutate: removeMember, isPending: isRemoving } =
-		useRemoveOrganizationMember();
-
-	// Reset error when modal is opened/closed
-	useEffect(() => {
-		setInviteError(null);
-	}, [inviteModalVisible]);
-
-	// Handle member removal
-	const handleRemoveMember = (memberId: string) => {
-		if (!activeOrganization?.id) return;
-
-		Alert.alert(
-			"Remove Member",
-			"Are you sure you want to remove this member from the organization?",
-			[
-				{ text: "Cancel", style: "cancel" },
-				{
-					text: "Remove",
-					style: "destructive",
-					onPress: () => {
-						removeMember({
-							memberId,
-							organizationId: activeOrganization.id,
-						});
-					},
-				},
-			],
-		);
-	};
-
-	// Custom list item renderer with reduced height
-	const renderMemberItem = ({ item }: { item: any }) => (
-		<>
-			<List.Item
-				title={item.email}
-				titleStyle={styles.listItemTitle}
-				description={`Role: ${item.role}`}
-				descriptionStyle={styles.listItemDescription}
-				style={styles.listItem}
-				right={(props) =>
-					isOwner && item.user_id !== user?.id ? (
-						<IconButton
-							{...props}
-							icon="delete"
-							size={20}
-							onPress={() => handleRemoveMember(item.id)}
-							disabled={isRemoving}
-						/>
-					) : null
-				}
-			/>
-			<Divider />
-		</>
-	);
 
 	return (
 		<SafeAreaView
@@ -151,28 +60,6 @@ export default function Settings() {
 									}))}
 								/>
 							</View>
-						</View>
-					)}
-
-					{activeOrganization && (
-						<View className="gap-y-2">
-							<Muted>Members of {activeOrganization.name}</Muted>
-
-							<Card style={styles.membersCard}>
-								<Card.Content style={styles.cardContent}>
-									<FlatList
-										data={organizationMembers}
-										keyExtractor={(item) => item.id}
-										renderItem={renderMemberItem}
-										ListEmptyComponent={() => (
-											<View style={styles.emptyContainer}>
-												<Text>No members found</Text>
-											</View>
-										)}
-										scrollEnabled={false}
-									/>
-								</Card.Content>
-							</Card>
 						</View>
 					)}
 
