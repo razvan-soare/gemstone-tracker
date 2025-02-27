@@ -5,13 +5,24 @@ import { Text } from "@/components/ui/text";
 import { H1, H2, Muted } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { colors } from "@/constants/colors";
 
 export default function Settings() {
 	const { signOut } = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView
+			style={[
+				styles.container,
+				{
+					backgroundColor:
+						colorScheme === "dark"
+							? colors.dark.background
+							: colors.light.background,
+				},
+			]}
+		>
 			<View className="flex-1 p-4 gap-y-8">
 				<View className="gap-y-8">
 					<H1>Settings</H1>

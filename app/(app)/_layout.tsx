@@ -21,6 +21,12 @@ export default function AppLayout() {
 					headerShown: true,
 					title: "",
 					headerBackTitle: "Back",
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
 					headerTintColor:
 						colorScheme === "dark"
 							? colors.dark.foreground
