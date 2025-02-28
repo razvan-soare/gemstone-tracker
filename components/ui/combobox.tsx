@@ -8,6 +8,8 @@ import {
 	TouchableOpacity,
 	View,
 	ViewStyle,
+	TextStyle,
+	Platform,
 } from "react-native";
 import { Menu } from "react-native-paper";
 
@@ -41,7 +43,7 @@ export function ComboBox({
 	const [inputWidth, setInputWidth] = React.useState(0);
 	const [customValue, setCustomValue] = React.useState("");
 	const [menuPosition, setMenuPosition] = React.useState({ x: 0, y: 0 });
-	const inputRef = React.useRef<View>(null);
+	const inputContainerRef = React.useRef<View>(null);
 
 	// Initialize customValue with the provided value
 	React.useEffect(() => {
@@ -56,9 +58,12 @@ export function ComboBox({
 	const openMenu = () => {
 		if (!disabled) {
 			// Measure the position of the input for menu placement
-			if (inputRef.current) {
-				inputRef.current.measureInWindow((x, y, width, height) => {
-					setMenuPosition({ x, y: y + height });
+			if (inputContainerRef.current) {
+				inputContainerRef.current.measureInWindow((x, y, width, height) => {
+					// Position the dropdown 5px below the input field
+					// Add platform-specific adjustments if needed
+					// const yOffset = Platform.OS === "ios" ? 5 : 5;
+					setMenuPosition({ x, y: y - height });
 					setInputWidth(width);
 					setVisible(true);
 				});
@@ -90,7 +95,11 @@ export function ComboBox({
 	return (
 		<View style={[styles.container, style]}>
 			{label && <Text style={styles.label}>{label}</Text>}
-			<View ref={inputRef} onLayout={handleLayout}>
+			<View
+				ref={inputContainerRef}
+				onLayout={handleLayout}
+				style={styles.inputContainer}
+			>
 				<TextInput
 					value={displayValue}
 					onChangeText={handleInputChange}
@@ -115,7 +124,7 @@ export function ComboBox({
 				style={[styles.menu, { width: inputWidth }, menuStyle]}
 				contentStyle={styles.menuContent}
 			>
-				<ScrollView style={styles.menuScrollView}>
+				<ScrollView style={styles.menuScrollView} nestedScrollEnabled={true}>
 					{options.map((option) => (
 						<TouchableOpacity
 							key={option.value}
@@ -150,23 +159,24 @@ export function ComboBox({
 }
 
 const styles = StyleSheet.create({
-	container: {
-		marginBottom: 16,
-	},
+	container: {},
 	label: {
 		fontSize: 16,
 		marginBottom: 8,
 		fontWeight: "500",
 	},
+	inputContainer: {
+		position: "relative",
+	},
 	input: {
 		height: 48,
 		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 8,
+		borderColor: "#a7a5ac",
+		borderRadius: 4,
 		paddingHorizontal: 12,
 		paddingRight: 40, // Space for dropdown icon
 		fontSize: 16,
-		backgroundColor: "#fff",
+		backgroundColor: "#fffbfe",
 	},
 	disabled: {
 		backgroundColor: "#f0f0f0",
@@ -186,7 +196,14 @@ const styles = StyleSheet.create({
 		color: "#666",
 	},
 	menu: {
-		marginTop: 4,
+		marginTop: 0, // Remove any default margin
+		elevation: 4, // Add elevation for Android
+		shadowColor: "#000", // Shadow for iOS
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 2,
+		borderRadius: 8,
+		backgroundColor: "#fff",
 	},
 	menuContent: {
 		paddingVertical: 0,

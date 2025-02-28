@@ -43,6 +43,7 @@ import {
 } from "react-native-paper";
 import { DatePickerInput } from "react-native-paper-dates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Dropdown } from "react-native-paper-dropdown";
 
 // Helper function to format dates consistently
 const formatDate = (dateString: string) => {
@@ -430,7 +431,6 @@ export default function GemstoneDetail() {
 									/>
 
 									<View style={styles.gemTypeContainer}>
-										<P style={styles.gemTypeLabel}>Gem Type</P>
 										<View style={styles.radioGroup}>
 											<TouchableOpacity
 												style={[
@@ -539,14 +539,17 @@ export default function GemstoneDetail() {
 											}
 										/>
 										<View style={styles.currencyDropdown}>
-											<ComboBox
+											<Dropdown
 												label="Currency"
+												mode="outlined"
+												hideMenuHeader
+												menuContentStyle={{ top: -40 }}
 												value={formData.buy_currency || Currency.RMB}
 												options={Object.values(Currency).map((currency) => ({
 													label: currency,
 													value: currency,
 												}))}
-												onChange={(value) =>
+												onSelect={(value) =>
 													setFormData((prev) => ({
 														...prev,
 														buy_currency: value as Currency,
@@ -586,14 +589,17 @@ export default function GemstoneDetail() {
 											placeholder="Set price without marking as sold"
 										/>
 										<View style={styles.currencyDropdown}>
-											<ComboBox
+											<Dropdown
 												label="Currency"
+												mode="outlined"
+												hideMenuHeader
+												menuContentStyle={{ top: -40 }}
 												value={formData.sell_currency || Currency.RMB}
 												options={Object.values(Currency).map((currency) => ({
 													label: currency,
 													value: currency,
 												}))}
-												onChange={(value) =>
+												onSelect={(value) =>
 													setFormData((prev) => ({
 														...prev,
 														sell_currency: value as Currency,
@@ -749,18 +755,6 @@ export default function GemstoneDetail() {
 					>
 						<Dialog.Title>Sell Gemstone</Dialog.Title>
 						<Dialog.Content>
-							<View style={styles.quantityDisplay}>
-								<P style={styles.quantityLabel}>Quantity:</P>
-								<P style={styles.quantityValue}>
-									{gemstone.quantity || "1"} pieces
-								</P>
-							</View>
-							<View style={styles.quantityDisplay}>
-								<P style={styles.quantityLabel}>Gem Type:</P>
-								<P style={styles.quantityValue}>
-									{GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]}
-								</P>
-							</View>
 							<View style={styles.priceContainer}>
 								<TextInput
 									label="Sell Price"
@@ -774,14 +768,17 @@ export default function GemstoneDetail() {
 									}
 								/>
 								<View style={styles.currencyDropdown}>
-									<ComboBox
+									<Dropdown
 										label="Currency"
+										mode="outlined"
+										hideMenuHeader
+										menuContentStyle={{ top: -40 }}
 										value={sellCurrency}
+										onSelect={(value) => setSellCurrency(value as Currency)}
 										options={Object.values(Currency).map((currency) => ({
 											label: currency,
 											value: currency,
 										}))}
-										onChange={(value) => setSellCurrency(value as Currency)}
 									/>
 								</View>
 							</View>
@@ -884,7 +881,7 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	input: {
-		marginBottom: 16,
+		marginBottom: 8,
 	},
 	certificateSection: {
 		marginTop: 24,

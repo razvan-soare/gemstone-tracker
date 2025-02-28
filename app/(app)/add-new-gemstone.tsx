@@ -35,6 +35,7 @@ import {
 	enGB,
 	registerTranslation,
 } from "react-native-paper-dates";
+import { Dropdown } from "react-native-paper-dropdown";
 import { ComboBox } from "@/components/ui/combobox";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { P } from "@/components/ui/typography";
@@ -216,17 +217,6 @@ export default function AddNewGemstone() {
 							onChange={(value) => updateField("name", value as GemstoneType)}
 						/>
 					</View>
-					<TextInput
-						label="Bill number"
-						mode="outlined"
-						value={formData.bill_number}
-						onChangeText={(value) => updateField("bill_number", value)}
-						style={[
-							styles.input,
-							error?.field === "bill_number" && styles.inputError,
-						]}
-						error={error?.field === "bill_number"}
-					/>
 
 					<View style={styles.input}>
 						<ComboBox
@@ -265,6 +255,18 @@ export default function AddNewGemstone() {
 					</View>
 
 					<TextInput
+						label="Bill number"
+						mode="outlined"
+						value={formData.bill_number}
+						onChangeText={(value) => updateField("bill_number", value)}
+						style={[
+							styles.input,
+							error?.field === "bill_number" && styles.inputError,
+						]}
+						error={error?.field === "bill_number"}
+					/>
+
+					<TextInput
 						label="Weight (carats)"
 						mode="outlined"
 						value={formData.weight}
@@ -300,32 +302,70 @@ export default function AddNewGemstone() {
 					</View>
 
 					<View style={styles.gemTypeContainer}>
-						<P style={styles.gemTypeLabel}>Gem Type</P>
 						<View style={styles.radioGroup}>
-							<Text style={styles.radioLabel}>Gem Type</Text>
-							<View style={styles.radioContainer}>
-								{Object.values(GemTypeEnum).map((type) => (
-									<TouchableOpacity
-										key={type}
-										style={[
-											styles.radioCard,
-											formData.gem_type === type && styles.radioCardSelected,
-										]}
-										onPress={() => updateField("gem_type", type)}
-									>
-										<Text
-											style={[
-												styles.radioText,
-												formData.gem_type === type
-													? styles.radioTextSelected
-													: {},
-											]}
-										>
-											{GemTypeLabels[type]}
-										</Text>
-									</TouchableOpacity>
-								))}
-							</View>
+							<TouchableOpacity
+								style={[
+									styles.radioCard,
+									formData.gem_type === GemTypeEnum.NATURAL &&
+										styles.radioCardSelected,
+								]}
+								onPress={() =>
+									setFormData((prev) => ({
+										...prev,
+										gem_type: GemTypeEnum.NATURAL,
+									}))
+								}
+								activeOpacity={0.7}
+							>
+								<View style={styles.radioIconContainer}>
+									<View style={styles.radioOuterCircle}>
+										{formData.gem_type === GemTypeEnum.NATURAL && (
+											<View style={styles.radioInnerCircle} />
+										)}
+									</View>
+								</View>
+								<P
+									style={
+										formData.gem_type === GemTypeEnum.NATURAL
+											? styles.radioTextSelected
+											: styles.radioText
+									}
+								>
+									{GemTypeLabels[GemTypeEnum.NATURAL]}
+								</P>
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								style={[
+									styles.radioCard,
+									formData.gem_type === GemTypeEnum.HEATED &&
+										styles.radioCardSelected,
+								]}
+								onPress={() =>
+									setFormData((prev) => ({
+										...prev,
+										gem_type: GemTypeEnum.HEATED,
+									}))
+								}
+								activeOpacity={0.7}
+							>
+								<View style={styles.radioIconContainer}>
+									<View style={styles.radioOuterCircle}>
+										{formData.gem_type === GemTypeEnum.HEATED && (
+											<View style={styles.radioInnerCircle} />
+										)}
+									</View>
+								</View>
+								<P
+									style={
+										formData.gem_type === GemTypeEnum.HEATED
+											? styles.radioTextSelected
+											: styles.radioText
+									}
+								>
+									{GemTypeLabels[GemTypeEnum.HEATED]}
+								</P>
+							</TouchableOpacity>
 						</View>
 					</View>
 
@@ -373,16 +413,17 @@ export default function AddNewGemstone() {
 							}
 						/>
 						<View style={styles.currencyDropdown}>
-							<ComboBox
+							<Dropdown
 								label="Currency"
+								mode="outlined"
+								hideMenuHeader
+								menuContentStyle={{ top: -50 }}
 								value={formData.buy_currency}
+								onSelect={(value) => updateField("buy_currency", value)}
 								options={Object.values(Currency).map((currency) => ({
 									label: currency,
 									value: currency,
 								}))}
-								onChange={(value) =>
-									updateField("buy_currency", value as Currency)
-								}
 							/>
 						</View>
 					</View>
@@ -405,16 +446,17 @@ export default function AddNewGemstone() {
 							}
 						/>
 						<View style={styles.currencyDropdown}>
-							<ComboBox
+							<Dropdown
 								label="Currency"
+								mode="outlined"
+								hideMenuHeader
+								menuContentStyle={{ top: -50 }}
 								value={formData.sell_currency}
+								onSelect={(value) => updateField("sell_currency", value)}
 								options={Object.values(Currency).map((currency) => ({
 									label: currency,
 									value: currency,
 								}))}
-								onChange={(value) =>
-									updateField("sell_currency", value as Currency)
-								}
 							/>
 						</View>
 					</View>
@@ -579,12 +621,8 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 	radioGroup: {
-		marginBottom: 16,
-	},
-	radioLabel: {
-		marginBottom: 8,
-		fontWeight: "bold",
-		fontSize: 16,
+		flexDirection: "row",
+		gap: 16,
 	},
 	radioContainer: {
 		flexDirection: "row",
@@ -616,5 +654,23 @@ const styles = StyleSheet.create({
 	radioTextSelected: {
 		fontWeight: "bold",
 		color: "#6200EE",
+	},
+	radioIconContainer: {
+		marginRight: 10,
+	},
+	radioOuterCircle: {
+		width: 20,
+		height: 20,
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: "#6200EE",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	radioInnerCircle: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		backgroundColor: "#6200EE",
 	},
 });

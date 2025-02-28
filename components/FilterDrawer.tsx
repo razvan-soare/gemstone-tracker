@@ -321,6 +321,7 @@ const styles = StyleSheet.create({
 	},
 	menuContent: {
 		maxHeight: 300,
+		top: 60,
 	},
 	menuScrollView: {
 		maxHeight: 300,
