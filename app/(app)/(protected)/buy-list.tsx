@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	ActivityIndicator,
 	SafeAreaView,
@@ -7,12 +7,18 @@ import {
 	StyleSheet,
 	View,
 } from "react-native";
-import { Divider, List, Surface, Text } from "react-native-paper";
+import {
+	Divider,
+	List,
+	Surface,
+	Text,
+	SegmentedButtons,
+} from "react-native-paper";
 
 import { H2, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { useGemstonesByDate } from "@/hooks/useGemstonesByDate";
+import { useGemstonesByDate, GemstoneFilter } from "@/hooks/useGemstonesByDate";
 import { useSupabase } from "@/context/supabase-provider";
 import { Tables } from "@/lib/database.types";
 import { router } from "expo-router";
@@ -65,28 +71,60 @@ const GemstoneItem = ({ gemstone, backgroundColor }: GemstoneItemProps) => {
 	);
 };
 
+// Component to render the gemstone list based on filter
+const GemstoneListView = ({
+	filter,
+	backgroundColor,
+	itemBackgroundColor,
+}: {
+	filter: GemstoneFilter;
+	backgroundColor: string;
+	itemBackgroundColor: string;
+}) => {
+	const { data: groupedGemstones, isLoading } = useGemstonesByDate(filter);
+
+	if (isLoading) {
+		return (
+			<View style={styles.loadingContainer}>
+				<ActivityIndicator size="large" />
+			</View>
+		);
+	}
+
+	return (
+		<SectionList
+			sections={groupedGemstones || []}
+			keyExtractor={(item) => item.id}
+			renderItem={({ item }) => (
+				<View style={{ backgroundColor }}>
+					<GemstoneItem gemstone={item} backgroundColor={itemBackgroundColor} />
+				</View>
+			)}
+			renderSectionHeader={({ section: { title } }) => (
+				<View style={[styles.sectionHeader, { backgroundColor }]}>
+					<Text style={styles.sectionHeaderText}>{title}</Text>
+				</View>
+			)}
+			contentContainerStyle={styles.listContent}
+			stickySectionHeadersEnabled={true}
+			ListEmptyComponent={() => (
+				<View style={styles.emptyContainer}>
+					<Text>No gemstones found</Text>
+				</View>
+			)}
+		/>
+	);
+};
+
 export default function BuyList() {
 	const { colorScheme } = useColorScheme();
 	const { activeOrganization } = useSupabase();
-	const { data: groupedGemstones, isLoading } = useGemstonesByDate();
+	const [activeTab, setActiveTab] = useState<GemstoneFilter>("purchased");
 
 	const backgroundColor =
 		colorScheme === "dark" ? colors.dark.background : colors.light.background;
 
 	const itemBackgroundColor = colorScheme === "dark" ? "#2c2c2c" : "#ffffff";
-
-	if (isLoading) {
-		return (
-			<SafeAreaView style={[styles.container, { backgroundColor }]}>
-				<StatusBar
-					barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-				/>
-				<View style={styles.loadingContainer}>
-					<ActivityIndicator size="large" />
-				</View>
-			</SafeAreaView>
-		);
-	}
 
 	return (
 		<SafeAreaView style={[styles.container, { backgroundColor }]}>
@@ -95,32 +133,30 @@ export default function BuyList() {
 			/>
 
 			<View className="w-full items-center justify-center py-4">
-				<H2>Purchase History</H2>
+				<H2>Gemstone History</H2>
 			</View>
 
-			<SectionList
-				sections={groupedGemstones || []}
-				keyExtractor={(item) => item.id}
-				renderItem={({ item }) => (
-					<View style={{ backgroundColor }}>
-						<GemstoneItem
-							gemstone={item}
-							backgroundColor={itemBackgroundColor}
-						/>
-					</View>
-				)}
-				renderSectionHeader={({ section: { title } }) => (
-					<View style={[styles.sectionHeader, { backgroundColor }]}>
-						<Text style={styles.sectionHeaderText}>{title}</Text>
-					</View>
-				)}
-				contentContainerStyle={styles.listContent}
-				stickySectionHeadersEnabled={true}
-				ListEmptyComponent={() => (
-					<View style={styles.emptyContainer}>
-						<Text>No gemstones found</Text>
-					</View>
-				)}
+			<View style={styles.segmentedButtonContainer}>
+				<SegmentedButtons
+					value={activeTab}
+					onValueChange={(value) => setActiveTab(value as GemstoneFilter)}
+					buttons={[
+						{
+							value: "purchased",
+							label: "Purchased",
+						},
+						{
+							value: "sold",
+							label: "Sold",
+						},
+					]}
+				/>
+			</View>
+
+			<GemstoneListView
+				filter={activeTab}
+				backgroundColor={backgroundColor}
+				itemBackgroundColor={itemBackgroundColor}
 			/>
 		</SafeAreaView>
 	);
@@ -164,5 +200,9 @@ const styles = StyleSheet.create({
 	emptyContainer: {
 		padding: 20,
 		alignItems: "center",
+	},
+	segmentedButtonContainer: {
+		paddingHorizontal: 16,
+		marginBottom: 16,
 	},
 });

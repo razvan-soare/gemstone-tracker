@@ -13,17 +13,31 @@ type GroupedGemstones = {
 	data: GemstoneWithDate[];
 };
 
-export const useGemstonesByDate = () => {
+export type GemstoneFilter = "purchased" | "sold";
+
+export const useGemstonesByDate = (filter: GemstoneFilter = "purchased") => {
 	const { activeOrganization } = useSupabase();
 
 	return useQuery({
-		queryKey: ["gemstones-by-date", activeOrganization?.id],
+		queryKey: ["gemstones-by-date", activeOrganization?.id, filter],
 		queryFn: async () => {
-			const { data, error } = await supabase
+			let query = supabase
 				.from("stones")
 				.select("*, images:images(*)")
-				.eq("organization_id", activeOrganization?.id || "")
-				.order("created_at", { ascending: false });
+				.eq("organization_id", activeOrganization?.id || "");
+
+			// Apply filter based on sold status
+			if (filter === "sold") {
+				// Get only sold gemstones (sold_at is not null)
+				query = query.not("sold_at", "is", null);
+			} else {
+				// For purchased filter, we get all gemstones regardless of sold status
+				// This is the original behavior
+			}
+
+			const { data, error } = await query.order("created_at", {
+				ascending: false,
+			});
 
 			if (error) {
 				throw error;
@@ -33,10 +47,11 @@ export const useGemstonesByDate = () => {
 			const gemstonesByDate: Record<string, GemstoneWithDate[]> = {};
 
 			data.forEach((gemstone) => {
-				// Use created_at as the purchase date
-				const date = gemstone.created_at
-					? new Date(gemstone.created_at)
-					: new Date();
+				// Use created_at as the purchase date for purchased filter
+				// Use sold_at as the date for sold filter
+				const dateField =
+					filter === "sold" ? gemstone.sold_at : gemstone.created_at;
+				const date = dateField ? new Date(dateField) : new Date();
 
 				const formattedDate = date.toLocaleDateString(undefined, {
 					year: "numeric",
