@@ -159,6 +159,7 @@ export type Database = {
           cut: string | null
           date: string | null
           dimensions: Json | null
+          gem_type: string | null
           id: string
           name: string
           organization_id: string | null
@@ -184,6 +185,7 @@ export type Database = {
           cut?: string | null
           date?: string | null
           dimensions?: Json | null
+          gem_type?: string | null
           id?: string
           name: string
           organization_id?: string | null
@@ -209,6 +211,7 @@ export type Database = {
           cut?: string | null
           date?: string | null
           dimensions?: Json | null
+          gem_type?: string | null
           id?: string
           name?: string
           organization_id?: string | null

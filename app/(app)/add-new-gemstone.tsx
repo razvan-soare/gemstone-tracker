@@ -5,6 +5,8 @@ import {
 	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
+	GemTypeEnum,
+	GemTypeLabels,
 } from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
@@ -13,11 +15,12 @@ import { useCreateGemstone } from "@/hooks/useCreateGemstone";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, TouchableOpacity } from "react-native";
 import {
 	Button,
 	MD2Colors,
 	PaperProvider,
+	RadioButton,
 	Snackbar,
 	TextInput,
 } from "react-native-paper";
@@ -28,6 +31,7 @@ import {
 } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { P } from "@/components/ui/typography";
 
 // Register the English locale
 registerTranslation("en", enGB);
@@ -53,6 +57,7 @@ export default function AddNewGemstone() {
 		cut: "",
 		weight: "",
 		quantity: "1",
+		gem_type: GemTypeEnum.NATURAL,
 		comment: "",
 		date: new Date().toISOString().split("T")[0],
 		dimensions: { length: "", width: "", height: "" },
@@ -65,7 +70,7 @@ export default function AddNewGemstone() {
 		buyer_address: "",
 	});
 
-	const updateField = (field: string, value?: string) => {
+	const updateField = (field: string, value?: string | GemTypeEnum) => {
 		if (!value) return;
 		setFormData((prev) => ({
 			...prev,
@@ -168,6 +173,7 @@ export default function AddNewGemstone() {
 				sold_at: formData.sold_at || null,
 				buy_currency: formData.buy_currency,
 				sell_currency: formData.sell_currency,
+				gem_type: formData.gem_type,
 			});
 			router.back();
 		} catch (error) {
@@ -297,6 +303,65 @@ export default function AddNewGemstone() {
 							error={error?.field === "quantity"}
 							placeholder="1"
 						/>
+					</View>
+
+					<View style={styles.gemTypeContainer}>
+						<P style={styles.gemTypeLabel}>Gem Type</P>
+						<View style={styles.radioGroup}>
+							<TouchableOpacity
+								style={[
+									styles.radioCard,
+									formData.gem_type === GemTypeEnum.NATURAL &&
+										styles.radioCardSelected,
+								]}
+								onPress={() => updateField("gem_type", GemTypeEnum.NATURAL)}
+								activeOpacity={0.7}
+							>
+								<View style={styles.radioIconContainer}>
+									<View style={styles.radioOuterCircle}>
+										{formData.gem_type === GemTypeEnum.NATURAL && (
+											<View style={styles.radioInnerCircle} />
+										)}
+									</View>
+								</View>
+								<P
+									style={
+										formData.gem_type === GemTypeEnum.NATURAL
+											? styles.radioTextSelected
+											: styles.radioText
+									}
+								>
+									{GemTypeLabels[GemTypeEnum.NATURAL]}
+								</P>
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								style={[
+									styles.radioCard,
+									formData.gem_type === GemTypeEnum.HEATED &&
+										styles.radioCardSelected,
+								]}
+								onPress={() => updateField("gem_type", GemTypeEnum.HEATED)}
+								activeOpacity={0.7}
+							>
+								<View style={styles.radioIconContainer}>
+									<View style={styles.radioOuterCircle}>
+										{formData.gem_type === GemTypeEnum.HEATED && (
+											<View style={styles.radioInnerCircle} />
+										)}
+									</View>
+								</View>
+								<P
+									style={
+										formData.gem_type === GemTypeEnum.HEATED
+											? styles.radioTextSelected
+											: styles.radioText
+									}
+								>
+									{GemTypeLabels[GemTypeEnum.HEATED]}
+								</P>
+							</TouchableOpacity>
+						</View>
 					</View>
 
 					<View style={styles.dimensionsContainer}>
@@ -541,5 +606,62 @@ const styles = StyleSheet.create({
 	},
 	quantityInput: {
 		flex: 1,
+	},
+	gemTypeContainer: {
+		marginBottom: 16,
+	},
+	gemTypeLabel: {
+		marginBottom: 8,
+		fontWeight: "bold",
+		fontSize: 16,
+	},
+	radioGroup: {
+		flexDirection: "row",
+		gap: 16,
+	},
+	radioCard: {
+		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
+		backgroundColor: "#FFFFFF",
+		borderWidth: 1,
+		borderColor: "#CCCCCC",
+		borderRadius: 8,
+		padding: 12,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 2,
+		elevation: 2,
+	},
+	radioCardSelected: {
+		borderColor: "#6200EE",
+		borderWidth: 1,
+		backgroundColor: "#F4EAFF",
+	},
+	radioIconContainer: {
+		marginRight: 10,
+	},
+	radioOuterCircle: {
+		width: 20,
+		height: 20,
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: "#6200EE",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	radioInnerCircle: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		backgroundColor: "#6200EE",
+	},
+	radioText: {
+		fontSize: 16,
+	},
+	radioTextSelected: {
+		fontWeight: "bold",
+		color: "#6200EE",
 	},
 });

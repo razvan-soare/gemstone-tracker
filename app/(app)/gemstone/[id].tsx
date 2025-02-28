@@ -5,6 +5,8 @@ import {
 	GemstoneType,
 	Currency,
 	CurrencySymbols,
+	GemTypeEnum,
+	GemTypeLabels,
 } from "@/app/types/gemstone";
 import { P } from "@/components/ui/typography";
 import { useGemstone } from "@/hooks/useGemstone";
@@ -21,7 +23,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
+import {
+	Dimensions,
+	ScrollView,
+	StyleSheet,
+	View,
+	TouchableOpacity,
+} from "react-native";
 import {
 	ActivityIndicator,
 	Button,
@@ -30,6 +38,7 @@ import {
 	IconButton,
 	PaperProvider,
 	Portal,
+	RadioButton,
 	TextInput,
 } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
@@ -58,6 +67,23 @@ const getCurrencySymbol = (currencyCode: string | null): string => {
 	}
 
 	return "$"; // Default fallback
+};
+
+// Helper function to convert string to GemTypeEnum
+const getGemTypeEnum = (gemType: string | null): GemTypeEnum => {
+	if (!gemType) return GemTypeEnum.NATURAL;
+
+	// Check if it's already a valid GemTypeEnum value
+	if (Object.values(GemTypeEnum).includes(gemType as any)) {
+		return gemType as GemTypeEnum;
+	}
+
+	// Convert legacy string values to enum
+	if (gemType.toLowerCase() === "natural") return GemTypeEnum.NATURAL;
+	if (gemType.toLowerCase() === "heated") return GemTypeEnum.HEATED;
+
+	// Default fallback
+	return GemTypeEnum.NATURAL;
 };
 
 export default function GemstoneDetail() {
@@ -263,6 +289,7 @@ export default function GemstoneDetail() {
 											cut: gemstone.cut,
 											weight: gemstone.weight,
 											quantity: gemstone.quantity || "1",
+											gem_type: getGemTypeEnum(gemstone.gem_type),
 											comment: gemstone.comment,
 											bill_number: gemstone.bill_number,
 											buy_price: gemstone.buy_price,
@@ -402,6 +429,75 @@ export default function GemstoneDetail() {
 										keyboardType="number-pad"
 										style={styles.input}
 									/>
+
+									<View style={styles.gemTypeContainer}>
+										<P style={styles.gemTypeLabel}>Gem Type</P>
+										<View style={styles.radioGroup}>
+											<TouchableOpacity
+												style={[
+													styles.radioCard,
+													formData.gem_type === GemTypeEnum.NATURAL &&
+														styles.radioCardSelected,
+												]}
+												onPress={() =>
+													setFormData((prev) => ({
+														...prev,
+														gem_type: GemTypeEnum.NATURAL,
+													}))
+												}
+												activeOpacity={0.7}
+											>
+												<View style={styles.radioIconContainer}>
+													<View style={styles.radioOuterCircle}>
+														{formData.gem_type === GemTypeEnum.NATURAL && (
+															<View style={styles.radioInnerCircle} />
+														)}
+													</View>
+												</View>
+												<P
+													style={
+														formData.gem_type === GemTypeEnum.NATURAL
+															? styles.radioTextSelected
+															: styles.radioText
+													}
+												>
+													{GemTypeLabels[GemTypeEnum.NATURAL]}
+												</P>
+											</TouchableOpacity>
+
+											<TouchableOpacity
+												style={[
+													styles.radioCard,
+													formData.gem_type === GemTypeEnum.HEATED &&
+														styles.radioCardSelected,
+												]}
+												onPress={() =>
+													setFormData((prev) => ({
+														...prev,
+														gem_type: GemTypeEnum.HEATED,
+													}))
+												}
+												activeOpacity={0.7}
+											>
+												<View style={styles.radioIconContainer}>
+													<View style={styles.radioOuterCircle}>
+														{formData.gem_type === GemTypeEnum.HEATED && (
+															<View style={styles.radioInnerCircle} />
+														)}
+													</View>
+												</View>
+												<P
+													style={
+														formData.gem_type === GemTypeEnum.HEATED
+															? styles.radioTextSelected
+															: styles.radioText
+													}
+												>
+													{GemTypeLabels[GemTypeEnum.HEATED]}
+												</P>
+											</TouchableOpacity>
+										</View>
+									</View>
 
 									<TextInput
 										label="Comments"
@@ -602,6 +698,10 @@ export default function GemstoneDetail() {
 										<P>{gemstone.weight} carats</P>
 									</View>
 									<View style={styles.detailRow}>
+										<P style={styles.label}>Gem Type:</P>
+										<P>{GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]}</P>
+									</View>
+									<View style={styles.detailRow}>
 										<P style={styles.label}>Quantity:</P>
 										<P>{gemstone.quantity || "1"} pieces</P>
 									</View>
@@ -660,6 +760,12 @@ export default function GemstoneDetail() {
 								<P style={styles.quantityLabel}>Quantity:</P>
 								<P style={styles.quantityValue}>
 									{gemstone.quantity || "1"} pieces
+								</P>
+							</View>
+							<View style={styles.quantityDisplay}>
+								<P style={styles.quantityLabel}>Gem Type:</P>
+								<P style={styles.quantityValue}>
+									{GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]}
 								</P>
 							</View>
 							<View style={styles.priceContainer}>
@@ -834,5 +940,61 @@ const styles = StyleSheet.create({
 	},
 	quantityValue: {
 		marginLeft: 8,
+	},
+	gemTypeContainer: {
+		marginBottom: 16,
+	},
+	gemTypeLabel: {
+		fontWeight: "bold",
+		marginBottom: 8,
+		fontSize: 16,
+	},
+	radioGroup: {
+		flexDirection: "row",
+		gap: 16,
+	},
+	radioCard: {
+		flex: 1,
+		flexDirection: "row",
+		alignItems: "center",
+		backgroundColor: "#FFFFFF",
+		borderWidth: 1,
+		borderRadius: 8,
+		padding: 12,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 2,
+		elevation: 2,
+	},
+	radioCardSelected: {
+		borderColor: "#6200EE",
+		borderWidth: 1,
+		backgroundColor: "#F4EAFF",
+	},
+	radioIconContainer: {
+		marginRight: 10,
+	},
+	radioOuterCircle: {
+		width: 20,
+		height: 20,
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: "#6200EE",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	radioInnerCircle: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		backgroundColor: "#6200EE",
+	},
+	radioText: {
+		fontSize: 16,
+	},
+	radioTextSelected: {
+		fontWeight: "bold",
+		color: "#6200EE",
 	},
 });
