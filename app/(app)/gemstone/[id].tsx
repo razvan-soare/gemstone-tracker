@@ -34,6 +34,17 @@ import { Dropdown } from "react-native-paper-dropdown";
 import { DatePickerInput } from "react-native-paper-dates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+// Helper function to format dates consistently
+const formatDate = (dateString: string) => {
+	const date = new Date(dateString);
+	// Create a date object that ignores timezone
+	return new Date(
+		date.getUTCFullYear(),
+		date.getUTCMonth(),
+		date.getUTCDate(),
+	).toLocaleDateString();
+};
+
 export default function GemstoneDetail() {
 	const { showActionSheetWithOptions } = useActionSheet();
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -146,10 +157,23 @@ export default function GemstoneDetail() {
 				return;
 			}
 
+			// Create a date at noon UTC to avoid timezone issues
+			const today = new Date();
+			const utcDate = new Date(
+				Date.UTC(
+					today.getFullYear(),
+					today.getMonth(),
+					today.getDate(),
+					12,
+					0,
+					0,
+				),
+			);
+
 			await updateGemstone.mutateAsync({
 				id: gemstone.id,
 				sell_price: price,
-				sold_at: new Date().toISOString(),
+				sold_at: utcDate.toISOString(),
 			});
 
 			setSellPrice("");
@@ -373,10 +397,28 @@ export default function GemstoneDetail() {
 													: undefined
 											}
 											onChange={(date) => {
-												setFormData((prev) => ({
-													...prev,
-													sold_at: date ? date.toISOString() : null,
-												}));
+												if (date) {
+													// Create a date at noon UTC to avoid timezone issues
+													const utcDate = new Date(
+														Date.UTC(
+															date.getFullYear(),
+															date.getMonth(),
+															date.getDate(),
+															12,
+															0,
+															0,
+														),
+													);
+													setFormData((prev) => ({
+														...prev,
+														sold_at: utcDate.toISOString(),
+													}));
+												} else {
+													setFormData((prev) => ({
+														...prev,
+														sold_at: null,
+													}));
+												}
 											}}
 											inputMode="start"
 											mode="outlined"
@@ -384,6 +426,20 @@ export default function GemstoneDetail() {
 											withDateFormatInLabel={false}
 										/>
 									</View>
+									{formData.sold_at && (
+										<Button
+											mode="outlined"
+											onPress={() =>
+												setFormData((prev) => ({
+													...prev,
+													sold_at: null,
+												}))
+											}
+											style={styles.input}
+										>
+											Clear Sold Date
+										</Button>
+									)}
 								</>
 							) : (
 								<>
@@ -428,7 +484,7 @@ export default function GemstoneDetail() {
 									{gemstone.sold_at && (
 										<View style={styles.detailRow}>
 											<P style={styles.label}>Sold At:</P>
-											<P>{new Date(gemstone.sold_at).toLocaleDateString()}</P>
+											<P>{formatDate(gemstone.sold_at)}</P>
 										</View>
 									)}
 								</>
