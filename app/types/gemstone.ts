@@ -65,3 +65,17 @@ export enum GemstoneType {
 	ZIRCON = "Zircon",
 	OTHER = "Other",
 }
+
+export enum Currency {
+	USD = "USD",
+	GBP = "GBP",
+	LKR = "LKR",
+	RMB = "RMB",
+}
+
+export const CurrencySymbols: Record<Currency, string> = {
+	[Currency.USD]: "$",
+	[Currency.GBP]: "£",
+	[Currency.LKR]: "Rs",
+	[Currency.RMB]: "¥",
+};

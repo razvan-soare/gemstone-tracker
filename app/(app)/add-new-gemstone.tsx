@@ -3,6 +3,8 @@ import {
 	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
+	Currency,
+	CurrencySymbols,
 } from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
@@ -38,7 +40,6 @@ type ValidationError = {
 export default function AddNewGemstone() {
 	const { activeOrganization } = useSupabase();
 	const createGemstone = useCreateGemstone();
-	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [error, setError] = useState<ValidationError | null>(null);
 	const { colorScheme } = useColorScheme();
 	const backgroundColor =
@@ -57,6 +58,8 @@ export default function AddNewGemstone() {
 		dimensions: { length: "", width: "", height: "" },
 		buy_price: 0,
 		sell_price: 0,
+		buy_currency: Currency.USD,
+		sell_currency: Currency.USD,
 		sold_at: null as string | null,
 		buyer: "",
 		buyer_address: "",
@@ -135,7 +138,6 @@ export default function AddNewGemstone() {
 		const validationError = validateForm();
 		if (validationError) {
 			setError(validationError);
-			setSnackbarVisible(true);
 			return;
 		}
 
@@ -153,6 +155,8 @@ export default function AddNewGemstone() {
 					? formData.dimensions
 					: null,
 				sold_at: formData.sold_at || null,
+				buy_currency: formData.buy_currency,
+				sell_currency: formData.sell_currency,
 			});
 			router.back();
 		} catch (error) {
@@ -160,7 +164,6 @@ export default function AddNewGemstone() {
 				field: "submit",
 				message: "Failed to create gemstone. Please try again later.",
 			});
-			setSnackbarVisible(true);
 			console.error("Error creating gemstone:", error);
 		}
 	};
@@ -263,29 +266,71 @@ export default function AddNewGemstone() {
 						error={error?.field === "weight"}
 					/>
 
-					<TextInput
-						label="Buy price"
-						mode="outlined"
-						value={formData.buy_price.toString()}
-						onChangeText={(value) => updateField("buy_price", value)}
-						keyboardType="decimal-pad"
-						style={[
-							styles.input,
-							error?.field === "buy_price" && styles.inputError,
-						]}
-					/>
+					<View style={styles.priceContainer}>
+						<TextInput
+							label="Buy price"
+							mode="outlined"
+							value={formData.buy_price.toString()}
+							onChangeText={(value) => updateField("buy_price", value)}
+							keyboardType="decimal-pad"
+							style={[
+								styles.priceInput,
+								error?.field === "buy_price" && styles.inputError,
+							]}
+							left={
+								<TextInput.Affix
+									text={CurrencySymbols[formData.buy_currency]}
+								/>
+							}
+						/>
+						<View style={styles.currencyDropdown}>
+							<Dropdown
+								label="Currency"
+								mode="outlined"
+								hideMenuHeader
+								menuContentStyle={{ top: -50 }}
+								value={formData.buy_currency}
+								onSelect={(value) => updateField("buy_currency", value)}
+								options={Object.values(Currency).map((currency) => ({
+									label: currency,
+									value: currency,
+								}))}
+							/>
+						</View>
+					</View>
 
-					<TextInput
-						label="Sell price"
-						mode="outlined"
-						value={formData.sell_price.toString()}
-						onChangeText={(value) => updateField("sell_price", value)}
-						keyboardType="decimal-pad"
-						style={[
-							styles.input,
-							error?.field === "sell_price" && styles.inputError,
-						]}
-					/>
+					<View style={styles.priceContainer}>
+						<TextInput
+							label="Sell price"
+							mode="outlined"
+							value={formData.sell_price.toString()}
+							onChangeText={(value) => updateField("sell_price", value)}
+							keyboardType="decimal-pad"
+							style={[
+								styles.priceInput,
+								error?.field === "sell_price" && styles.inputError,
+							]}
+							left={
+								<TextInput.Affix
+									text={CurrencySymbols[formData.sell_currency]}
+								/>
+							}
+						/>
+						<View style={styles.currencyDropdown}>
+							<Dropdown
+								label="Currency"
+								mode="outlined"
+								hideMenuHeader
+								menuContentStyle={{ top: -50 }}
+								value={formData.sell_currency}
+								onSelect={(value) => updateField("sell_currency", value)}
+								options={Object.values(Currency).map((currency) => ({
+									label: currency,
+									value: currency,
+								}))}
+							/>
+						</View>
+					</View>
 
 					<View style={styles.dimensionsContainer}>
 						<TextInput
@@ -437,11 +482,22 @@ const styles = StyleSheet.create({
 	dimensionInput: {
 		flex: 1,
 	},
+	priceContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginBottom: 16,
+		gap: 16,
+	},
+	priceInput: {
+		flex: 2,
+	},
+	currencyDropdown: {
+		flex: 1,
+	},
 	button: {
 		marginTop: 8,
 		marginBottom: 24,
 	},
-
 	errorSnackbar: {
 		backgroundColor: MD2Colors.red800,
 	},

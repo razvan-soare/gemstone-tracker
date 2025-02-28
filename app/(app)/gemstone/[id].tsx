@@ -3,6 +3,8 @@ import {
 	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
+	Currency,
+	CurrencySymbols,
 } from "@/app/types/gemstone";
 import { P } from "@/components/ui/typography";
 import { useGemstone } from "@/hooks/useGemstone";
@@ -43,6 +45,19 @@ const formatDate = (dateString: string) => {
 		date.getUTCMonth(),
 		date.getUTCDate(),
 	).toLocaleDateString();
+};
+
+// Helper function to safely get currency symbol
+const getCurrencySymbol = (currencyCode: string | null): string => {
+	if (!currencyCode) return "$";
+
+	// Check if the currency code is a valid Currency enum value
+	const isValidCurrency = Object.values(Currency).includes(currencyCode as any);
+	if (isValidCurrency) {
+		return CurrencySymbols[currencyCode as Currency];
+	}
+
+	return "$"; // Default fallback
 };
 
 export default function GemstoneDetail() {
@@ -181,6 +196,7 @@ export default function GemstoneDetail() {
 			await updateGemstone.mutateAsync({
 				id: gemstone.id,
 				sell_price: price,
+				sell_currency: gemstone.sell_currency || Currency.USD,
 				sold_at: utcDate.toISOString(),
 				buyer: buyer,
 				buyer_address: buyerAddress,
@@ -237,6 +253,8 @@ export default function GemstoneDetail() {
 											bill_number: gemstone.bill_number,
 											buy_price: gemstone.buy_price,
 											sell_price: gemstone.sell_price,
+											buy_currency: gemstone.buy_currency || Currency.USD,
+											sell_currency: gemstone.sell_currency || Currency.USD,
 											sold_at: gemstone.sold_at,
 											buyer: gemstone.buyer,
 											buyer_address: gemstone.buyer_address,
@@ -376,33 +394,93 @@ export default function GemstoneDetail() {
 										numberOfLines={3}
 										style={[styles.input, { height: 100 }]}
 									/>
-									<TextInput
-										label="Buy price ($)"
-										mode="outlined"
-										value={String(formData.buy_price || "")}
-										onChangeText={(value) =>
-											setFormData((prev) => ({
-												...prev,
-												buy_price: value ? parseFloat(value) : null,
-											}))
-										}
-										keyboardType="decimal-pad"
-										style={[styles.input]}
-									/>
-									<TextInput
-										label="Sell price ($)"
-										mode="outlined"
-										value={String(formData.sell_price || "")}
-										onChangeText={(value) =>
-											setFormData((prev) => ({
-												...prev,
-												sell_price: value ? parseFloat(value) : null,
-											}))
-										}
-										keyboardType="decimal-pad"
-										style={[styles.input]}
-										placeholder="Set price without marking as sold"
-									/>
+									<View style={styles.priceContainer}>
+										<TextInput
+											label="Buy price"
+											mode="outlined"
+											value={String(formData.buy_price || "")}
+											onChangeText={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													buy_price: value ? parseFloat(value) : null,
+												}))
+											}
+											keyboardType="decimal-pad"
+											style={styles.priceInput}
+											left={
+												<TextInput.Affix
+													text={
+														CurrencySymbols[
+															formData.buy_currency || Currency.USD
+														]
+													}
+												/>
+											}
+										/>
+										<View style={styles.currencyDropdown}>
+											<Dropdown
+												label="Currency"
+												mode="outlined"
+												hideMenuHeader
+												menuContentStyle={{ top: -35 }}
+												value={formData.buy_currency || Currency.USD}
+												onSelect={(value) =>
+													setFormData((prev) => ({
+														...prev,
+														buy_currency: value,
+													}))
+												}
+												options={Object.values(Currency).map((currency) => ({
+													label: currency,
+													value: currency,
+												}))}
+											/>
+										</View>
+									</View>
+									<View style={styles.priceContainer}>
+										<TextInput
+											label="Sell price"
+											mode="outlined"
+											value={String(formData.sell_price || "")}
+											onChangeText={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													sell_price: value ? parseFloat(value) : null,
+												}))
+											}
+											keyboardType="decimal-pad"
+											style={styles.priceInput}
+											left={
+												<TextInput.Affix
+													text={
+														CurrencySymbols[
+															formData.sell_currency || Currency.USD
+														]
+													}
+												/>
+											}
+											placeholder="Set price without marking as sold"
+										/>
+										<View style={styles.currencyDropdown}>
+											<Dropdown
+												label="Currency"
+												mode="outlined"
+												hideMenuHeader
+												menuContentStyle={{ top: -35 }}
+												value={formData.sell_currency || Currency.USD}
+												onSelect={(value) =>
+													setFormData((prev) => ({
+														...prev,
+														sell_currency: value,
+													}))
+												}
+												options={Object.values(Currency).map((currency) => ({
+													label: currency,
+													value: currency,
+												}))}
+											/>
+										</View>
+									</View>
 									<View style={styles.input}>
 										<DatePickerInput
 											locale="en"
@@ -501,12 +579,18 @@ export default function GemstoneDetail() {
 									</View>
 									<View style={styles.detailRow}>
 										<P style={styles.label}>Buy price:</P>
-										<P>${gemstone.buy_price || 0}</P>
+										<P>
+											{getCurrencySymbol(gemstone.buy_currency)}
+											{gemstone.buy_price || 0}
+										</P>
 									</View>
 
 									<View style={styles.detailRow}>
 										<P style={styles.label}>Sell price:</P>
-										<P>${gemstone.sell_price || 0}</P>
+										<P>
+											{getCurrencySymbol(gemstone.sell_currency)}
+											{gemstone.sell_price || 0}
+										</P>
 									</View>
 
 									{gemstone.sold_at && (
@@ -541,7 +625,7 @@ export default function GemstoneDetail() {
 						<Dialog.Title>Sell Gemstone</Dialog.Title>
 						<Dialog.Content>
 							<TextInput
-								label="Sell Price ($)"
+								label={`Sell Price (${getCurrencySymbol(gemstone.sell_currency)})`}
 								defaultValue={sellPrice}
 								onChangeText={setSellPrice}
 								keyboardType="decimal-pad"
@@ -670,5 +754,17 @@ const styles = StyleSheet.create({
 		width: 56,
 		height: 56,
 		borderRadius: 100,
+	},
+	priceContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginBottom: 16,
+		gap: 16,
+	},
+	priceInput: {
+		flex: 2,
+	},
+	currencyDropdown: {
+		flex: 1,
 	},
 });

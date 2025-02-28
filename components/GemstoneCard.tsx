@@ -6,6 +6,20 @@ import { Card, Title } from "react-native-paper";
 import { OptimizedImage } from "./OptimizedImage";
 import { Badge } from "./ui/badge";
 import { Muted, P } from "./ui/typography";
+import { Currency, CurrencySymbols } from "@/app/types/gemstone";
+
+// Helper function to safely get currency symbol
+const getCurrencySymbol = (currencyCode: string | null): string => {
+	if (!currencyCode) return "$";
+
+	// Check if the currency code is a valid Currency enum value
+	const isValidCurrency = Object.values(Currency).includes(currencyCode as any);
+	if (isValidCurrency) {
+		return CurrencySymbols[currencyCode as Currency];
+	}
+
+	return "$"; // Default fallback
+};
 
 const GemstoneCard = ({
 	gemstone,
@@ -49,6 +63,22 @@ const GemstoneCard = ({
 							<P style={styles.chip}>{gemstone.cut}</P>
 						</Badge>
 					</View>
+					{(gemstone.buy_price || gemstone.sell_price) && (
+						<View style={styles.priceContainer}>
+							{gemstone.buy_price && (
+								<P className="text-green-500 font-semibold">
+									Buy: {getCurrencySymbol(gemstone.buy_currency)}
+									{gemstone.buy_price.toFixed(2)}
+								</P>
+							)}
+							{gemstone.sell_price && (
+								<P className="text-red-500 font-semibold">
+									Sell: {getCurrencySymbol(gemstone.sell_currency)}
+									{gemstone.sell_price.toFixed(2)}
+								</P>
+							)}
+						</View>
+					)}
 				</Card.Content>
 			</Card>
 		</Pressable>
@@ -105,6 +135,11 @@ const styles = StyleSheet.create({
 	chip: {
 		padding: 0,
 		fontSize: 12,
+	},
+	priceContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginTop: 8,
 	},
 });
 

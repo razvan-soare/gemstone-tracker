@@ -16,13 +16,30 @@ import { useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { useSupabase } from "@/context/supabase-provider";
 import { Tables } from "@/lib/database.types";
 import { router } from "expo-router";
+import { Currency, CurrencySymbols } from "@/app/types/gemstone";
 
 type GemstoneItemProps = {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
 	backgroundColor: string;
 };
 
+// Helper function to safely get currency symbol
+const getCurrencySymbol = (currencyCode: string | null): string => {
+	if (!currencyCode) return "$";
+
+	// Check if the currency code is a valid Currency enum value
+	const isValidCurrency = Object.values(Currency).includes(currencyCode as any);
+	if (isValidCurrency) {
+		return CurrencySymbols[currencyCode as Currency];
+	}
+
+	return "$"; // Default fallback
+};
+
 const GemstoneItem = ({ gemstone, backgroundColor }: GemstoneItemProps) => {
+	const buyCurrencySymbol = getCurrencySymbol(gemstone.buy_currency);
+	const sellCurrencySymbol = getCurrencySymbol(gemstone.sell_currency);
+
 	return (
 		<Surface style={[styles.gemstoneItem, { backgroundColor }]}>
 			<List.Item
@@ -31,10 +48,12 @@ const GemstoneItem = ({ gemstone, backgroundColor }: GemstoneItemProps) => {
 				right={() => (
 					<View style={styles.priceContainer}>
 						<P className="text-green-500 font-semibold">
-							${gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}
+							{buyCurrencySymbol}
+							{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}
 						</P>
 						<P className="text-red-500 font-semibold">
-							${gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}
+							{sellCurrencySymbol}
+							{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}
 						</P>
 					</View>
 				)}
