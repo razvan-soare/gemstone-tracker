@@ -1,10 +1,10 @@
 import {
+	Currency,
+	CurrencySymbols,
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
-	Currency,
-	CurrencySymbols,
 } from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
@@ -52,14 +52,14 @@ export default function AddNewGemstone() {
 		color: "",
 		cut: "",
 		weight: "",
-		identification: "",
+		quantity: "1",
 		comment: "",
 		date: new Date().toISOString().split("T")[0],
 		dimensions: { length: "", width: "", height: "" },
 		buy_price: 0,
 		sell_price: 0,
-		buy_currency: Currency.USD,
-		sell_currency: Currency.USD,
+		buy_currency: Currency.RMB,
+		sell_currency: Currency.RMB,
 		sold_at: null as string | null,
 		buyer: "",
 		buyer_address: "",
@@ -118,6 +118,17 @@ export default function AddNewGemstone() {
 			return {
 				field: "weight",
 				message: "Weight must be a valid number",
+			};
+		}
+
+		if (
+			!formData.quantity ||
+			isNaN(parseInt(formData.quantity)) ||
+			parseInt(formData.quantity) < 1
+		) {
+			return {
+				field: "quantity",
+				message: "Quantity must be at least 1",
 			};
 		}
 
@@ -266,6 +277,54 @@ export default function AddNewGemstone() {
 						error={error?.field === "weight"}
 					/>
 
+					<View style={styles.quantityContainer}>
+						<TextInput
+							label="Quantity (pieces)"
+							mode="outlined"
+							value={formData.quantity}
+							onChangeText={(value) => {
+								// Only allow positive integers
+								const numericValue = value.replace(/[^0-9]/g, "");
+								// Ensure at least 1
+								const finalValue = numericValue === "" ? "1" : numericValue;
+								updateField("quantity", finalValue);
+							}}
+							keyboardType="number-pad"
+							style={[
+								styles.quantityInput,
+								error?.field === "quantity" && styles.inputError,
+							]}
+							error={error?.field === "quantity"}
+							placeholder="1"
+						/>
+					</View>
+
+					<View style={styles.dimensionsContainer}>
+						<TextInput
+							label="Length"
+							mode="outlined"
+							value={formData.dimensions.length}
+							onChangeText={(value) => handleDimensionInput(value, "length")}
+							keyboardType="decimal-pad"
+							style={styles.dimensionInput}
+						/>
+						<TextInput
+							label="Width"
+							mode="outlined"
+							value={formData.dimensions.width}
+							onChangeText={(value) => handleDimensionInput(value, "width")}
+							keyboardType="decimal-pad"
+							style={styles.dimensionInput}
+						/>
+						<TextInput
+							label="Height"
+							mode="outlined"
+							value={formData.dimensions.height}
+							onChangeText={(value) => handleDimensionInput(value, "height")}
+							keyboardType="decimal-pad"
+							style={styles.dimensionInput}
+						/>
+					</View>
 					<View style={styles.priceContainer}>
 						<TextInput
 							label="Buy price"
@@ -330,33 +389,6 @@ export default function AddNewGemstone() {
 								}))}
 							/>
 						</View>
-					</View>
-
-					<View style={styles.dimensionsContainer}>
-						<TextInput
-							label="Length"
-							mode="outlined"
-							value={formData.dimensions.length}
-							onChangeText={(value) => handleDimensionInput(value, "length")}
-							keyboardType="decimal-pad"
-							style={styles.dimensionInput}
-						/>
-						<TextInput
-							label="Width"
-							mode="outlined"
-							value={formData.dimensions.width}
-							onChangeText={(value) => handleDimensionInput(value, "width")}
-							keyboardType="decimal-pad"
-							style={styles.dimensionInput}
-						/>
-						<TextInput
-							label="Height"
-							mode="outlined"
-							value={formData.dimensions.height}
-							onChangeText={(value) => handleDimensionInput(value, "height")}
-							keyboardType="decimal-pad"
-							style={styles.dimensionInput}
-						/>
 					</View>
 
 					<TextInput
@@ -500,5 +532,14 @@ const styles = StyleSheet.create({
 	},
 	errorSnackbar: {
 		backgroundColor: MD2Colors.red800,
+	},
+	quantityContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginBottom: 16,
+		gap: 16,
+	},
+	quantityInput: {
+		flex: 1,
 	},
 });

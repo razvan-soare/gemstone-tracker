@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 	},
 	priceContainer: {
-		flexDirection: "row",
 		justifyContent: "space-between",
 		marginTop: 8,
 	},

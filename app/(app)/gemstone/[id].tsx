@@ -79,7 +79,7 @@ export default function GemstoneDetail() {
 	>([]);
 	const [sellDialogVisible, setSellDialogVisible] = useState(false);
 	const [sellPrice, setSellPrice] = useState("");
-	const [sellCurrency, setSellCurrency] = useState<Currency>(Currency.USD);
+	const [sellCurrency, setSellCurrency] = useState<Currency>(Currency.RMB);
 	const [buyer, setBuyer] = useState("");
 	const [buyerAddress, setBuyerAddress] = useState("");
 	const [sellComment, setSellComment] = useState("");
@@ -176,7 +176,7 @@ export default function GemstoneDetail() {
 		) {
 			setSellCurrency(gemstone.sell_currency as Currency);
 		} else {
-			setSellCurrency(Currency.USD);
+			setSellCurrency(Currency.RMB);
 		}
 
 		setBuyer(gemstone.buyer || "");
@@ -213,10 +213,11 @@ export default function GemstoneDetail() {
 				buyer: buyer,
 				buyer_address: buyerAddress,
 				comment: sellComment || gemstone.comment,
+				quantity: gemstone.quantity,
 			});
 
 			setSellPrice("");
-			setSellCurrency(Currency.USD);
+			setSellCurrency(Currency.RMB);
 			setBuyer("");
 			setBuyerAddress("");
 			setSellComment("");
@@ -261,13 +262,13 @@ export default function GemstoneDetail() {
 											color: gemstone.color,
 											cut: gemstone.cut,
 											weight: gemstone.weight,
-											identification: gemstone.identification,
+											quantity: gemstone.quantity || "1",
 											comment: gemstone.comment,
 											bill_number: gemstone.bill_number,
 											buy_price: gemstone.buy_price,
 											sell_price: gemstone.sell_price,
-											buy_currency: gemstone.buy_currency || Currency.USD,
-											sell_currency: gemstone.sell_currency || Currency.USD,
+											buy_currency: gemstone.buy_currency || Currency.RMB,
+											sell_currency: gemstone.sell_currency || Currency.RMB,
 											sold_at: gemstone.sold_at,
 											buyer: gemstone.buyer,
 											buyer_address: gemstone.buyer_address,
@@ -384,15 +385,21 @@ export default function GemstoneDetail() {
 									/>
 
 									<TextInput
-										label="Identification"
+										label="Quantity (pieces)"
 										mode="outlined"
-										value={formData.identification || ""}
-										onChangeText={(value) =>
+										value={String(formData.quantity || "1")}
+										onChangeText={(value) => {
+											// Only allow positive integers
+											const numericValue = value.replace(/[^0-9]/g, "");
+											// Ensure at least 1
+											const finalValue =
+												numericValue === "" ? "1" : numericValue;
 											setFormData((prev) => ({
 												...prev,
-												identification: value,
-											}))
-										}
+												quantity: finalValue,
+											}));
+										}}
+										keyboardType="number-pad"
 										style={styles.input}
 									/>
 
@@ -442,7 +449,7 @@ export default function GemstoneDetail() {
 												mode="outlined"
 												hideMenuHeader
 												menuContentStyle={{ top: -95, left: -8 }}
-												value={formData.buy_currency || Currency.USD}
+												value={formData.buy_currency || Currency.RMB}
 												onSelect={(value) =>
 													setFormData((prev) => ({
 														...prev,
@@ -492,7 +499,7 @@ export default function GemstoneDetail() {
 												mode="outlined"
 												hideMenuHeader
 												menuContentStyle={{ top: -95, left: -8 }}
-												value={formData.sell_currency || Currency.USD}
+												value={formData.sell_currency || Currency.RMB}
 												onSelect={(value) =>
 													setFormData((prev) => ({
 														...prev,
@@ -595,8 +602,8 @@ export default function GemstoneDetail() {
 										<P>{gemstone.weight} carats</P>
 									</View>
 									<View style={styles.detailRow}>
-										<P style={styles.label}>Identification:</P>
-										<P>{gemstone.identification}</P>
+										<P style={styles.label}>Quantity:</P>
+										<P>{gemstone.quantity || "1"} pieces</P>
 									</View>
 									<View style={styles.detailRow}>
 										<P style={styles.label}>Comments:</P>
@@ -649,6 +656,12 @@ export default function GemstoneDetail() {
 					>
 						<Dialog.Title>Sell Gemstone</Dialog.Title>
 						<Dialog.Content>
+							<View style={styles.quantityDisplay}>
+								<P style={styles.quantityLabel}>Quantity:</P>
+								<P style={styles.quantityValue}>
+									{gemstone.quantity || "1"} pieces
+								</P>
+							</View>
 							<View style={styles.priceContainer}>
 								<TextInput
 									label="Sell Price"
@@ -765,7 +778,7 @@ const styles = StyleSheet.create({
 	},
 	detailsContainer: {
 		padding: 16,
-		gap: 16,
+		gap: 8,
 	},
 	detailRow: {
 		flexDirection: "row",
@@ -810,5 +823,16 @@ const styles = StyleSheet.create({
 	},
 	currencyDropdown: {
 		flex: 1,
+	},
+	quantityDisplay: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 16,
+	},
+	quantityLabel: {
+		fontWeight: "bold",
+	},
+	quantityValue: {
+		marginLeft: 8,
 	},
 });

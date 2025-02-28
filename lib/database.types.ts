@@ -160,10 +160,10 @@ export type Database = {
           date: string | null
           dimensions: Json | null
           id: string
-          identification: string | null
           name: string
           organization_id: string | null
           pictures: string[] | null
+          quantity: string | null
           sell_currency: string | null
           sell_price: number | null
           shape: string | null
@@ -185,10 +185,10 @@ export type Database = {
           date?: string | null
           dimensions?: Json | null
           id?: string
-          identification?: string | null
           name: string
           organization_id?: string | null
           pictures?: string[] | null
+          quantity?: string | null
           sell_currency?: string | null
           sell_price?: number | null
           shape?: string | null
@@ -210,10 +210,10 @@ export type Database = {
           date?: string | null
           dimensions?: Json | null
           id?: string
-          identification?: string | null
           name?: string
           organization_id?: string | null
           pictures?: string[] | null
+          quantity?: string | null
           sell_currency?: string | null
           sell_price?: number | null
           shape?: string | null
