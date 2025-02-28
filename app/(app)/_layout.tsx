@@ -82,7 +82,7 @@ export default function AppLayout() {
 						options={{
 							presentation: "modal",
 							headerShown: true,
-							headerTitle: "Add New Gemstone",
+							headerTitle: "Add new gemstone",
 							headerStyle: {
 								backgroundColor:
 									colorScheme === "dark"

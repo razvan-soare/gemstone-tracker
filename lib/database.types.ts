@@ -147,9 +147,9 @@ export type Database = {
       }
       stones: {
         Row: {
+          bill_number: string | null
           buy_price: number | null
           certificate_id: string | null
-          code: string | null
           color: string | null
           comment: string | null
           created_at: string | null
@@ -168,9 +168,9 @@ export type Database = {
           weight: number | null
         }
         Insert: {
+          bill_number?: string | null
           buy_price?: number | null
           certificate_id?: string | null
-          code?: string | null
           color?: string | null
           comment?: string | null
           created_at?: string | null
@@ -189,9 +189,9 @@ export type Database = {
           weight?: number | null
         }
         Update: {
+          bill_number?: string | null
           buy_price?: number | null
           certificate_id?: string | null
-          code?: string | null
           color?: string | null
           comment?: string | null
           created_at?: string | null

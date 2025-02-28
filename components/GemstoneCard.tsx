@@ -33,14 +33,14 @@ const GemstoneCard = ({
 				<Card.Content>
 					<View className="flex flex-row items-center gap-4 mb-4">
 						<P className="text-base font-bold">{gemstone.name}</P>
-						<Muted className="font-bold">{gemstone.code}</Muted>
+						<Muted className="font-bold">{gemstone.bill_number}</Muted>
 					</View>
 					<View style={styles.chipsWrapper}>
 						<Badge variant="outline" style={styles.chipBox}>
 							<P style={styles.chip}>{gemstone.shape}</P>
 						</Badge>
 						<Badge variant="outline" style={styles.chipBox}>
-							<P style={styles.chip}>{gemstone.weight} kt</P>
+							<P style={styles.chip}>{gemstone.weight} ct</P>
 						</Badge>
 						<Badge variant="outline" style={styles.chipBox}>
 							<P style={styles.chip}>{gemstone.color}</P>

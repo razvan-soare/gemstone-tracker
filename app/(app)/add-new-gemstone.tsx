@@ -2,6 +2,7 @@ import {
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
+	GemstoneType,
 } from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
@@ -36,6 +37,7 @@ export default function AddNewGemstone() {
 
 	const [formData, setFormData] = useState({
 		name: "",
+		bill_number: "",
 		shape: "",
 		color: "",
 		cut: "",
@@ -44,6 +46,9 @@ export default function AddNewGemstone() {
 		comment: "",
 		date: new Date().toISOString().split("T")[0],
 		dimensions: { length: "", width: "", height: "" },
+		buy_price: 0,
+		sell_price: 0,
+		sold_at: null,
 	});
 
 	const updateField = (field: string, value?: string) => {
@@ -159,13 +164,30 @@ export default function AddNewGemstone() {
 	return (
 		<PaperProvider>
 			<ScrollView style={[styles.container, { backgroundColor }]}>
+				<View style={styles.input}>
+					<Dropdown
+						label="Stone type"
+						mode="outlined"
+						hideMenuHeader
+						menuContentStyle={{ top: -50 }}
+						value={formData.name}
+						onSelect={(value) => updateField("name", value)}
+						options={Object.values(GemstoneType).map((type) => ({
+							label: type,
+							value: type,
+						}))}
+					/>
+				</View>
 				<TextInput
-					label="Name"
+					label="Bill number"
 					mode="outlined"
-					value={formData.name}
-					onChangeText={(value) => updateField("name", value)}
-					style={[styles.input, error?.field === "name" && styles.inputError]}
-					error={error?.field === "name"}
+					value={formData.bill_number}
+					onChangeText={(value) => updateField("bill_number", value)}
+					style={[
+						styles.input,
+						error?.field === "bill_number" && styles.inputError,
+					]}
+					error={error?.field === "bill_number"}
 				/>
 
 				<View style={styles.input}>
@@ -224,11 +246,27 @@ export default function AddNewGemstone() {
 				/>
 
 				<TextInput
-					label="Identification"
+					label="Buy price"
 					mode="outlined"
-					value={formData.identification}
-					onChangeText={(value) => updateField("identification", value)}
-					style={styles.input}
+					value={formData.buy_price.toString()}
+					onChangeText={(value) => updateField("buy_price", value)}
+					keyboardType="decimal-pad"
+					style={[
+						styles.input,
+						error?.field === "buy_price" && styles.inputError,
+					]}
+				/>
+
+				<TextInput
+					label="Sell price"
+					mode="outlined"
+					value={formData.sell_price.toString()}
+					onChangeText={(value) => updateField("sell_price", value)}
+					keyboardType="decimal-pad"
+					style={[
+						styles.input,
+						error?.field === "sell_price" && styles.inputError,
+					]}
 				/>
 
 				<View style={styles.dimensionsContainer}>
