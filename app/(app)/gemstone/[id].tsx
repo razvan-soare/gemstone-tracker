@@ -64,6 +64,9 @@ export default function GemstoneDetail() {
 	>([]);
 	const [sellDialogVisible, setSellDialogVisible] = useState(false);
 	const [sellPrice, setSellPrice] = useState("");
+	const [buyer, setBuyer] = useState("");
+	const [buyerAddress, setBuyerAddress] = useState("");
+	const [sellComment, setSellComment] = useState("");
 
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
@@ -147,6 +150,11 @@ export default function GemstoneDetail() {
 	};
 
 	const onSellStone = () => {
+		// Prepopulate fields with existing values if available
+		setSellPrice(gemstone.sell_price ? String(gemstone.sell_price) : "");
+		setBuyer(gemstone.buyer || "");
+		setBuyerAddress(gemstone.buyer_address || "");
+		setSellComment(gemstone.comment || "");
 		setSellDialogVisible(true);
 	};
 
@@ -174,9 +182,15 @@ export default function GemstoneDetail() {
 				id: gemstone.id,
 				sell_price: price,
 				sold_at: utcDate.toISOString(),
+				buyer: buyer,
+				buyer_address: buyerAddress,
+				comment: sellComment || gemstone.comment,
 			});
 
 			setSellPrice("");
+			setBuyer("");
+			setBuyerAddress("");
+			setSellComment("");
 			setSellDialogVisible(false);
 
 			await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
@@ -224,6 +238,8 @@ export default function GemstoneDetail() {
 											buy_price: gemstone.buy_price,
 											sell_price: gemstone.sell_price,
 											sold_at: gemstone.sold_at,
+											buyer: gemstone.buyer,
+											buyer_address: gemstone.buyer_address,
 										});
 										setIsEditing(true);
 									}}
@@ -440,6 +456,31 @@ export default function GemstoneDetail() {
 											Clear Sold Date
 										</Button>
 									)}
+									{formData.sold_at && (
+										<>
+											<TextInput
+												label="Buyer"
+												mode="outlined"
+												value={formData.buyer || ""}
+												onChangeText={(value) =>
+													setFormData((prev) => ({ ...prev, buyer: value }))
+												}
+												style={styles.input}
+											/>
+											<TextInput
+												label="Buyer Address"
+												mode="outlined"
+												value={formData.buyer_address || ""}
+												onChangeText={(value) =>
+													setFormData((prev) => ({
+														...prev,
+														buyer_address: value,
+													}))
+												}
+												style={styles.input}
+											/>
+										</>
+									)}
 								</>
 							) : (
 								<>
@@ -487,6 +528,18 @@ export default function GemstoneDetail() {
 											<P>{formatDate(gemstone.sold_at)}</P>
 										</View>
 									)}
+									{gemstone.buyer && (
+										<View style={styles.detailRow}>
+											<P style={styles.label}>Buyer:</P>
+											<P>{gemstone.buyer}</P>
+										</View>
+									)}
+									{gemstone.buyer_address && (
+										<View style={styles.detailRow}>
+											<P style={styles.label}>Buyer Address:</P>
+											<P>{gemstone.buyer_address}</P>
+										</View>
+									)}
 								</>
 							)}
 						</View>
@@ -506,7 +559,30 @@ export default function GemstoneDetail() {
 								onChangeText={setSellPrice}
 								keyboardType="decimal-pad"
 								mode="outlined"
-								style={{ marginTop: 10 }}
+								style={{ marginTop: 10, marginBottom: 10 }}
+							/>
+							<TextInput
+								label="Buyer"
+								value={buyer}
+								onChangeText={setBuyer}
+								mode="outlined"
+								style={{ marginBottom: 10 }}
+							/>
+							<TextInput
+								label="Buyer Address"
+								value={buyerAddress}
+								onChangeText={setBuyerAddress}
+								mode="outlined"
+								style={{ marginBottom: 10 }}
+							/>
+							<TextInput
+								label="Comment"
+								value={sellComment}
+								onChangeText={setSellComment}
+								mode="outlined"
+								multiline
+								numberOfLines={3}
+								style={{ height: 80 }}
 							/>
 						</Dialog.Content>
 						<Dialog.Actions>

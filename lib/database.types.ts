@@ -149,6 +149,8 @@ export type Database = {
         Row: {
           bill_number: string | null
           buy_price: number | null
+          buyer: string | null
+          buyer_address: string | null
           certificate_id: string | null
           color: string | null
           comment: string | null
@@ -170,6 +172,8 @@ export type Database = {
         Insert: {
           bill_number?: string | null
           buy_price?: number | null
+          buyer?: string | null
+          buyer_address?: string | null
           certificate_id?: string | null
           color?: string | null
           comment?: string | null
@@ -191,6 +195,8 @@ export type Database = {
         Update: {
           bill_number?: string | null
           buy_price?: number | null
+          buyer?: string | null
+          buyer_address?: string | null
           certificate_id?: string | null
           color?: string | null
           comment?: string | null
