@@ -442,20 +442,7 @@ export default function GemstoneDetail() {
 											withDateFormatInLabel={false}
 										/>
 									</View>
-									{formData.sold_at && (
-										<Button
-											mode="outlined"
-											onPress={() =>
-												setFormData((prev) => ({
-													...prev,
-													sold_at: null,
-												}))
-											}
-											style={styles.input}
-										>
-											Clear Sold Date
-										</Button>
-									)}
+
 									{formData.sold_at && (
 										<>
 											<TextInput
@@ -555,7 +542,7 @@ export default function GemstoneDetail() {
 						<Dialog.Content>
 							<TextInput
 								label="Sell Price ($)"
-								value={sellPrice}
+								defaultValue={sellPrice}
 								onChangeText={setSellPrice}
 								keyboardType="decimal-pad"
 								mode="outlined"
@@ -563,21 +550,21 @@ export default function GemstoneDetail() {
 							/>
 							<TextInput
 								label="Buyer"
-								value={buyer}
+								defaultValue={buyer}
 								onChangeText={setBuyer}
 								mode="outlined"
 								style={{ marginBottom: 10 }}
 							/>
 							<TextInput
 								label="Buyer Address"
-								value={buyerAddress}
+								defaultValue={buyerAddress}
 								onChangeText={setBuyerAddress}
 								mode="outlined"
 								style={{ marginBottom: 10 }}
 							/>
 							<TextInput
 								label="Comment"
-								value={sellComment}
+								defaultValue={sellComment}
 								onChangeText={setSellComment}
 								mode="outlined"
 								multiline
