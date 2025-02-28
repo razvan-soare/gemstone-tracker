@@ -15,7 +15,13 @@ import { useCreateGemstone } from "@/hooks/useCreateGemstone";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View, TouchableOpacity } from "react-native";
+import {
+	ScrollView,
+	StyleSheet,
+	View,
+	TouchableOpacity,
+	Text,
+} from "react-native";
 import {
 	Button,
 	MD2Colors,
@@ -29,7 +35,7 @@ import {
 	enGB,
 	registerTranslation,
 } from "react-native-paper-dates";
-import { Dropdown } from "react-native-paper-dropdown";
+import { ComboBox } from "@/components/ui/combobox";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { P } from "@/components/ui/typography";
 
@@ -200,17 +206,14 @@ export default function AddNewGemstone() {
 			<PaperProvider>
 				<ScrollView style={[styles.container, { backgroundColor }]}>
 					<View style={styles.input}>
-						<Dropdown
+						<ComboBox
 							label="Stone type"
-							mode="outlined"
-							hideMenuHeader
-							menuContentStyle={{ top: -50 }}
-							value={formData.name}
-							onSelect={(value) => updateField("name", value)}
+							value={formData.name || ""}
 							options={Object.values(GemstoneType).map((type) => ({
 								label: type,
 								value: type,
 							}))}
+							onChange={(value) => updateField("name", value as GemstoneType)}
 						/>
 					</View>
 					<TextInput
@@ -226,47 +229,38 @@ export default function AddNewGemstone() {
 					/>
 
 					<View style={styles.input}>
-						<Dropdown
+						<ComboBox
 							label="Shape"
-							mode="outlined"
-							hideMenuHeader
-							menuContentStyle={{ top: -50 }}
-							value={formData.shape}
-							onSelect={(value) => updateField("shape", value)}
+							value={formData.shape || ""}
 							options={Object.values(GemstoneShape).map((shape) => ({
 								label: shape,
 								value: shape,
 							}))}
+							onChange={(value) => updateField("shape", value as GemstoneShape)}
 						/>
 					</View>
 
 					<View style={styles.input}>
-						<Dropdown
+						<ComboBox
 							label="Color"
-							mode="outlined"
-							hideMenuHeader
-							menuContentStyle={{ top: -50 }}
-							value={formData.color}
-							onSelect={(value) => updateField("color", value)}
+							value={formData.color || ""}
 							options={Object.values(GemstoneColor).map((color) => ({
 								label: color,
 								value: color,
 							}))}
+							onChange={(value) => updateField("color", value as GemstoneColor)}
 						/>
 					</View>
 
 					<View style={styles.input}>
-						<Dropdown
+						<ComboBox
 							label="Cut"
-							mode="outlined"
-							hideMenuHeader
-							menuContentStyle={{ top: -50 }}
-							value={formData.cut}
-							onSelect={(value) => updateField("cut", value)}
+							value={formData.cut || ""}
 							options={Object.values(GemstoneCut).map((cut) => ({
 								label: cut,
 								value: cut,
 							}))}
+							onChange={(value) => updateField("cut", value as GemstoneCut)}
 						/>
 					</View>
 
@@ -308,59 +302,30 @@ export default function AddNewGemstone() {
 					<View style={styles.gemTypeContainer}>
 						<P style={styles.gemTypeLabel}>Gem Type</P>
 						<View style={styles.radioGroup}>
-							<TouchableOpacity
-								style={[
-									styles.radioCard,
-									formData.gem_type === GemTypeEnum.NATURAL &&
-										styles.radioCardSelected,
-								]}
-								onPress={() => updateField("gem_type", GemTypeEnum.NATURAL)}
-								activeOpacity={0.7}
-							>
-								<View style={styles.radioIconContainer}>
-									<View style={styles.radioOuterCircle}>
-										{formData.gem_type === GemTypeEnum.NATURAL && (
-											<View style={styles.radioInnerCircle} />
-										)}
-									</View>
-								</View>
-								<P
-									style={
-										formData.gem_type === GemTypeEnum.NATURAL
-											? styles.radioTextSelected
-											: styles.radioText
-									}
-								>
-									{GemTypeLabels[GemTypeEnum.NATURAL]}
-								</P>
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={[
-									styles.radioCard,
-									formData.gem_type === GemTypeEnum.HEATED &&
-										styles.radioCardSelected,
-								]}
-								onPress={() => updateField("gem_type", GemTypeEnum.HEATED)}
-								activeOpacity={0.7}
-							>
-								<View style={styles.radioIconContainer}>
-									<View style={styles.radioOuterCircle}>
-										{formData.gem_type === GemTypeEnum.HEATED && (
-											<View style={styles.radioInnerCircle} />
-										)}
-									</View>
-								</View>
-								<P
-									style={
-										formData.gem_type === GemTypeEnum.HEATED
-											? styles.radioTextSelected
-											: styles.radioText
-									}
-								>
-									{GemTypeLabels[GemTypeEnum.HEATED]}
-								</P>
-							</TouchableOpacity>
+							<Text style={styles.radioLabel}>Gem Type</Text>
+							<View style={styles.radioContainer}>
+								{Object.values(GemTypeEnum).map((type) => (
+									<TouchableOpacity
+										key={type}
+										style={[
+											styles.radioCard,
+											formData.gem_type === type && styles.radioCardSelected,
+										]}
+										onPress={() => updateField("gem_type", type)}
+									>
+										<Text
+											style={[
+												styles.radioText,
+												formData.gem_type === type
+													? styles.radioTextSelected
+													: {},
+											]}
+										>
+											{GemTypeLabels[type]}
+										</Text>
+									</TouchableOpacity>
+								))}
+							</View>
 						</View>
 					</View>
 
@@ -408,17 +373,16 @@ export default function AddNewGemstone() {
 							}
 						/>
 						<View style={styles.currencyDropdown}>
-							<Dropdown
+							<ComboBox
 								label="Currency"
-								mode="outlined"
-								hideMenuHeader
-								menuContentStyle={{ top: -50 }}
 								value={formData.buy_currency}
-								onSelect={(value) => updateField("buy_currency", value)}
 								options={Object.values(Currency).map((currency) => ({
 									label: currency,
 									value: currency,
 								}))}
+								onChange={(value) =>
+									updateField("buy_currency", value as Currency)
+								}
 							/>
 						</View>
 					</View>
@@ -441,17 +405,16 @@ export default function AddNewGemstone() {
 							}
 						/>
 						<View style={styles.currencyDropdown}>
-							<Dropdown
+							<ComboBox
 								label="Currency"
-								mode="outlined"
-								hideMenuHeader
-								menuContentStyle={{ top: -50 }}
 								value={formData.sell_currency}
-								onSelect={(value) => updateField("sell_currency", value)}
 								options={Object.values(Currency).map((currency) => ({
 									label: currency,
 									value: currency,
 								}))}
+								onChange={(value) =>
+									updateField("sell_currency", value as Currency)
+								}
 							/>
 						</View>
 					</View>
@@ -616,6 +579,14 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 	radioGroup: {
+		marginBottom: 16,
+	},
+	radioLabel: {
+		marginBottom: 8,
+		fontWeight: "bold",
+		fontSize: 16,
+	},
+	radioContainer: {
 		flexDirection: "row",
 		gap: 16,
 	},
@@ -638,24 +609,6 @@ const styles = StyleSheet.create({
 		borderColor: "#6200EE",
 		borderWidth: 1,
 		backgroundColor: "#F4EAFF",
-	},
-	radioIconContainer: {
-		marginRight: 10,
-	},
-	radioOuterCircle: {
-		width: 20,
-		height: 20,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: "#6200EE",
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	radioInnerCircle: {
-		width: 10,
-		height: 10,
-		borderRadius: 5,
-		backgroundColor: "#6200EE",
 	},
 	radioText: {
 		fontSize: 16,

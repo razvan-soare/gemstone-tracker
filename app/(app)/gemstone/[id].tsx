@@ -1,10 +1,10 @@
 import {
+	Currency,
+	CurrencySymbols,
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
-	Currency,
-	CurrencySymbols,
 	GemTypeEnum,
 	GemTypeLabels,
 } from "@/app/types/gemstone";
@@ -13,6 +13,7 @@ import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
+import { ComboBox } from "@/components/ui/combobox";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
@@ -27,8 +28,8 @@ import {
 	Dimensions,
 	ScrollView,
 	StyleSheet,
-	View,
 	TouchableOpacity,
+	View,
 } from "react-native";
 import {
 	ActivityIndicator,
@@ -38,10 +39,8 @@ import {
 	IconButton,
 	PaperProvider,
 	Portal,
-	RadioButton,
 	TextInput,
 } from "react-native-paper";
-import { Dropdown } from "react-native-paper-dropdown";
 import { DatePickerInput } from "react-native-paper-dates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -321,19 +320,19 @@ export default function GemstoneDetail() {
 							{isEditing ? (
 								<>
 									<View style={styles.input}>
-										<Dropdown
+										<ComboBox
 											label="Stone type"
-											mode="outlined"
-											hideMenuHeader
-											menuContentStyle={{ top: -35 }}
-											value={formData.name || undefined}
-											onSelect={(value) =>
-												setFormData((prev) => ({ ...prev, name: value }))
-											}
+											value={formData.name || ""}
 											options={Object.values(GemstoneType).map((type) => ({
 												label: type,
 												value: type,
 											}))}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													name: value as GemstoneType,
+												}))
+											}
 										/>
 									</View>
 									<TextInput
@@ -347,53 +346,53 @@ export default function GemstoneDetail() {
 									/>
 
 									<View style={styles.input}>
-										<Dropdown
+										<ComboBox
 											label="Shape"
-											mode="outlined"
-											hideMenuHeader
-											menuContentStyle={{ top: -35 }}
-											value={formData.shape || undefined}
-											onSelect={(value) =>
-												setFormData((prev) => ({ ...prev, shape: value }))
-											}
+											value={formData.shape || ""}
 											options={Object.values(GemstoneShape).map((shape) => ({
 												label: shape,
 												value: shape,
 											}))}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													shape: value as GemstoneShape,
+												}))
+											}
 										/>
 									</View>
 
 									<View style={styles.input}>
-										<Dropdown
+										<ComboBox
 											label="Color"
-											mode="outlined"
-											hideMenuHeader
-											menuContentStyle={{ top: -35 }}
-											value={formData.color || undefined}
-											onSelect={(value) =>
-												setFormData((prev) => ({ ...prev, color: value }))
-											}
+											value={formData.color || ""}
 											options={Object.values(GemstoneColor).map((color) => ({
 												label: color,
 												value: color,
 											}))}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													color: value as GemstoneColor,
+												}))
+											}
 										/>
 									</View>
 
 									<View style={styles.input}>
-										<Dropdown
+										<ComboBox
 											label="Cut"
-											mode="outlined"
-											hideMenuHeader
-											menuContentStyle={{ top: -35 }}
-											value={formData.cut || undefined}
-											onSelect={(value) =>
-												setFormData((prev) => ({ ...prev, cut: value }))
-											}
+											value={formData.cut || ""}
 											options={Object.values(GemstoneCut).map((cut) => ({
 												label: cut,
 												value: cut,
 											}))}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													cut: value as GemstoneCut,
+												}))
+											}
 										/>
 									</View>
 
@@ -540,22 +539,19 @@ export default function GemstoneDetail() {
 											}
 										/>
 										<View style={styles.currencyDropdown}>
-											<Dropdown
+											<ComboBox
 												label="Currency"
-												mode="outlined"
-												hideMenuHeader
-												menuContentStyle={{ top: -95, left: -8 }}
 												value={formData.buy_currency || Currency.RMB}
-												onSelect={(value) =>
-													setFormData((prev) => ({
-														...prev,
-														buy_currency: value,
-													}))
-												}
 												options={Object.values(Currency).map((currency) => ({
 													label: currency,
 													value: currency,
 												}))}
+												onChange={(value) =>
+													setFormData((prev) => ({
+														...prev,
+														buy_currency: value as Currency,
+													}))
+												}
 											/>
 										</View>
 									</View>
@@ -590,22 +586,19 @@ export default function GemstoneDetail() {
 											placeholder="Set price without marking as sold"
 										/>
 										<View style={styles.currencyDropdown}>
-											<Dropdown
+											<ComboBox
 												label="Currency"
-												mode="outlined"
-												hideMenuHeader
-												menuContentStyle={{ top: -95, left: -8 }}
 												value={formData.sell_currency || Currency.RMB}
-												onSelect={(value) =>
-													setFormData((prev) => ({
-														...prev,
-														sell_currency: value,
-													}))
-												}
 												options={Object.values(Currency).map((currency) => ({
 													label: currency,
 													value: currency,
 												}))}
+												onChange={(value) =>
+													setFormData((prev) => ({
+														...prev,
+														sell_currency: value as Currency,
+													}))
+												}
 											/>
 										</View>
 									</View>
@@ -781,17 +774,14 @@ export default function GemstoneDetail() {
 									}
 								/>
 								<View style={styles.currencyDropdown}>
-									<Dropdown
+									<ComboBox
 										label="Currency"
-										mode="outlined"
-										hideMenuHeader
-										menuContentStyle={{ top: -95, left: -15 }}
 										value={sellCurrency}
-										onSelect={(value) => setSellCurrency(value as Currency)}
 										options={Object.values(Currency).map((currency) => ({
 											label: currency,
 											value: currency,
 										}))}
+										onChange={(value) => setSellCurrency(value as Currency)}
 									/>
 								</View>
 							</View>
