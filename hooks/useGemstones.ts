@@ -5,6 +5,7 @@ import {
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
+	GemstoneSize,
 } from "@/app/types/gemstone";
 import { useSupabase } from "@/context/supabase-provider";
 
@@ -13,6 +14,7 @@ type GemstoneFilters = {
 	shape?: GemstoneShape;
 	color?: GemstoneColor;
 	cut?: GemstoneCut;
+	size?: GemstoneSize;
 	sold?: boolean;
 };
 
@@ -75,6 +77,46 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 			// Add cut filter if provided
 			if (filters.cut) {
 				query = query.eq("cut", filters.cut);
+			}
+
+			// Add size filter if provided
+			if (filters.size) {
+				// Handle different size ranges
+				switch (filters.size) {
+					case GemstoneSize.RANGE_0_1:
+						query = query.gte("weight", 0).lt("weight", 1);
+						break;
+					case GemstoneSize.RANGE_1_2:
+						query = query.gte("weight", 1).lt("weight", 2);
+						break;
+					case GemstoneSize.RANGE_2_3:
+						query = query.gte("weight", 2).lt("weight", 3);
+						break;
+					case GemstoneSize.RANGE_3_4:
+						query = query.gte("weight", 3).lt("weight", 4);
+						break;
+					case GemstoneSize.RANGE_4_5:
+						query = query.gte("weight", 4).lt("weight", 5);
+						break;
+					case GemstoneSize.RANGE_5_6:
+						query = query.gte("weight", 5).lt("weight", 6);
+						break;
+					case GemstoneSize.RANGE_6_7:
+						query = query.gte("weight", 6).lt("weight", 7);
+						break;
+					case GemstoneSize.RANGE_7_8:
+						query = query.gte("weight", 7).lt("weight", 8);
+						break;
+					case GemstoneSize.RANGE_8_9:
+						query = query.gte("weight", 8).lt("weight", 9);
+						break;
+					case GemstoneSize.RANGE_9_10:
+						query = query.gte("weight", 9).lt("weight", 10);
+						break;
+					case GemstoneSize.RANGE_10_PLUS:
+						query = query.gte("weight", 10);
+						break;
+				}
 			}
 
 			// Add sold filter if provided

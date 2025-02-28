@@ -15,6 +15,7 @@ import {
 	GemstoneColor,
 	GemstoneCut,
 	GemstoneShape,
+	GemstoneSize,
 } from "@/app/types/gemstone";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -26,12 +27,14 @@ type FilterDrawerProps = {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		size?: GemstoneSize;
 		sold?: boolean;
 	};
 	onApplyFilters: (filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		cut?: GemstoneCut;
+		size?: GemstoneSize;
 		sold?: boolean;
 	}) => void;
 };
@@ -123,6 +126,7 @@ export default function FilterDrawer({
 		shape: filters.shape,
 		color: filters.color,
 		cut: filters.cut,
+		size: filters.size,
 		sold: filters.sold,
 	});
 
@@ -136,6 +140,7 @@ export default function FilterDrawer({
 			shape: undefined,
 			color: undefined,
 			cut: undefined,
+			size: undefined,
 			sold: undefined,
 		});
 	};
@@ -146,6 +151,7 @@ export default function FilterDrawer({
 			shape: filters.shape,
 			color: filters.color,
 			cut: filters.cut,
+			size: filters.size,
 			sold: filters.sold,
 		});
 	}, [filters]);
@@ -181,9 +187,6 @@ export default function FilterDrawer({
 
 				<ScrollView style={styles.scrollView}>
 					<View style={styles.dropdownContainer}>
-						<Text variant="titleMedium" style={styles.sectionTitle}>
-							Shape
-						</Text>
 						<CustomDropdown
 							label="Select Shape"
 							value={tempFilters.shape}
@@ -198,9 +201,6 @@ export default function FilterDrawer({
 					</View>
 
 					<View style={styles.dropdownContainer}>
-						<Text variant="titleMedium" style={styles.sectionTitle}>
-							Color
-						</Text>
 						<CustomDropdown
 							label="Select Color"
 							value={tempFilters.color}
@@ -215,9 +215,6 @@ export default function FilterDrawer({
 					</View>
 
 					<View style={styles.dropdownContainer}>
-						<Text variant="titleMedium" style={styles.sectionTitle}>
-							Cut
-						</Text>
 						<CustomDropdown
 							label="Select Cut"
 							value={tempFilters.cut}
@@ -231,10 +228,24 @@ export default function FilterDrawer({
 						/>
 					</View>
 
+					<View style={styles.dropdownContainer}>
+						<CustomDropdown
+							label="Select Size"
+							value={tempFilters.size}
+							options={Object.values(GemstoneSize).map((size) => ({
+								label: size,
+								value: size,
+							}))}
+							onChange={(value) =>
+								setTempFilters((prev) => ({
+									...prev,
+									size: value,
+								}))
+							}
+						/>
+					</View>
+
 					<View style={styles.switchContainer}>
-						<Text variant="titleMedium" style={styles.sectionTitle}>
-							Sold Status
-						</Text>
 						<View style={styles.switchRow}>
 							<Text>Show only sold gemstones</Text>
 							<Switch
@@ -289,15 +300,12 @@ const styles = StyleSheet.create({
 		padding: 16,
 	},
 	dropdownContainer: {
-		marginBottom: 24,
+		marginBottom: 8,
 		position: "relative",
 		zIndex: 1,
 	},
 	dropdownWrapper: {
 		width: "100%",
-	},
-	sectionTitle: {
-		marginBottom: 8,
 	},
 	footer: {
 		flexDirection: "row",
