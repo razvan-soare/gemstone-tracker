@@ -5,21 +5,30 @@ import {
 	GemstoneType,
 } from "@/app/types/gemstone";
 import { H3 } from "@/components/ui/typography";
+import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import {
 	Button,
-	PaperProvider,
-	TextInput,
-	Snackbar,
 	MD2Colors,
+	PaperProvider,
+	Snackbar,
+	TextInput,
 } from "react-native-paper";
+import {
+	DatePickerInput,
+	enGB,
+	registerTranslation,
+} from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
-import { colors } from "@/constants/colors";
-import { useColorScheme } from "@/lib/useColorScheme";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+// Register the English locale
+registerTranslation("en", enGB);
 
 type ValidationError = {
 	field: string;
@@ -48,7 +57,9 @@ export default function AddNewGemstone() {
 		dimensions: { length: "", width: "", height: "" },
 		buy_price: 0,
 		sell_price: 0,
-		sold_at: null,
+		sold_at: null as string | null,
+		buyer: "",
+		buyer_address: "",
 	});
 
 	const updateField = (field: string, value?: string) => {
@@ -96,7 +107,7 @@ export default function AddNewGemstone() {
 		if (!formData.name.trim()) {
 			return {
 				field: "name",
-				message: "Name is required",
+				message: "Stone type is required",
 			};
 		}
 
@@ -141,6 +152,7 @@ export default function AddNewGemstone() {
 				dimensions: Object.values(formData.dimensions).some((v) => v)
 					? formData.dimensions
 					: null,
+				sold_at: formData.sold_at || null,
 			});
 			router.back();
 		} catch (error) {
@@ -155,167 +167,236 @@ export default function AddNewGemstone() {
 
 	if (!activeOrganization) {
 		return (
-			<View style={styles.container}>
-				<H3>No organization found. Please join an organization first.</H3>
-			</View>
+			<SafeAreaProvider>
+				<View style={styles.container}>
+					<H3>No organization found. Please join an organization first.</H3>
+				</View>
+			</SafeAreaProvider>
 		);
 	}
 
 	return (
-		<PaperProvider>
-			<ScrollView style={[styles.container, { backgroundColor }]}>
-				<View style={styles.input}>
-					<Dropdown
-						label="Stone type"
-						mode="outlined"
-						hideMenuHeader
-						menuContentStyle={{ top: -50 }}
-						value={formData.name}
-						onSelect={(value) => updateField("name", value)}
-						options={Object.values(GemstoneType).map((type) => ({
-							label: type,
-							value: type,
-						}))}
-					/>
-				</View>
-				<TextInput
-					label="Bill number"
-					mode="outlined"
-					value={formData.bill_number}
-					onChangeText={(value) => updateField("bill_number", value)}
-					style={[
-						styles.input,
-						error?.field === "bill_number" && styles.inputError,
-					]}
-					error={error?.field === "bill_number"}
-				/>
-
-				<View style={styles.input}>
-					<Dropdown
-						label="Shape"
-						mode="outlined"
-						hideMenuHeader
-						menuContentStyle={{ top: -50 }}
-						value={formData.shape}
-						onSelect={(value) => updateField("shape", value)}
-						options={Object.values(GemstoneShape).map((shape) => ({
-							label: shape,
-							value: shape,
-						}))}
-					/>
-				</View>
-
-				<View style={styles.input}>
-					<Dropdown
-						label="Color"
-						mode="outlined"
-						hideMenuHeader
-						menuContentStyle={{ top: -50 }}
-						value={formData.color}
-						onSelect={(value) => updateField("color", value)}
-						options={Object.values(GemstoneColor).map((color) => ({
-							label: color,
-							value: color,
-						}))}
-					/>
-				</View>
-
-				<View style={styles.input}>
-					<Dropdown
-						label="Cut"
-						mode="outlined"
-						hideMenuHeader
-						menuContentStyle={{ top: -50 }}
-						value={formData.cut}
-						onSelect={(value) => updateField("cut", value)}
-						options={Object.values(GemstoneCut).map((cut) => ({
-							label: cut,
-							value: cut,
-						}))}
-					/>
-				</View>
-
-				<TextInput
-					label="Weight (carats)"
-					mode="outlined"
-					value={formData.weight}
-					onChangeText={(value) => handleNumericInput(value, "weight")}
-					keyboardType="decimal-pad"
-					style={[styles.input, error?.field === "weight" && styles.inputError]}
-					error={error?.field === "weight"}
-				/>
-
-				<TextInput
-					label="Buy price"
-					mode="outlined"
-					value={formData.buy_price.toString()}
-					onChangeText={(value) => updateField("buy_price", value)}
-					keyboardType="decimal-pad"
-					style={[
-						styles.input,
-						error?.field === "buy_price" && styles.inputError,
-					]}
-				/>
-
-				<TextInput
-					label="Sell price"
-					mode="outlined"
-					value={formData.sell_price.toString()}
-					onChangeText={(value) => updateField("sell_price", value)}
-					keyboardType="decimal-pad"
-					style={[
-						styles.input,
-						error?.field === "sell_price" && styles.inputError,
-					]}
-				/>
-
-				<View style={styles.dimensionsContainer}>
+		<SafeAreaProvider>
+			<PaperProvider>
+				<ScrollView style={[styles.container, { backgroundColor }]}>
+					<View style={styles.input}>
+						<Dropdown
+							label="Stone type"
+							mode="outlined"
+							hideMenuHeader
+							menuContentStyle={{ top: -50 }}
+							value={formData.name}
+							onSelect={(value) => updateField("name", value)}
+							options={Object.values(GemstoneType).map((type) => ({
+								label: type,
+								value: type,
+							}))}
+						/>
+					</View>
 					<TextInput
-						label="Length"
+						label="Bill number"
 						mode="outlined"
-						value={formData.dimensions.length}
-						onChangeText={(value) => handleDimensionInput(value, "length")}
-						keyboardType="decimal-pad"
-						style={styles.dimensionInput}
+						value={formData.bill_number}
+						onChangeText={(value) => updateField("bill_number", value)}
+						style={[
+							styles.input,
+							error?.field === "bill_number" && styles.inputError,
+						]}
+						error={error?.field === "bill_number"}
 					/>
+
+					<View style={styles.input}>
+						<Dropdown
+							label="Shape"
+							mode="outlined"
+							hideMenuHeader
+							menuContentStyle={{ top: -50 }}
+							value={formData.shape}
+							onSelect={(value) => updateField("shape", value)}
+							options={Object.values(GemstoneShape).map((shape) => ({
+								label: shape,
+								value: shape,
+							}))}
+						/>
+					</View>
+
+					<View style={styles.input}>
+						<Dropdown
+							label="Color"
+							mode="outlined"
+							hideMenuHeader
+							menuContentStyle={{ top: -50 }}
+							value={formData.color}
+							onSelect={(value) => updateField("color", value)}
+							options={Object.values(GemstoneColor).map((color) => ({
+								label: color,
+								value: color,
+							}))}
+						/>
+					</View>
+
+					<View style={styles.input}>
+						<Dropdown
+							label="Cut"
+							mode="outlined"
+							hideMenuHeader
+							menuContentStyle={{ top: -50 }}
+							value={formData.cut}
+							onSelect={(value) => updateField("cut", value)}
+							options={Object.values(GemstoneCut).map((cut) => ({
+								label: cut,
+								value: cut,
+							}))}
+						/>
+					</View>
+
 					<TextInput
-						label="Width"
+						label="Weight (carats)"
 						mode="outlined"
-						value={formData.dimensions.width}
-						onChangeText={(value) => handleDimensionInput(value, "width")}
+						value={formData.weight}
+						onChangeText={(value) => handleNumericInput(value, "weight")}
 						keyboardType="decimal-pad"
-						style={styles.dimensionInput}
+						style={[
+							styles.input,
+							error?.field === "weight" && styles.inputError,
+						]}
+						error={error?.field === "weight"}
 					/>
+
 					<TextInput
-						label="Height"
+						label="Buy price"
 						mode="outlined"
-						value={formData.dimensions.height}
-						onChangeText={(value) => handleDimensionInput(value, "height")}
+						value={formData.buy_price.toString()}
+						onChangeText={(value) => updateField("buy_price", value)}
 						keyboardType="decimal-pad"
-						style={styles.dimensionInput}
+						style={[
+							styles.input,
+							error?.field === "buy_price" && styles.inputError,
+						]}
 					/>
-				</View>
 
-				<TextInput
-					label="Comments"
-					mode="outlined"
-					value={formData.comment}
-					onChangeText={(value) => updateField("comment", value)}
-					multiline
-					numberOfLines={3}
-					style={styles.input}
-				/>
+					<TextInput
+						label="Sell price"
+						mode="outlined"
+						value={formData.sell_price.toString()}
+						onChangeText={(value) => updateField("sell_price", value)}
+						keyboardType="decimal-pad"
+						style={[
+							styles.input,
+							error?.field === "sell_price" && styles.inputError,
+						]}
+					/>
 
-				<Button
-					mode="contained"
-					onPress={handleSubmit}
-					loading={createGemstone.isPending}
-					disabled={createGemstone.isPending}
-					style={styles.button}
-				>
-					Add Gemstone
-				</Button>
+					<View style={styles.dimensionsContainer}>
+						<TextInput
+							label="Length"
+							mode="outlined"
+							value={formData.dimensions.length}
+							onChangeText={(value) => handleDimensionInput(value, "length")}
+							keyboardType="decimal-pad"
+							style={styles.dimensionInput}
+						/>
+						<TextInput
+							label="Width"
+							mode="outlined"
+							value={formData.dimensions.width}
+							onChangeText={(value) => handleDimensionInput(value, "width")}
+							keyboardType="decimal-pad"
+							style={styles.dimensionInput}
+						/>
+						<TextInput
+							label="Height"
+							mode="outlined"
+							value={formData.dimensions.height}
+							onChangeText={(value) => handleDimensionInput(value, "height")}
+							keyboardType="decimal-pad"
+							style={styles.dimensionInput}
+						/>
+					</View>
 
+					<TextInput
+						label="Buyer"
+						mode="outlined"
+						value={formData.buyer}
+						onChangeText={(value) => updateField("buyer", value)}
+						style={[
+							styles.input,
+							error?.field === "buyer" && styles.inputError,
+						]}
+						error={error?.field === "buyer"}
+					/>
+
+					<TextInput
+						label="Buyer Address"
+						mode="outlined"
+						value={formData.buyer_address}
+						onChangeText={(value) => updateField("buyer_address", value)}
+						style={[
+							styles.input,
+							error?.field === "buyer_address" && styles.inputError,
+						]}
+						error={error?.field === "buyer_address"}
+						multiline
+						numberOfLines={2}
+					/>
+
+					<View style={styles.input}>
+						<DatePickerInput
+							locale="en"
+							label="Sold date"
+							value={formData.sold_at ? new Date(formData.sold_at) : undefined}
+							onChange={(date) => {
+								if (date) {
+									// Create a date at noon UTC to avoid timezone issues
+									const utcDate = new Date(
+										Date.UTC(
+											date.getFullYear(),
+											date.getMonth(),
+											date.getDate(),
+											12,
+											0,
+											0,
+										),
+									);
+									setFormData((prev) => ({
+										...prev,
+										sold_at: utcDate.toISOString(),
+									}));
+								} else {
+									setFormData((prev) => ({
+										...prev,
+										sold_at: null,
+									}));
+								}
+							}}
+							inputMode="start"
+							mode="outlined"
+							presentationStyle="pageSheet"
+							withDateFormatInLabel={false}
+							error={error?.field === "sold_at"}
+						/>
+					</View>
+
+					<TextInput
+						label="Comments"
+						mode="outlined"
+						value={formData.comment}
+						onChangeText={(value) => updateField("comment", value)}
+						multiline
+						numberOfLines={3}
+						style={styles.input}
+					/>
+
+					<Button
+						mode="contained"
+						onPress={handleSubmit}
+						loading={createGemstone.isPending}
+						disabled={createGemstone.isPending}
+						style={styles.button}
+					>
+						Add Gemstone
+					</Button>
+				</ScrollView>
 				<Snackbar
 					visible={!!error}
 					onDismiss={() => setError(null)}
@@ -329,8 +410,8 @@ export default function AddNewGemstone() {
 				>
 					{error?.message || ""}
 				</Snackbar>
-			</ScrollView>
-		</PaperProvider>
+			</PaperProvider>
+		</SafeAreaProvider>
 	);
 }
 const styles = StyleSheet.create({
