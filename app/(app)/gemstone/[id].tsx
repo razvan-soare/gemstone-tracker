@@ -79,6 +79,7 @@ export default function GemstoneDetail() {
 	>([]);
 	const [sellDialogVisible, setSellDialogVisible] = useState(false);
 	const [sellPrice, setSellPrice] = useState("");
+	const [sellCurrency, setSellCurrency] = useState<Currency>(Currency.USD);
 	const [buyer, setBuyer] = useState("");
 	const [buyerAddress, setBuyerAddress] = useState("");
 	const [sellComment, setSellComment] = useState("");
@@ -167,6 +168,17 @@ export default function GemstoneDetail() {
 	const onSellStone = () => {
 		// Prepopulate fields with existing values if available
 		setSellPrice(gemstone.sell_price ? String(gemstone.sell_price) : "");
+
+		// Handle the currency type safely
+		if (
+			gemstone.sell_currency &&
+			Object.values(Currency).includes(gemstone.sell_currency as any)
+		) {
+			setSellCurrency(gemstone.sell_currency as Currency);
+		} else {
+			setSellCurrency(Currency.USD);
+		}
+
 		setBuyer(gemstone.buyer || "");
 		setBuyerAddress(gemstone.buyer_address || "");
 		setSellComment(gemstone.comment || "");
@@ -196,7 +208,7 @@ export default function GemstoneDetail() {
 			await updateGemstone.mutateAsync({
 				id: gemstone.id,
 				sell_price: price,
-				sell_currency: gemstone.sell_currency || Currency.USD,
+				sell_currency: sellCurrency,
 				sold_at: utcDate.toISOString(),
 				buyer: buyer,
 				buyer_address: buyerAddress,
@@ -204,6 +216,7 @@ export default function GemstoneDetail() {
 			});
 
 			setSellPrice("");
+			setSellCurrency(Currency.USD);
 			setBuyer("");
 			setBuyerAddress("");
 			setSellComment("");
@@ -410,9 +423,15 @@ export default function GemstoneDetail() {
 											left={
 												<TextInput.Affix
 													text={
-														CurrencySymbols[
-															formData.buy_currency || Currency.USD
-														]
+														formData.buy_currency &&
+														typeof formData.buy_currency === "string" &&
+														Object.values(Currency).includes(
+															formData.buy_currency as any,
+														)
+															? CurrencySymbols[
+																	formData.buy_currency as Currency
+																]
+															: "$"
 													}
 												/>
 											}
@@ -422,7 +441,7 @@ export default function GemstoneDetail() {
 												label="Currency"
 												mode="outlined"
 												hideMenuHeader
-												menuContentStyle={{ top: -35 }}
+												menuContentStyle={{ top: -95, left: -8 }}
 												value={formData.buy_currency || Currency.USD}
 												onSelect={(value) =>
 													setFormData((prev) => ({
@@ -453,9 +472,15 @@ export default function GemstoneDetail() {
 											left={
 												<TextInput.Affix
 													text={
-														CurrencySymbols[
-															formData.sell_currency || Currency.USD
-														]
+														formData.sell_currency &&
+														typeof formData.sell_currency === "string" &&
+														Object.values(Currency).includes(
+															formData.sell_currency as any,
+														)
+															? CurrencySymbols[
+																	formData.sell_currency as Currency
+																]
+															: "$"
 													}
 												/>
 											}
@@ -466,7 +491,7 @@ export default function GemstoneDetail() {
 												label="Currency"
 												mode="outlined"
 												hideMenuHeader
-												menuContentStyle={{ top: -35 }}
+												menuContentStyle={{ top: -95, left: -8 }}
 												value={formData.sell_currency || Currency.USD}
 												onSelect={(value) =>
 													setFormData((prev) => ({
@@ -624,14 +649,33 @@ export default function GemstoneDetail() {
 					>
 						<Dialog.Title>Sell Gemstone</Dialog.Title>
 						<Dialog.Content>
-							<TextInput
-								label={`Sell Price (${getCurrencySymbol(gemstone.sell_currency)})`}
-								defaultValue={sellPrice}
-								onChangeText={setSellPrice}
-								keyboardType="decimal-pad"
-								mode="outlined"
-								style={{ marginTop: 10, marginBottom: 10 }}
-							/>
+							<View style={styles.priceContainer}>
+								<TextInput
+									label="Sell Price"
+									defaultValue={sellPrice}
+									onChangeText={setSellPrice}
+									keyboardType="decimal-pad"
+									mode="outlined"
+									style={styles.priceInput}
+									left={
+										<TextInput.Affix text={CurrencySymbols[sellCurrency]} />
+									}
+								/>
+								<View style={styles.currencyDropdown}>
+									<Dropdown
+										label="Currency"
+										mode="outlined"
+										hideMenuHeader
+										menuContentStyle={{ top: -95, left: -15 }}
+										value={sellCurrency}
+										onSelect={(value) => setSellCurrency(value as Currency)}
+										options={Object.values(Currency).map((currency) => ({
+											label: currency,
+											value: currency,
+										}))}
+									/>
+								</View>
+							</View>
 							<TextInput
 								label="Buyer"
 								defaultValue={buyer}
