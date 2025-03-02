@@ -2,7 +2,6 @@ import {
 	Currency,
 	CurrencySymbols,
 	GemstoneColor,
-	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
 	GemTypeEnum,
@@ -239,18 +238,6 @@ export default function AddNewGemstone() {
 								value: color,
 							}))}
 							onChange={(value) => updateField("color", value as GemstoneColor)}
-						/>
-					</View>
-
-					<View style={styles.input}>
-						<ComboBox
-							label="Cut"
-							value={formData.cut || ""}
-							options={Object.values(GemstoneCut).map((cut) => ({
-								label: cut,
-								value: cut,
-							}))}
-							onChange={(value) => updateField("cut", value as GemstoneCut)}
 						/>
 					</View>
 

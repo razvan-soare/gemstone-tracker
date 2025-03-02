@@ -63,22 +63,22 @@ const GemstoneCard = ({
 							<P style={styles.chip}>{gemstone.cut}</P>
 						</Badge>
 					</View>
-					{(gemstone.buy_price || gemstone.sell_price) && (
+					{gemstone.buy_price || gemstone.sell_price ? (
 						<View style={styles.priceContainer}>
-							{gemstone.buy_price && (
+							{gemstone.buy_price ? (
 								<P className="text-green-500 font-semibold">
 									Buy: {getCurrencySymbol(gemstone.buy_currency)}
 									{gemstone.buy_price.toFixed(2)}
 								</P>
-							)}
-							{gemstone.sell_price && (
+							) : undefined}
+							{gemstone.sell_price ? (
 								<P className="text-red-500 font-semibold">
 									Sell: {getCurrencySymbol(gemstone.sell_currency)}
 									{gemstone.sell_price.toFixed(2)}
 								</P>
-							)}
+							) : undefined}
 						</View>
-					)}
+					) : undefined}
 				</Card.Content>
 			</Card>
 		</Pressable>

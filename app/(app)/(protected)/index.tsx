@@ -3,11 +3,7 @@ import { useState } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { FAB } from "react-native-paper";
 
-import {
-	GemstoneColor,
-	GemstoneCut,
-	GemstoneShape,
-} from "@/app/types/gemstone";
+import { GemstoneColor, GemstoneShape } from "@/app/types/gemstone";
 import FilterButton from "@/components/FilterButton";
 import GemstoneList from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
@@ -22,7 +18,6 @@ export default function Home() {
 	const [filters, setFilters] = useState<{
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
-		cut?: GemstoneCut;
 		sold?: boolean;
 	}>({});
 	const { activeOrganization } = useSupabase();

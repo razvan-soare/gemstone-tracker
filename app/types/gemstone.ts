@@ -1,15 +1,18 @@
 export enum GemstoneShape {
-	ROUND = "Round",
-	OVAL = "Oval",
-	CUSHION = "Cushion",
-	PRINCESS = "Princess",
-	EMERALD = "Emerald",
-	PEAR = "Pear",
 	MARQUISE = "Marquise",
-	RADIANT = "Radiant",
-	HEART = "Heart",
+	ROUND = "Round",
 	TRILLION = "Trillion",
+	OVAL = "Oval",
+	PEAR = "Pear",
+	SQUARE = "Square",
+	OCTAGON = "Octagon",
+	EMERALD = "Emerald",
 	BAGUETTE = "Baguette",
+	CUSHION = "Cushion",
+	HEART = "Heart",
+	COBOCHON = "Cobochon",
+	PRINCESS = "Princess",
+	RADIANT = "Radiant",
 	ASSCHER = "Asscher",
 }
 
@@ -19,6 +22,8 @@ export enum GemstoneColor {
 	GREEN = "Green",
 	YELLOW = "Yellow",
 	PURPLE = "Purple",
+	PINKISH_PURPLE = "Pinkish-purple",
+	PURPLEISH_PINK = "Purplish-pink",
 	PINK = "Pink",
 	ORANGE = "Orange",
 	BROWN = "Brown",
@@ -26,17 +31,6 @@ export enum GemstoneColor {
 	WHITE = "White",
 	COLORLESS = "Colorless",
 	MULTI = "Multi-colored",
-}
-
-export enum GemstoneCut {
-	BRILLIANT = "Brilliant",
-	STEP = "Step",
-	MIXED = "Mixed",
-	CABOCHON = "Cabochon",
-	FACETED = "Faceted",
-	ROSE = "Rose",
-	ROUGH = "Rough",
-	CARVED = "Carved",
 }
 
 export enum GemstoneType {

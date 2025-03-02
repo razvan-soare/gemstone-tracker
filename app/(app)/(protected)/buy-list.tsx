@@ -7,22 +7,16 @@ import {
 	StyleSheet,
 	View,
 } from "react-native";
-import {
-	Divider,
-	List,
-	Surface,
-	Text,
-	SegmentedButtons,
-} from "react-native-paper";
+import { List, SegmentedButtons, Surface, Text } from "react-native-paper";
 
+import { Currency, CurrencySymbols } from "@/app/types/gemstone";
 import { H2, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
-import { useColorScheme } from "@/lib/useColorScheme";
-import { useGemstonesByDate, GemstoneFilter } from "@/hooks/useGemstonesByDate";
 import { useSupabase } from "@/context/supabase-provider";
+import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { Tables } from "@/lib/database.types";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
-import { Currency, CurrencySymbols } from "@/app/types/gemstone";
 
 type GemstoneItemProps = {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };

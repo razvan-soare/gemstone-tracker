@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Badge, Button, Icon, IconButton } from "react-native-paper";
-import {
-	GemstoneColor,
-	GemstoneCut,
-	GemstoneShape,
-} from "@/app/types/gemstone";
+import { GemstoneColor, GemstoneShape } from "@/app/types/gemstone";
 import FilterDrawer from "./FilterDrawer";
 import { P } from "./ui/typography";
 import { colors } from "@/constants/colors";
@@ -14,13 +10,11 @@ type FilterButtonProps = {
 	onFiltersChange: (filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
-		cut?: GemstoneCut;
 		sold?: boolean;
 	}) => void;
 	filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
-		cut?: GemstoneCut;
 		sold?: boolean;
 	};
 };

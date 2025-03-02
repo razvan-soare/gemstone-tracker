@@ -3,7 +3,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { parseSearchQuery } from "@/lib/searchParser";
 import {
 	GemstoneColor,
-	GemstoneCut,
 	GemstoneShape,
 	GemstoneSize,
 } from "@/app/types/gemstone";
@@ -13,7 +12,6 @@ type GemstoneFilters = {
 	search?: string;
 	shape?: GemstoneShape;
 	color?: GemstoneColor;
-	cut?: GemstoneCut;
 	size?: GemstoneSize;
 	sold?: boolean;
 };
@@ -72,11 +70,6 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 			// Add color filter if provided
 			if (filters.color) {
 				query = query.eq("color", filters.color);
-			}
-
-			// Add cut filter if provided
-			if (filters.cut) {
-				query = query.eq("cut", filters.cut);
 			}
 
 			// Add size filter if provided

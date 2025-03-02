@@ -13,7 +13,6 @@ import {
 } from "react-native-paper";
 import {
 	GemstoneColor,
-	GemstoneCut,
 	GemstoneShape,
 	GemstoneSize,
 } from "@/app/types/gemstone";
@@ -26,14 +25,12 @@ type FilterDrawerProps = {
 	filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
-		cut?: GemstoneCut;
 		size?: GemstoneSize;
 		sold?: boolean;
 	};
 	onApplyFilters: (filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
-		cut?: GemstoneCut;
 		size?: GemstoneSize;
 		sold?: boolean;
 	}) => void;
@@ -125,7 +122,6 @@ export default function FilterDrawer({
 	const [tempFilters, setTempFilters] = React.useState({
 		shape: filters.shape,
 		color: filters.color,
-		cut: filters.cut,
 		size: filters.size,
 		sold: filters.sold,
 	});
@@ -139,7 +135,6 @@ export default function FilterDrawer({
 		setTempFilters({
 			shape: undefined,
 			color: undefined,
-			cut: undefined,
 			size: undefined,
 			sold: undefined,
 		});
@@ -150,7 +145,6 @@ export default function FilterDrawer({
 		setTempFilters({
 			shape: filters.shape,
 			color: filters.color,
-			cut: filters.cut,
 			size: filters.size,
 			sold: filters.sold,
 		});
@@ -165,11 +159,6 @@ export default function FilterDrawer({
 	const colorOptions = Object.values(GemstoneColor).map((color) => ({
 		label: color,
 		value: color,
-	}));
-
-	const cutOptions = Object.values(GemstoneCut).map((cut) => ({
-		label: cut,
-		value: cut,
 	}));
 
 	return (
@@ -209,20 +198,6 @@ export default function FilterDrawer({
 								setTempFilters((prev) => ({
 									...prev,
 									color: value,
-								}))
-							}
-						/>
-					</View>
-
-					<View style={styles.dropdownContainer}>
-						<CustomDropdown
-							label="Select Cut"
-							value={tempFilters.cut}
-							options={cutOptions}
-							onChange={(value) =>
-								setTempFilters((prev) => ({
-									...prev,
-									cut: value,
 								}))
 							}
 						/>

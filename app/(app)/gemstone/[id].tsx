@@ -2,7 +2,6 @@ import {
 	Currency,
 	CurrencySymbols,
 	GemstoneColor,
-	GemstoneCut,
 	GemstoneShape,
 	GemstoneType,
 	GemTypeEnum,
@@ -336,100 +335,6 @@ export default function GemstoneDetail() {
 											}
 										/>
 									</View>
-									<TextInput
-										label="Bill number"
-										mode="outlined"
-										value={formData.bill_number || ""}
-										onChangeText={(value) =>
-											setFormData((prev) => ({ ...prev, bill_number: value }))
-										}
-										style={styles.input}
-									/>
-
-									<View style={styles.input}>
-										<ComboBox
-											label="Shape"
-											value={formData.shape || ""}
-											options={Object.values(GemstoneShape).map((shape) => ({
-												label: shape,
-												value: shape,
-											}))}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													shape: value as GemstoneShape,
-												}))
-											}
-										/>
-									</View>
-
-									<View style={styles.input}>
-										<ComboBox
-											label="Color"
-											value={formData.color || ""}
-											options={Object.values(GemstoneColor).map((color) => ({
-												label: color,
-												value: color,
-											}))}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													color: value as GemstoneColor,
-												}))
-											}
-										/>
-									</View>
-
-									<View style={styles.input}>
-										<ComboBox
-											label="Cut"
-											value={formData.cut || ""}
-											options={Object.values(GemstoneCut).map((cut) => ({
-												label: cut,
-												value: cut,
-											}))}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													cut: value as GemstoneCut,
-												}))
-											}
-										/>
-									</View>
-
-									<TextInput
-										label="Weight (carats)"
-										mode="outlined"
-										value={String(formData.weight || "")}
-										onChangeText={(value) =>
-											setFormData((prev) => ({
-												...prev,
-												weight: value ? parseFloat(value) : null,
-											}))
-										}
-										keyboardType="decimal-pad"
-										style={styles.input}
-									/>
-
-									<TextInput
-										label="Quantity (pieces)"
-										mode="outlined"
-										value={String(formData.quantity || "1")}
-										onChangeText={(value) => {
-											// Only allow positive integers
-											const numericValue = value.replace(/[^0-9]/g, "");
-											// Ensure at least 1
-											const finalValue =
-												numericValue === "" ? "1" : numericValue;
-											setFormData((prev) => ({
-												...prev,
-												quantity: finalValue,
-											}));
-										}}
-										keyboardType="number-pad"
-										style={styles.input}
-									/>
-
 									<View style={styles.gemTypeContainer}>
 										<View style={styles.radioGroup}>
 											<TouchableOpacity
@@ -497,6 +402,82 @@ export default function GemstoneDetail() {
 											</TouchableOpacity>
 										</View>
 									</View>
+									<TextInput
+										label="Bill number"
+										mode="outlined"
+										value={formData.bill_number || ""}
+										onChangeText={(value) =>
+											setFormData((prev) => ({ ...prev, bill_number: value }))
+										}
+										style={styles.input}
+									/>
+
+									<View style={styles.input}>
+										<ComboBox
+											label="Shape"
+											value={formData.shape || ""}
+											options={Object.values(GemstoneShape).map((shape) => ({
+												label: shape,
+												value: shape,
+											}))}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													shape: value as GemstoneShape,
+												}))
+											}
+										/>
+									</View>
+
+									<View style={styles.input}>
+										<ComboBox
+											label="Color"
+											value={formData.color || ""}
+											options={Object.values(GemstoneColor).map((color) => ({
+												label: color,
+												value: color,
+											}))}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													color: value as GemstoneColor,
+												}))
+											}
+										/>
+									</View>
+
+									<TextInput
+										label="Weight (carats)"
+										mode="outlined"
+										value={String(formData.weight || "")}
+										onChangeText={(value) =>
+											setFormData((prev) => ({
+												...prev,
+												weight: value ? parseFloat(value) : null,
+											}))
+										}
+										keyboardType="decimal-pad"
+										style={styles.input}
+									/>
+
+									<TextInput
+										label="Quantity (pieces)"
+										mode="outlined"
+										value={String(formData.quantity || "1")}
+										onChangeText={(value) => {
+											// Only allow positive integers
+											const numericValue = value.replace(/[^0-9]/g, "");
+											// Ensure at least 1
+											const finalValue =
+												numericValue === "" ? "1" : numericValue;
+											setFormData((prev) => ({
+												...prev,
+												quantity: finalValue,
+											}));
+										}}
+										keyboardType="number-pad"
+										style={styles.input}
+									/>
 
 									<TextInput
 										label="Comments"
@@ -675,74 +656,162 @@ export default function GemstoneDetail() {
 									)}
 								</>
 							) : (
-								<>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Bill number:</P>
-										<P>{gemstone.bill_number}</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Shape:</P>
-										<P>{gemstone.shape}</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Color:</P>
-										<P>{gemstone.color}</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Cut:</P>
-										<P>{gemstone.cut}</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Weight:</P>
-										<P>{gemstone.weight} carats</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Gem Type:</P>
-										<P>{GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]}</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Quantity:</P>
-										<P>{gemstone.quantity || "1"} pieces</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Comments:</P>
-										<P>{gemstone.comment}</P>
-									</View>
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Buy price:</P>
-										<P>
-											{getCurrencySymbol(gemstone.buy_currency)}
-											{gemstone.buy_price || 0}
-										</P>
+								<View style={styles.tableContainer}>
+									<View style={styles.tableHeader}>
+										<P style={styles.tableHeaderText}>Property</P>
+										<P style={styles.tableHeaderText}>Value</P>
 									</View>
 
-									<View style={styles.detailRow}>
-										<P style={styles.label}>Sell price:</P>
-										<P>
-											{getCurrencySymbol(gemstone.sell_currency)}
-											{gemstone.sell_price || 0}
-										</P>
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Gem Type</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]}
+											</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Gem type</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.name}</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Bill number</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{gemstone.bill_number}
+											</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Shape</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.shape}</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Color</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.color}</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Cut</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.cut}</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Weight</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{gemstone.weight} carats
+											</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Quantity</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{gemstone.quantity || "1"} pieces
+											</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Comments</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.comment}</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Buy price</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{getCurrencySymbol(gemstone.buy_currency)}
+												{gemstone.buy_price || 0}
+											</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Sell price</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{getCurrencySymbol(gemstone.sell_currency)}
+												{gemstone.sell_price || 0}
+											</P>
+										</View>
 									</View>
 
 									{gemstone.sold_at && (
-										<View style={styles.detailRow}>
-											<P style={styles.label}>Sold At:</P>
-											<P>{formatDate(gemstone.sold_at)}</P>
+										<View style={styles.tableRow}>
+											<View style={styles.tableCell}>
+												<P style={styles.tableCellLabel}>Sold At</P>
+											</View>
+											<View style={styles.tableCell}>
+												<P style={styles.tableCellValue}>
+													{formatDate(gemstone.sold_at)}
+												</P>
+											</View>
 										</View>
 									)}
+
 									{gemstone.buyer && (
-										<View style={styles.detailRow}>
-											<P style={styles.label}>Buyer:</P>
-											<P>{gemstone.buyer}</P>
+										<View style={styles.tableRow}>
+											<View style={styles.tableCell}>
+												<P style={styles.tableCellLabel}>Buyer</P>
+											</View>
+											<View style={styles.tableCell}>
+												<P style={styles.tableCellValue}>{gemstone.buyer}</P>
+											</View>
 										</View>
 									)}
+
 									{gemstone.buyer_address && (
-										<View style={styles.detailRow}>
-											<P style={styles.label}>Buyer Address:</P>
-											<P>{gemstone.buyer_address}</P>
+										<View style={styles.tableRow}>
+											<View style={styles.tableCell}>
+												<P style={styles.tableCellLabel}>Buyer Address</P>
+											</View>
+											<View style={styles.tableCell}>
+												<P style={styles.tableCellValue}>
+													{gemstone.buyer_address}
+												</P>
+											</View>
 										</View>
 									)}
-								</>
+								</View>
 							)}
 						</View>
 					</View>
@@ -878,7 +947,11 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	label: {
+		fontSize: 20,
 		fontWeight: "bold",
+	},
+	textValue: {
+		fontSize: 20,
 	},
 	input: {
 		marginBottom: 8,
@@ -983,5 +1056,45 @@ const styles = StyleSheet.create({
 	radioTextSelected: {
 		fontWeight: "bold",
 		color: "#6200EE",
+	},
+	tableContainer: {
+		borderRadius: 8,
+		overflow: "hidden",
+		borderWidth: 1,
+		borderColor: "#e0e0e0",
+		marginBottom: 16,
+	},
+	tableHeader: {
+		flexDirection: "row",
+		backgroundColor: "#f5f5f5",
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		borderBottomWidth: 1,
+		borderBottomColor: "#e0e0e0",
+	},
+	tableHeaderText: {
+		fontSize: 16,
+		fontWeight: "bold",
+		flex: 1,
+		color: "#333",
+	},
+	tableRow: {
+		flexDirection: "row",
+		borderBottomWidth: 1,
+		borderBottomColor: "#e0e0e0",
+	},
+	tableCell: {
+		flex: 1,
+		padding: 12,
+		justifyContent: "center",
+	},
+	tableCellLabel: {
+		fontSize: 16,
+		fontWeight: "bold",
+		color: "#555",
+	},
+	tableCellValue: {
+		fontSize: 16,
+		color: "#333",
 	},
 });
