@@ -2,6 +2,7 @@ import {
 	Currency,
 	CurrencySymbols,
 	GemstoneColor,
+	GemstoneOwner,
 	GemstoneShape,
 	GemstoneType,
 	GemTypeEnum,
@@ -66,6 +67,7 @@ export default function AddNewGemstone() {
 		sold_at: null as string | null,
 		buyer: "",
 		buyer_address: "",
+		owner: "Nuo",
 	});
 
 	const updateField = (field: string, value?: string | GemTypeEnum) => {
@@ -173,6 +175,7 @@ export default function AddNewGemstone() {
 				sell_currency: formData.sell_currency,
 				gem_type: formData.gem_type,
 				sold: false,
+				owner: formData.owner,
 			});
 			router.back();
 		} catch (error) {
@@ -231,6 +234,18 @@ export default function AddNewGemstone() {
 								value: color,
 							}))}
 							onChange={(value) => updateField("color", value as GemstoneColor)}
+						/>
+					</View>
+
+					<View style={styles.input}>
+						<ComboBox
+							label="Owner"
+							value={formData.owner || ""}
+							options={Object.values(GemstoneOwner).map((owner) => ({
+								label: owner,
+								value: owner,
+							}))}
+							onChange={(value) => updateField("owner", value as GemstoneOwner)}
 						/>
 					</View>
 

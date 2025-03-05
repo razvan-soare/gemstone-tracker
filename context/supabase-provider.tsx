@@ -1,7 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Session, User } from "@supabase/supabase-js";
 import { SplashScreen, useRouter, useSegments } from "expo-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { supabase } from "@/config/supabase";
 import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";

@@ -34,9 +34,10 @@ const buildSearchQuery = (term: string) => {
 };
 
 export const useGemstones = (filters: GemstoneFilters = {}) => {
-	const { activeOrganization } = useSupabase();
+	const { session, activeOrganization } = useSupabase();
 	return useInfiniteQuery({
 		queryKey: ["gemstones", activeOrganization, filters],
+		enabled: !!session && !!activeOrganization,
 		queryFn: async ({ pageParam = 0 }) => {
 			let query = supabase
 				.from("stones")

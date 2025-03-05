@@ -1,14 +1,12 @@
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Badge, Button, Icon, IconButton } from "react-native-paper";
 import {
 	GemstoneColor,
-	GemstoneShape,
 	GemstoneOwner,
+	GemstoneShape,
 } from "@/app/types/gemstone";
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Badge, Button, Icon } from "react-native-paper";
 import FilterDrawer from "./FilterDrawer";
-import { P } from "./ui/typography";
-import { colors } from "@/constants/colors";
 
 type FilterButtonProps = {
 	onFiltersChange: (filters: {

@@ -462,6 +462,32 @@ export default function GemstoneDetail() {
 										/>
 									</View>
 
+									<View style={styles.input}>
+										<ComboBox
+											label="Owner"
+											value={formData.owner || ""}
+											options={[
+												...Object.values(GemstoneOwner).map((owner) => ({
+													label: owner,
+													value: owner,
+												})),
+												// Allow free text input by adding the current value if it's not in the enum
+												...(formData.owner &&
+												!Object.values(GemstoneOwner).includes(
+													formData.owner as any,
+												)
+													? [{ label: formData.owner, value: formData.owner }]
+													: []),
+											]}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													owner: value,
+												}))
+											}
+										/>
+									</View>
+
 									<TextInput
 										label="Weight (carats)"
 										mode="outlined"
@@ -495,43 +521,6 @@ export default function GemstoneDetail() {
 										style={styles.input}
 									/>
 
-									<View style={styles.input}>
-										<ComboBox
-											label="Owner"
-											value={formData.owner || ""}
-											options={[
-												...Object.values(GemstoneOwner).map((owner) => ({
-													label: owner,
-													value: owner,
-												})),
-												// Allow free text input by adding the current value if it's not in the enum
-												...(formData.owner &&
-												!Object.values(GemstoneOwner).includes(
-													formData.owner as any,
-												)
-													? [{ label: formData.owner, value: formData.owner }]
-													: []),
-											]}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													owner: value,
-												}))
-											}
-										/>
-									</View>
-
-									<TextInput
-										label="Comments"
-										mode="outlined"
-										value={formData.comment || ""}
-										onChangeText={(value) =>
-											setFormData((prev) => ({ ...prev, comment: value }))
-										}
-										multiline
-										numberOfLines={3}
-										style={[styles.input, { height: 100 }]}
-									/>
 									<View style={styles.priceContainer}>
 										<TextInput
 											label="Buy price"
@@ -671,31 +660,39 @@ export default function GemstoneDetail() {
 										/>
 									</View>
 
-									{formData.sold_at && (
-										<>
-											<TextInput
-												label="Buyer"
-												mode="outlined"
-												value={formData.buyer || ""}
-												onChangeText={(value) =>
-													setFormData((prev) => ({ ...prev, buyer: value }))
-												}
-												style={styles.input}
-											/>
-											<TextInput
-												label="Buyer Address"
-												mode="outlined"
-												value={formData.buyer_address || ""}
-												onChangeText={(value) =>
-													setFormData((prev) => ({
-														...prev,
-														buyer_address: value,
-													}))
-												}
-												style={styles.input}
-											/>
-										</>
-									)}
+									<TextInput
+										label="Buyer"
+										mode="outlined"
+										value={formData.buyer || ""}
+										onChangeText={(value) =>
+											setFormData((prev) => ({ ...prev, buyer: value }))
+										}
+										style={styles.input}
+									/>
+									<TextInput
+										label="Buyer Address"
+										mode="outlined"
+										value={formData.buyer_address || ""}
+										onChangeText={(value) =>
+											setFormData((prev) => ({
+												...prev,
+												buyer_address: value,
+											}))
+										}
+										style={styles.input}
+									/>
+
+									<TextInput
+										label="Comments"
+										mode="outlined"
+										value={formData.comment || ""}
+										onChangeText={(value) =>
+											setFormData((prev) => ({ ...prev, comment: value }))
+										}
+										multiline
+										numberOfLines={3}
+										style={[styles.input, { height: 100 }]}
+									/>
 								</>
 							) : (
 								<View style={styles.tableContainer}>
@@ -724,10 +721,12 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Cut</P>
+											<P style={styles.tableCellLabel}>Owner</P>
 										</View>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.cut}</P>
+											<P style={styles.tableCellValue}>
+												{gemstone.owner || ""}
+											</P>
 										</View>
 									</View>
 
@@ -750,26 +749,6 @@ export default function GemstoneDetail() {
 											<P style={styles.tableCellValue}>
 												{gemstone.quantity || "1"} pieces
 											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Owner</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{gemstone.owner || ""}
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Comments</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.comment}</P>
 										</View>
 									</View>
 
@@ -833,6 +812,15 @@ export default function GemstoneDetail() {
 											</View>
 										</View>
 									)}
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Comments</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.comment}</P>
+										</View>
+									</View>
 								</View>
 							)}
 						</View>
