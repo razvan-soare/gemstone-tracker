@@ -10,6 +10,7 @@ interface OptimizedImageProps {
 	style?: any;
 	placeholder?: string;
 	alt?: string;
+	contentFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
 }
 
 export function OptimizedImage({
@@ -17,6 +18,7 @@ export function OptimizedImage({
 	style,
 	placeholder,
 	alt,
+	contentFit = "cover",
 }: OptimizedImageProps) {
 	const { thumbnail, source, isLoading } = useImage(image);
 	const { colorScheme } = useColorScheme();
@@ -44,7 +46,7 @@ export function OptimizedImage({
 				<ExpoImage
 					source={{ uri: placeholder }}
 					style={[style, styles.placeholderImage]}
-					contentFit="cover"
+					contentFit={contentFit}
 					transition={200}
 				/>
 			)}
@@ -53,7 +55,7 @@ export function OptimizedImage({
 					source={{ uri: source }}
 					placeholder={{ uri: thumbnail }}
 					style={[style, isLoading ? styles.hiddenImage : null]}
-					contentFit="cover"
+					contentFit={contentFit}
 					transition={300}
 					alt={alt}
 				/>
