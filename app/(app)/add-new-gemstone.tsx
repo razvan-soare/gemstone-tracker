@@ -7,25 +7,19 @@ import {
 	GemTypeEnum,
 	GemTypeLabels,
 } from "@/app/types/gemstone";
-import { H3 } from "@/components/ui/typography";
+import { ComboBox } from "@/components/ui/combobox";
+import { H3, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-	ScrollView,
-	StyleSheet,
-	View,
-	TouchableOpacity,
-	Text,
-} from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import {
 	Button,
 	MD2Colors,
 	PaperProvider,
-	RadioButton,
 	Snackbar,
 	TextInput,
 } from "react-native-paper";
@@ -35,9 +29,7 @@ import {
 	registerTranslation,
 } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
-import { ComboBox } from "@/components/ui/combobox";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { P } from "@/components/ui/typography";
 
 // Register the English locale
 registerTranslation("en", enGB);
@@ -180,6 +172,7 @@ export default function AddNewGemstone() {
 				buy_currency: formData.buy_currency,
 				sell_currency: formData.sell_currency,
 				gem_type: formData.gem_type,
+				sold: false,
 			});
 			router.back();
 		} catch (error) {

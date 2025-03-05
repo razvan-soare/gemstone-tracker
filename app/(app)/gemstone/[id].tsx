@@ -12,6 +12,7 @@ import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
+import { GemstoneHeader } from "@/components/GemstoneHeader";
 import { ComboBox } from "@/components/ui/combobox";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
@@ -41,9 +42,8 @@ import {
 	TextInput,
 } from "react-native-paper";
 import { DatePickerInput } from "react-native-paper-dates";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-paper-dropdown";
-import { GemstoneHeader } from "@/components/GemstoneHeader";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Helper function to format dates consistently
 const formatDate = (dateString: string) => {
@@ -236,6 +236,7 @@ export default function GemstoneDetail() {
 				sell_price: price,
 				sell_currency: sellCurrency,
 				sold_at: utcDate.toISOString(),
+				sold: true,
 				buyer: buyer,
 				buyer_address: buyerAddress,
 				comment: sellComment || gemstone.comment,
@@ -243,7 +244,6 @@ export default function GemstoneDetail() {
 			});
 
 			setSellPrice("");
-			setSellCurrency(Currency.RMB);
 			setBuyer("");
 			setBuyerAddress("");
 			setSellComment("");
@@ -309,6 +309,15 @@ export default function GemstoneDetail() {
 				<ScrollView style={[styles.container, { backgroundColor }]}>
 					<View style={{ paddingBottom: 30 }}>
 						<View style={styles.carouselSection}>
+							{gemstone.sold && (
+								<View style={styles.prominentSoldBadge}>
+									<View className="bg-red-600 px-4 py-2 rounded-lg shadow-lg transform rotate-45">
+										<P className="text-white font-bold text-base text-center">
+											SOLD
+										</P>
+									</View>
+								</View>
+							)}
 							<GemstoneCarousel
 								images={gemstone.images || []}
 								tempImagePreviews={tempImagePreviews}
@@ -889,6 +898,17 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+	},
+	prominentSoldBadge: {
+		position: "absolute",
+		top: 10,
+		right: 10,
+		zIndex: 10,
+		width: 70,
+		height: 70,
+		justifyContent: "center",
+		alignItems: "center",
+		overflow: "visible",
 	},
 	header: {
 		flexDirection: "row",

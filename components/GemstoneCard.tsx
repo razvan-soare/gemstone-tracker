@@ -1,13 +1,12 @@
+import { Currency, CurrencySymbols } from "@/app/types/gemstone";
 import { Tables } from "@/lib/database.types";
 import { getDefaultStoneImage } from "@/lib/imageUtils";
 import { router } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Card, Title } from "react-native-paper";
+import { Card } from "react-native-paper";
 import { OptimizedImage } from "./OptimizedImage";
 import { Badge } from "./ui/badge";
 import { Muted, P } from "./ui/typography";
-import { Currency, CurrencySymbols } from "@/app/types/gemstone";
-import { Image } from "react-native-svg";
 
 // Helper function to safely get currency symbol
 const getCurrencySymbol = (currencyCode: string | null): string => {
@@ -27,18 +26,16 @@ const GemstoneCard = ({
 }: {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
 }) => {
-	const isSold = !!gemstone.sold_at;
-
 	return (
 		<Pressable onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}>
-			<Card style={[styles.card, isSold && styles.soldCard]}>
+			<Card style={[styles.card, gemstone.sold && styles.soldCard]}>
 				<View style={styles.imageContainer}>
 					<OptimizedImage
 						image={gemstone.images?.[0] || ""}
 						placeholder={getDefaultStoneImage()}
 						style={styles.image}
 					/>
-					{isSold && (
+					{gemstone.sold && (
 						<View style={styles.soldBadge}>
 							<P style={styles.soldBadgeText}>SOLD</P>
 						</View>
@@ -106,7 +103,7 @@ const styles = StyleSheet.create({
 		position: "absolute",
 		top: 10,
 		right: 10,
-		backgroundColor: "#4CAF50", // Green color
+		backgroundColor: "#EF4444", // Red color (Tailwind red-500)
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 4,

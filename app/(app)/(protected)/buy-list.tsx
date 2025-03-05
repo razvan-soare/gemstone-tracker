@@ -46,15 +46,26 @@ const GemstoneItem = ({ gemstone, backgroundColor }: GemstoneItemProps) => {
 				title={gemstone.name}
 				description={`${gemstone.shape}, ${gemstone.color}, ${gemstone.cut}`}
 				right={() => (
-					<View style={styles.priceContainer}>
-						<P className="text-green-500 font-semibold">
-							{buyCurrencySymbol}
-							{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}
-						</P>
-						<P className="text-red-500 font-semibold">
-							{sellCurrencySymbol}
-							{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}
-						</P>
+					<View className="flex-row items-center justify-between gap-10">
+						{gemstone.sold && (
+							<View className="relative w-15 h-15 overflow-visible justify-center items-center">
+								<View className="bg-red-600 px-2 py-1 rounded shadow-md transform rotate-45">
+									<P className="text-white font-bold text-xs text-center">
+										SOLD
+									</P>
+								</View>
+							</View>
+						)}
+						<View style={styles.priceContainer}>
+							<P className="text-green-500 font-semibold">
+								{buyCurrencySymbol}
+								{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}
+							</P>
+							<P className="text-red-500 font-semibold">
+								{sellCurrencySymbol}
+								{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}
+							</P>
+						</View>
 					</View>
 				)}
 				onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}
