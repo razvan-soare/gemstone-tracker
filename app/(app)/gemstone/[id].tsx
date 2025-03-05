@@ -267,49 +267,62 @@ export default function GemstoneDetail() {
 				<Stack.Screen
 					options={{
 						title: gemstone.name,
-						headerRight: () =>
-							isEditing ? (
-								<View style={{ flexDirection: "row" }}>
+						headerRight: () => {
+							if (isEditing) {
+								return (
+									<View style={{ flexDirection: "row" }}>
+										<IconButton
+											icon="close"
+											onPress={() => {
+												setIsEditing(false);
+												setFormData({});
+											}}
+										/>
+										<IconButton
+											icon="check"
+											onPress={handleSave}
+											loading={updateGemstone.isPending}
+										/>
+									</View>
+								);
+							}
+
+							return (
+								<View
+									style={{
+										flexDirection: "row",
+										width: 100,
+										justifyContent: "flex-end",
+									}}
+								>
 									<IconButton
-										icon="close"
+										icon="pencil"
 										onPress={() => {
-											setIsEditing(false);
-											setFormData({});
+											setFormData({
+												name: gemstone.name,
+												shape: gemstone.shape,
+												color: gemstone.color,
+												cut: gemstone.cut,
+												weight: gemstone.weight,
+												quantity: gemstone.quantity || "1",
+												gem_type: getGemTypeEnum(gemstone.gem_type),
+												comment: gemstone.comment,
+												bill_number: gemstone.bill_number,
+												buy_price: gemstone.buy_price,
+												sell_price: gemstone.sell_price,
+												buy_currency: gemstone.buy_currency || Currency.RMB,
+												sell_currency: gemstone.sell_currency || Currency.RMB,
+												sold_at: gemstone.sold_at,
+												buyer: gemstone.buyer,
+												buyer_address: gemstone.buyer_address,
+												owner: gemstone.owner,
+											});
+											setIsEditing(true);
 										}}
 									/>
-									<IconButton
-										icon="check"
-										onPress={handleSave}
-										loading={updateGemstone.isPending}
-									/>
 								</View>
-							) : (
-								<IconButton
-									icon="pencil"
-									onPress={() => {
-										setFormData({
-											name: gemstone.name,
-											shape: gemstone.shape,
-											color: gemstone.color,
-											cut: gemstone.cut,
-											weight: gemstone.weight,
-											quantity: gemstone.quantity || "1",
-											gem_type: getGemTypeEnum(gemstone.gem_type),
-											comment: gemstone.comment,
-											bill_number: gemstone.bill_number,
-											buy_price: gemstone.buy_price,
-											sell_price: gemstone.sell_price,
-											buy_currency: gemstone.buy_currency || Currency.RMB,
-											sell_currency: gemstone.sell_currency || Currency.RMB,
-											sold_at: gemstone.sold_at,
-											buyer: gemstone.buyer,
-											buyer_address: gemstone.buyer_address,
-											owner: gemstone.owner,
-										});
-										setIsEditing(true);
-									}}
-								/>
-							),
+							);
+						},
 					}}
 				/>
 				<ScrollView style={[styles.container, { backgroundColor }]}>
