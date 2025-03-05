@@ -29,7 +29,7 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "purchased") => {
 			// Apply filter based on sold status
 			if (filter === "sold") {
 				// Get only sold gemstones (sold_at is not null)
-				query = query.not("sold_at", "is", null);
+				query = query.not("sold", "is", null);
 			} else {
 				// For purchased filter, we get all gemstones regardless of sold status
 				// This is the original behavior

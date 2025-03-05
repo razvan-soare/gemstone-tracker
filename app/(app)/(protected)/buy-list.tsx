@@ -107,7 +107,7 @@ const GemstoneListView = ({
 			)}
 			renderSectionHeader={({ section: { title } }) => (
 				<View style={[styles.sectionHeader, { backgroundColor }]}>
-					<Text style={styles.sectionHeaderText}>{title}</Text>
+					<P style={styles.sectionHeaderText}>{title}</P>
 				</View>
 			)}
 			contentContainerStyle={styles.listContent}
