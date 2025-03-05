@@ -43,6 +43,7 @@ import {
 import { DatePickerInput } from "react-native-paper-dates";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-paper-dropdown";
+import { GemstoneHeader } from "@/components/GemstoneHeader";
 
 // Helper function to format dates consistently
 const formatDate = (dateString: string) => {
@@ -657,29 +658,16 @@ export default function GemstoneDetail() {
 								</>
 							) : (
 								<View style={styles.tableContainer}>
+									<GemstoneHeader
+										name={gemstone.name}
+										shape={gemstone.shape as GemstoneShape}
+										color={gemstone.color as GemstoneColor}
+										gemType={getGemTypeEnum(gemstone.gem_type)}
+									/>
+
 									<View style={styles.tableHeader}>
 										<P style={styles.tableHeaderText}>Property</P>
 										<P style={styles.tableHeaderText}>Value</P>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Gem Type</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]}
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Gem type</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.name}</P>
-										</View>
 									</View>
 
 									<View style={styles.tableRow}>
@@ -690,24 +678,6 @@ export default function GemstoneDetail() {
 											<P style={styles.tableCellValue}>
 												{gemstone.bill_number}
 											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Shape</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.shape}</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Color</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.color}</P>
 										</View>
 									</View>
 

@@ -168,6 +168,7 @@ export type Database = {
           sell_currency: string | null
           sell_price: number | null
           shape: string | null
+          sold: boolean | null
           sold_at: string | null
           updated_at: string | null
           weight: number | null
@@ -194,6 +195,7 @@ export type Database = {
           sell_currency?: string | null
           sell_price?: number | null
           shape?: string | null
+          sold?: boolean | null
           sold_at?: string | null
           updated_at?: string | null
           weight?: number | null
@@ -220,6 +222,7 @@ export type Database = {
           sell_currency?: string | null
           sell_price?: number | null
           shape?: string | null
+          sold?: boolean | null
           sold_at?: string | null
           updated_at?: string | null
           weight?: number | null

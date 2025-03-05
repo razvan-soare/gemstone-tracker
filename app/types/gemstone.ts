@@ -17,19 +17,24 @@ export enum GemstoneShape {
 }
 
 export enum GemstoneColor {
-	RED = "Red",
+	ROYAL_BLUE = "Royal Blue",
+	CORN_FLOWER = "Corn Flower",
+	PINKISH_PURPLE = "Pink & Purple",
+	NEON_PINK = "Neon Pink",
+	HOT_PINK = "Hot Pink",
 	BLUE = "Blue",
-	GREEN = "Green",
-	YELLOW = "Yellow",
-	PURPLE = "Purple",
-	PINKISH_PURPLE = "Pinkish-purple",
-	PURPLEISH_PINK = "Purplish-pink",
+	RED = "Red",
 	PINK = "Pink",
+	YELLOW = "Yellow",
+	GREEN = "Green",
 	ORANGE = "Orange",
+	PINK_ORANGE = "Pink & Orange",
 	BROWN = "Brown",
 	BLACK = "Black",
 	WHITE = "White",
 	COLORLESS = "Colorless",
+	NEON_BLUE = "Neon Blue",
+	PURPLE = "Purple",
 	MULTI = "Multi-colored",
 }
 

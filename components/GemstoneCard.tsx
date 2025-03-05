@@ -7,6 +7,7 @@ import { OptimizedImage } from "./OptimizedImage";
 import { Badge } from "./ui/badge";
 import { Muted, P } from "./ui/typography";
 import { Currency, CurrencySymbols } from "@/app/types/gemstone";
+import { Image } from "react-native-svg";
 
 // Helper function to safely get currency symbol
 const getCurrencySymbol = (currencyCode: string | null): string => {
@@ -63,22 +64,18 @@ const GemstoneCard = ({
 							<P style={styles.chip}>{gemstone.cut}</P>
 						</Badge>
 					</View>
-					{gemstone.buy_price || gemstone.sell_price ? (
-						<View style={styles.priceContainer}>
-							{gemstone.buy_price ? (
-								<P className="text-green-500 font-semibold">
-									Buy: {getCurrencySymbol(gemstone.buy_currency)}
-									{gemstone.buy_price.toFixed(2)}
-								</P>
-							) : undefined}
-							{gemstone.sell_price ? (
-								<P className="text-red-500 font-semibold">
-									Sell: {getCurrencySymbol(gemstone.sell_currency)}
-									{gemstone.sell_price.toFixed(2)}
-								</P>
-							) : undefined}
-						</View>
-					) : undefined}
+
+					<View style={styles.priceContainer}>
+						<P className="text-green-500 font-semibold">
+							Buy: {getCurrencySymbol(gemstone.buy_currency)}
+							{gemstone.buy_price?.toFixed(2) || "0.00"}
+						</P>
+
+						<P className="text-red-500 font-semibold">
+							Sell: {getCurrencySymbol(gemstone.sell_currency)}
+							{gemstone.sell_price?.toFixed(2) || "0.00"}
+						</P>
+					</View>
 				</Card.Content>
 			</Card>
 		</Pressable>
