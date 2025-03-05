@@ -102,3 +102,9 @@ export enum GemstoneSize {
 	RANGE_9_10 = "9 - 10",
 	RANGE_10_PLUS = "10+",
 }
+
+export enum GemstoneOwner {
+	NUO = "Nuo",
+	HAN = "Han",
+	HULU = "Hulu",
+}

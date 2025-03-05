@@ -5,6 +5,7 @@ import {
 	GemstoneColor,
 	GemstoneShape,
 	GemstoneSize,
+	GemstoneOwner,
 } from "@/app/types/gemstone";
 import { useSupabase } from "@/context/supabase-provider";
 
@@ -14,6 +15,7 @@ type GemstoneFilters = {
 	color?: GemstoneColor;
 	size?: GemstoneSize;
 	sold?: boolean;
+	owner?: GemstoneOwner;
 };
 
 const ITEMS_PER_PAGE = 20;
@@ -115,6 +117,11 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 			// Add sold filter if provided
 			if (filters.sold === true) {
 				query = query.not("sold_at", "is", null);
+			}
+
+			// Add owner filter if provided
+			if (filters.owner) {
+				query = query.eq("owner", filters.owner);
 			}
 
 			const { data, error, count } = await query;

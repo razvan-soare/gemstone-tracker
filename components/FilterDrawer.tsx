@@ -15,6 +15,7 @@ import {
 	GemstoneColor,
 	GemstoneShape,
 	GemstoneSize,
+	GemstoneOwner,
 } from "@/app/types/gemstone";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -27,12 +28,14 @@ type FilterDrawerProps = {
 		color?: GemstoneColor;
 		size?: GemstoneSize;
 		sold?: boolean;
+		owner?: GemstoneOwner;
 	};
 	onApplyFilters: (filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		size?: GemstoneSize;
 		sold?: boolean;
+		owner?: GemstoneOwner;
 	}) => void;
 };
 
@@ -124,6 +127,7 @@ export default function FilterDrawer({
 		color: filters.color,
 		size: filters.size,
 		sold: filters.sold,
+		owner: filters.owner,
 	});
 
 	const handleApply = () => {
@@ -137,6 +141,7 @@ export default function FilterDrawer({
 			color: undefined,
 			size: undefined,
 			sold: undefined,
+			owner: undefined,
 		});
 	};
 
@@ -147,6 +152,7 @@ export default function FilterDrawer({
 			color: filters.color,
 			size: filters.size,
 			sold: filters.sold,
+			owner: filters.owner,
 		});
 	}, [filters]);
 
@@ -159,6 +165,11 @@ export default function FilterDrawer({
 	const colorOptions = Object.values(GemstoneColor).map((color) => ({
 		label: color,
 		value: color,
+	}));
+
+	const ownerOptions = Object.values(GemstoneOwner).map((owner) => ({
+		label: owner,
+		value: owner,
 	}));
 
 	return (
@@ -215,6 +226,20 @@ export default function FilterDrawer({
 								setTempFilters((prev) => ({
 									...prev,
 									size: value,
+								}))
+							}
+						/>
+					</View>
+
+					<View style={styles.dropdownContainer}>
+						<CustomDropdown
+							label="Select Owner"
+							value={tempFilters.owner}
+							options={ownerOptions}
+							onChange={(value) =>
+								setTempFilters((prev) => ({
+									...prev,
+									owner: value,
 								}))
 							}
 						/>

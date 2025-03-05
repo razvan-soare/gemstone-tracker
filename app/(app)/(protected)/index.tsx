@@ -3,7 +3,11 @@ import { useState } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { FAB } from "react-native-paper";
 
-import { GemstoneColor, GemstoneShape } from "@/app/types/gemstone";
+import {
+	GemstoneColor,
+	GemstoneShape,
+	GemstoneOwner,
+} from "@/app/types/gemstone";
 import FilterButton from "@/components/FilterButton";
 import GemstoneList from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
@@ -19,6 +23,7 @@ export default function Home() {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		sold?: boolean;
+		owner?: GemstoneOwner;
 	}>({});
 	const { activeOrganization } = useSupabase();
 	const { colorScheme } = useColorScheme();

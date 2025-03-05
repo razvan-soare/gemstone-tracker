@@ -163,6 +163,7 @@ export type Database = {
           id: string
           name: string
           organization_id: string | null
+          owner: string | null
           pictures: string[] | null
           quantity: string | null
           sell_currency: string | null
@@ -190,6 +191,7 @@ export type Database = {
           id?: string
           name: string
           organization_id?: string | null
+          owner?: string | null
           pictures?: string[] | null
           quantity?: string | null
           sell_currency?: string | null
@@ -217,6 +219,7 @@ export type Database = {
           id?: string
           name?: string
           organization_id?: string | null
+          owner?: string | null
           pictures?: string[] | null
           quantity?: string | null
           sell_currency?: string | null

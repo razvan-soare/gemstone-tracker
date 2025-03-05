@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Badge, Button, Icon, IconButton } from "react-native-paper";
-import { GemstoneColor, GemstoneShape } from "@/app/types/gemstone";
+import {
+	GemstoneColor,
+	GemstoneShape,
+	GemstoneOwner,
+} from "@/app/types/gemstone";
 import FilterDrawer from "./FilterDrawer";
 import { P } from "./ui/typography";
 import { colors } from "@/constants/colors";
@@ -11,11 +15,13 @@ type FilterButtonProps = {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		sold?: boolean;
+		owner?: GemstoneOwner;
 	}) => void;
 	filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
 		sold?: boolean;
+		owner?: GemstoneOwner;
 	};
 };
 

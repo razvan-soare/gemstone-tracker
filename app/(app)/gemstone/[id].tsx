@@ -2,6 +2,7 @@ import {
 	Currency,
 	CurrencySymbols,
 	GemstoneColor,
+	GemstoneOwner,
 	GemstoneShape,
 	GemstoneType,
 	GemTypeEnum,
@@ -106,6 +107,7 @@ export default function GemstoneDetail() {
 	const [sellDialogVisible, setSellDialogVisible] = useState(false);
 	const [sellPrice, setSellPrice] = useState("");
 	const [sellCurrency, setSellCurrency] = useState<Currency>(Currency.RMB);
+	const [owner, setOwner] = useState("");
 	const [buyer, setBuyer] = useState("");
 	const [buyerAddress, setBuyerAddress] = useState("");
 	const [sellComment, setSellComment] = useState("");
@@ -205,6 +207,7 @@ export default function GemstoneDetail() {
 			setSellCurrency(Currency.RMB);
 		}
 
+		setOwner(gemstone.owner || "");
 		setBuyer(gemstone.buyer || "");
 		setBuyerAddress(gemstone.buyer_address || "");
 		setSellComment(gemstone.comment || "");
@@ -237,6 +240,7 @@ export default function GemstoneDetail() {
 				sell_currency: sellCurrency,
 				sold_at: utcDate.toISOString(),
 				sold: true,
+				owner: owner,
 				buyer: buyer,
 				buyer_address: buyerAddress,
 				comment: sellComment || gemstone.comment,
@@ -247,6 +251,7 @@ export default function GemstoneDetail() {
 			setBuyer("");
 			setBuyerAddress("");
 			setSellComment("");
+			setOwner("");
 			setSellDialogVisible(false);
 
 			await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
@@ -299,6 +304,7 @@ export default function GemstoneDetail() {
 											sold_at: gemstone.sold_at,
 											buyer: gemstone.buyer,
 											buyer_address: gemstone.buyer_address,
+											owner: gemstone.owner,
 										});
 										setIsEditing(true);
 									}}
@@ -488,6 +494,32 @@ export default function GemstoneDetail() {
 										keyboardType="number-pad"
 										style={styles.input}
 									/>
+
+									<View style={styles.input}>
+										<ComboBox
+											label="Owner"
+											value={formData.owner || ""}
+											options={[
+												...Object.values(GemstoneOwner).map((owner) => ({
+													label: owner,
+													value: owner,
+												})),
+												// Allow free text input by adding the current value if it's not in the enum
+												...(formData.owner &&
+												!Object.values(GemstoneOwner).includes(
+													formData.owner as any,
+												)
+													? [{ label: formData.owner, value: formData.owner }]
+													: []),
+											]}
+											onChange={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													owner: value,
+												}))
+											}
+										/>
+									</View>
 
 									<TextInput
 										label="Comments"
@@ -723,6 +755,17 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Owner</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{gemstone.owner || ""}
+											</P>
+										</View>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
 											<P style={styles.tableCellLabel}>Comments</P>
 										</View>
 										<View style={styles.tableCell}>
@@ -830,6 +873,7 @@ export default function GemstoneDetail() {
 									/>
 								</View>
 							</View>
+
 							<TextInput
 								label="Buyer"
 								defaultValue={buyer}
