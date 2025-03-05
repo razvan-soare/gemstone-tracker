@@ -17,6 +17,7 @@ import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
+import ExportButton from "@/components/ExportButton";
 
 type GemstoneItemProps = {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
@@ -163,6 +164,8 @@ export default function BuyList() {
 				backgroundColor={backgroundColor}
 				itemBackgroundColor={itemBackgroundColor}
 			/>
+			{/* Export Button */}
+			<ExportButton style={styles.exportFab} />
 		</SafeAreaView>
 	);
 }
@@ -209,5 +212,12 @@ const styles = StyleSheet.create({
 	segmentedButtonContainer: {
 		paddingHorizontal: 16,
 		marginBottom: 16,
+	},
+	exportFab: {
+		position: "absolute",
+		margin: 16,
+		right: 0,
+		bottom: 0, // Position above the add button
+		borderRadius: 100,
 	},
 });
