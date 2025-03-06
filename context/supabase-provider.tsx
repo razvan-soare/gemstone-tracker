@@ -54,7 +54,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const [session, setSession] = useState<Session | null>(null);
 	const [initialized, setInitialized] = useState<boolean>(false);
 	const queryClient = useQueryClient();
-	const { data: organizationMemberships } = useOrganizationMemberships();
+	const { data: organizationMemberships } = useOrganizationMemberships(session);
 	const [activeOrganization, setActiveOrganization] =
 		useState<Tables<"organizations"> | null>(null);
 
@@ -179,7 +179,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
 		if (session && !inProtectedGroup) {
 			router.replace("/(app)/(protected)");
-		} else if (!session) {
+		} else if (!session && inProtectedGroup) {
 			router.replace("/(app)/welcome");
 		}
 

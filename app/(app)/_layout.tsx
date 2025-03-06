@@ -1,5 +1,5 @@
-import { Stack } from "expo-router";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { Stack } from "expo-router";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -18,6 +18,7 @@ export default function AppLayout() {
 				<Stack screenOptions={{ headerShown: false }}>
 					<Stack.Screen name="(protected)" />
 					<Stack.Screen name="welcome" />
+					<Stack.Screen name="verify" />
 					<Stack.Screen
 						name="gemstone/[id]"
 						options={{

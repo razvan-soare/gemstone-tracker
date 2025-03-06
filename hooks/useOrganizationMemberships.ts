@@ -1,9 +1,8 @@
 import { supabase } from "@/config/supabase";
-import { useSupabase } from "@/context/supabase-provider";
+import { Session } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 
-export const useOrganizationMemberships = () => {
-	const { session } = useSupabase();
+export const useOrganizationMemberships = (session: Session | null) => {
 	return useQuery({
 		queryKey: ["organization_members"],
 		queryFn: async () => {
