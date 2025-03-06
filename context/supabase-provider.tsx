@@ -26,6 +26,10 @@ type SupabaseContextProps = {
 	activeOrganization: Tables<"organizations"> | null;
 	userOrganizations: Tables<"organizations">[];
 	onSelectOrganization: (organizationId: string) => Promise<void>;
+	createOrganizationForUser: (
+		userId: string,
+		email: string,
+	) => Promise<Tables<"organizations"> | null>;
 };
 
 type SupabaseProviderProps = {
@@ -43,6 +47,7 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	activeOrganization: null,
 	userOrganizations: [],
 	onSelectOrganization: async () => {},
+	createOrganizationForUser: async () => null,
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -132,12 +137,17 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	};
 
 	const signInWithPassword = async (email: string, password: string) => {
-		const { error } = await supabase.auth.signInWithPassword({
+		const { data, error } = await supabase.auth.signInWithPassword({
 			email,
 			password,
 		});
+
 		if (error) {
 			throw error;
+		}
+		// If login successful, check if user has an organization and create one if not
+		if (data.user) {
+			await createOrganizationForUser(data.user.id, data.user.email || "");
 		}
 	};
 
@@ -162,6 +172,72 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		return data;
 	};
 
+	// Function to create an organization for a user
+	const createOrganizationForUser = async (
+		userId: string,
+		email: string,
+	): Promise<Tables<"organizations"> | null> => {
+		try {
+			// Check if user already has an organization
+			const { data: existingMemberships, error: membershipError } =
+				await supabase
+					.from("organization_members")
+					.select("organization_id")
+					.eq("user_id", userId);
+
+			if (membershipError) {
+				console.error("Error checking existing memberships:", membershipError);
+				return null;
+			}
+
+			// If user already has organizations, don't create a new one
+			if (existingMemberships && existingMemberships.length > 0) {
+				return null;
+			}
+
+			// Create a new organization with a name based on the user's email
+			const orgName = email
+				? `${email.split("@")[0]}'s Organization`
+				: "My Organization";
+
+			const { data: organization, error: orgError } = await supabase
+				.from("organizations")
+				.insert({
+					name: orgName,
+					user_id: userId,
+				})
+				.select()
+				.single();
+
+			if (orgError) {
+				console.error("Error creating organization:", orgError);
+				return null;
+			}
+
+			// Add user as owner of the organization
+			const { error: memberError } = await supabase
+				.from("organization_members")
+				.insert({
+					organization_id: organization.id,
+					user_id: userId,
+					role: "owner",
+				});
+
+			if (memberError) {
+				console.error("Error adding user to organization:", memberError);
+				return null;
+			}
+
+			// Invalidate queries to refresh data
+			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
+
+			return organization;
+		} catch (error) {
+			console.error("Error in createOrganizationForUser:", error);
+			return null;
+		}
+	};
+
 	useEffect(() => {
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			setSession(session);
@@ -180,7 +256,9 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
 		const inProtectedGroup = segments[1] === "(protected)";
 
-		if (session && !inProtectedGroup) {
+		if (segments[1]?.split("#")[0] === "verify") {
+			return;
+		} else if (session && !inProtectedGroup) {
 			router.replace("/(app)/(protected)");
 		} else if (!session && inProtectedGroup) {
 			router.replace("/(app)/welcome");
@@ -209,6 +287,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				activeOrganization,
 				userOrganizations,
 				onSelectOrganization,
+				createOrganizationForUser,
 			}}
 		>
 			{children}
