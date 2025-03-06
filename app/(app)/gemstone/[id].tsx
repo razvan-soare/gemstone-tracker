@@ -263,672 +263,657 @@ export default function GemstoneDetail() {
 
 	return (
 		<SafeAreaProvider>
-			<PaperProvider>
-				<Stack.Screen
-					options={{
-						title: gemstone.name,
-						headerRight: () => {
-							if (isEditing) {
-								return (
-									<View style={{ flexDirection: "row" }}>
-										<IconButton
-											icon="close"
-											onPress={() => {
-												setIsEditing(false);
-												setFormData({});
-											}}
-										/>
-										<IconButton
-											icon="check"
-											onPress={handleSave}
-											loading={updateGemstone.isPending}
-										/>
-									</View>
-								);
-							}
-
+			<Stack.Screen
+				options={{
+					title: gemstone.name,
+					headerRight: () => {
+						if (isEditing) {
 							return (
-								<View
-									style={{
-										flexDirection: "row",
-										width: 100,
-										justifyContent: "flex-end",
-									}}
-								>
+								<View style={{ flexDirection: "row" }}>
 									<IconButton
-										icon="pencil"
+										icon="close"
 										onPress={() => {
-											setFormData({
-												name: gemstone.name,
-												shape: gemstone.shape,
-												color: gemstone.color,
-												cut: gemstone.cut,
-												weight: gemstone.weight,
-												quantity: gemstone.quantity || "1",
-												gem_type: getGemTypeEnum(gemstone.gem_type),
-												comment: gemstone.comment,
-												bill_number: gemstone.bill_number,
-												buy_price: gemstone.buy_price,
-												sell_price: gemstone.sell_price,
-												buy_currency: gemstone.buy_currency || Currency.RMB,
-												sell_currency: gemstone.sell_currency || Currency.RMB,
-												sold_at: gemstone.sold_at,
-												buyer: gemstone.buyer,
-												buyer_address: gemstone.buyer_address,
-												owner: gemstone.owner,
-											});
-											setIsEditing(true);
+											setIsEditing(false);
+											setFormData({});
 										}}
+									/>
+									<IconButton
+										icon="check"
+										onPress={handleSave}
+										loading={updateGemstone.isPending}
 									/>
 								</View>
 							);
-						},
-					}}
-				/>
-				<ScrollView style={[styles.container, { backgroundColor }]}>
-					<View style={{ paddingBottom: 30 }}>
-						<View style={styles.carouselSection}>
-							{gemstone.sold && (
-								<View style={styles.prominentSoldBadge}>
-									<View className="bg-red-600 px-4 py-2 rounded-lg shadow-lg transform rotate-45">
-										<P className="text-white font-bold text-base text-center">
-											SOLD
-										</P>
+						}
+
+						return (
+							<View
+								style={{
+									flexDirection: "row",
+									width: 100,
+									justifyContent: "flex-end",
+								}}
+							>
+								<IconButton
+									icon="pencil"
+									onPress={() => {
+										setFormData({
+											name: gemstone.name,
+											shape: gemstone.shape,
+											color: gemstone.color,
+											cut: gemstone.cut,
+											weight: gemstone.weight,
+											quantity: gemstone.quantity || "1",
+											gem_type: getGemTypeEnum(gemstone.gem_type),
+											comment: gemstone.comment,
+											bill_number: gemstone.bill_number,
+											buy_price: gemstone.buy_price,
+											sell_price: gemstone.sell_price,
+											buy_currency: gemstone.buy_currency || Currency.RMB,
+											sell_currency: gemstone.sell_currency || Currency.RMB,
+											sold_at: gemstone.sold_at,
+											buyer: gemstone.buyer,
+											buyer_address: gemstone.buyer_address,
+											owner: gemstone.owner,
+										});
+										setIsEditing(true);
+									}}
+								/>
+							</View>
+						);
+					},
+				}}
+			/>
+			<ScrollView style={[styles.container, { backgroundColor }]}>
+				<View style={{ paddingBottom: 30 }}>
+					<View style={styles.carouselSection}>
+						{gemstone.sold && (
+							<View style={styles.prominentSoldBadge}>
+								<View className="bg-red-600 px-4 py-2 rounded-lg shadow-lg transform rotate-45">
+									<P className="text-white font-bold text-base text-center">
+										SOLD
+									</P>
+								</View>
+							</View>
+						)}
+						<GemstoneCarousel
+							images={gemstone.images || []}
+							tempImagePreviews={tempImagePreviews}
+							height={200}
+							width={screenWidth}
+						/>
+					</View>
+
+					<View style={styles.detailsContainer}>
+						{isEditing ? (
+							<>
+								<View style={styles.input}>
+									<ComboBox
+										label="Stone type"
+										value={formData.name || ""}
+										options={Object.values(GemstoneType).map((type) => ({
+											label: type,
+											value: type,
+										}))}
+										onChange={(value) =>
+											setFormData((prev) => ({
+												...prev,
+												name: value as GemstoneType,
+											}))
+										}
+									/>
+								</View>
+								<View style={styles.gemTypeContainer}>
+									<View style={styles.radioGroup}>
+										<TouchableOpacity
+											style={[
+												styles.radioCard,
+												formData.gem_type === GemTypeEnum.NATURAL &&
+													styles.radioCardSelected,
+											]}
+											onPress={() =>
+												setFormData((prev) => ({
+													...prev,
+													gem_type: GemTypeEnum.NATURAL,
+												}))
+											}
+											activeOpacity={0.7}
+										>
+											<View style={styles.radioIconContainer}>
+												<View style={styles.radioOuterCircle}>
+													{formData.gem_type === GemTypeEnum.NATURAL && (
+														<View style={styles.radioInnerCircle} />
+													)}
+												</View>
+											</View>
+											<P
+												style={
+													formData.gem_type === GemTypeEnum.NATURAL
+														? styles.radioTextSelected
+														: styles.radioText
+												}
+											>
+												{GemTypeLabels[GemTypeEnum.NATURAL]}
+											</P>
+										</TouchableOpacity>
+
+										<TouchableOpacity
+											style={[
+												styles.radioCard,
+												formData.gem_type === GemTypeEnum.HEATED &&
+													styles.radioCardSelected,
+											]}
+											onPress={() =>
+												setFormData((prev) => ({
+													...prev,
+													gem_type: GemTypeEnum.HEATED,
+												}))
+											}
+											activeOpacity={0.7}
+										>
+											<View style={styles.radioIconContainer}>
+												<View style={styles.radioOuterCircle}>
+													{formData.gem_type === GemTypeEnum.HEATED && (
+														<View style={styles.radioInnerCircle} />
+													)}
+												</View>
+											</View>
+											<P
+												style={
+													formData.gem_type === GemTypeEnum.HEATED
+														? styles.radioTextSelected
+														: styles.radioText
+												}
+											>
+												{GemTypeLabels[GemTypeEnum.HEATED]}
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
-							)}
-							<GemstoneCarousel
-								images={gemstone.images || []}
-								tempImagePreviews={tempImagePreviews}
-								height={200}
-								width={screenWidth}
-							/>
-						</View>
+								<TextInput
+									label="Bill number"
+									mode="outlined"
+									value={formData.bill_number || ""}
+									onChangeText={(value) =>
+										setFormData((prev) => ({ ...prev, bill_number: value }))
+									}
+									style={styles.input}
+								/>
 
-						<View style={styles.detailsContainer}>
-							{isEditing ? (
-								<>
-									<View style={styles.input}>
-										<ComboBox
-											label="Stone type"
-											value={formData.name || ""}
-											options={Object.values(GemstoneType).map((type) => ({
-												label: type,
-												value: type,
-											}))}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													name: value as GemstoneType,
-												}))
-											}
-										/>
-									</View>
-									<View style={styles.gemTypeContainer}>
-										<View style={styles.radioGroup}>
-											<TouchableOpacity
-												style={[
-													styles.radioCard,
-													formData.gem_type === GemTypeEnum.NATURAL &&
-														styles.radioCardSelected,
-												]}
-												onPress={() =>
-													setFormData((prev) => ({
-														...prev,
-														gem_type: GemTypeEnum.NATURAL,
-													}))
-												}
-												activeOpacity={0.7}
-											>
-												<View style={styles.radioIconContainer}>
-													<View style={styles.radioOuterCircle}>
-														{formData.gem_type === GemTypeEnum.NATURAL && (
-															<View style={styles.radioInnerCircle} />
-														)}
-													</View>
-												</View>
-												<P
-													style={
-														formData.gem_type === GemTypeEnum.NATURAL
-															? styles.radioTextSelected
-															: styles.radioText
-													}
-												>
-													{GemTypeLabels[GemTypeEnum.NATURAL]}
-												</P>
-											</TouchableOpacity>
-
-											<TouchableOpacity
-												style={[
-													styles.radioCard,
-													formData.gem_type === GemTypeEnum.HEATED &&
-														styles.radioCardSelected,
-												]}
-												onPress={() =>
-													setFormData((prev) => ({
-														...prev,
-														gem_type: GemTypeEnum.HEATED,
-													}))
-												}
-												activeOpacity={0.7}
-											>
-												<View style={styles.radioIconContainer}>
-													<View style={styles.radioOuterCircle}>
-														{formData.gem_type === GemTypeEnum.HEATED && (
-															<View style={styles.radioInnerCircle} />
-														)}
-													</View>
-												</View>
-												<P
-													style={
-														formData.gem_type === GemTypeEnum.HEATED
-															? styles.radioTextSelected
-															: styles.radioText
-													}
-												>
-													{GemTypeLabels[GemTypeEnum.HEATED]}
-												</P>
-											</TouchableOpacity>
-										</View>
-									</View>
-									<TextInput
-										label="Bill number"
-										mode="outlined"
-										value={formData.bill_number || ""}
-										onChangeText={(value) =>
-											setFormData((prev) => ({ ...prev, bill_number: value }))
+								<View style={styles.input}>
+									<ComboBox
+										label="Shape"
+										value={formData.shape || ""}
+										options={Object.values(GemstoneShape).map((shape) => ({
+											label: shape,
+											value: shape,
+										}))}
+										onChange={(value) =>
+											setFormData((prev) => ({
+												...prev,
+												shape: value as GemstoneShape,
+											}))
 										}
-										style={styles.input}
 									/>
+								</View>
 
-									<View style={styles.input}>
-										<ComboBox
-											label="Shape"
-											value={formData.shape || ""}
-											options={Object.values(GemstoneShape).map((shape) => ({
-												label: shape,
-												value: shape,
-											}))}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													shape: value as GemstoneShape,
-												}))
-											}
-										/>
-									</View>
+								<View style={styles.input}>
+									<ComboBox
+										label="Color"
+										value={formData.color || ""}
+										options={Object.values(GemstoneColor).map((color) => ({
+											label: color,
+											value: color,
+										}))}
+										onChange={(value) =>
+											setFormData((prev) => ({
+												...prev,
+												color: value as GemstoneColor,
+											}))
+										}
+									/>
+								</View>
 
-									<View style={styles.input}>
-										<ComboBox
-											label="Color"
-											value={formData.color || ""}
-											options={Object.values(GemstoneColor).map((color) => ({
-												label: color,
-												value: color,
-											}))}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													color: value as GemstoneColor,
-												}))
-											}
-										/>
-									</View>
+								<View style={styles.input}>
+									<ComboBox
+										label="Owner"
+										value={formData.owner || ""}
+										options={[
+											...Object.values(GemstoneOwner).map((owner) => ({
+												label: owner,
+												value: owner,
+											})),
+											// Allow free text input by adding the current value if it's not in the enum
+											...(formData.owner &&
+											!Object.values(GemstoneOwner).includes(
+												formData.owner as any,
+											)
+												? [{ label: formData.owner, value: formData.owner }]
+												: []),
+										]}
+										onChange={(value) =>
+											setFormData((prev) => ({
+												...prev,
+												owner: value,
+											}))
+										}
+									/>
+								</View>
 
-									<View style={styles.input}>
-										<ComboBox
-											label="Owner"
-											value={formData.owner || ""}
-											options={[
-												...Object.values(GemstoneOwner).map((owner) => ({
-													label: owner,
-													value: owner,
-												})),
-												// Allow free text input by adding the current value if it's not in the enum
-												...(formData.owner &&
-												!Object.values(GemstoneOwner).includes(
-													formData.owner as any,
-												)
-													? [{ label: formData.owner, value: formData.owner }]
-													: []),
-											]}
-											onChange={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													owner: value,
-												}))
-											}
-										/>
-									</View>
+								<TextInput
+									label="Weight (carats)"
+									mode="outlined"
+									value={String(formData.weight || "")}
+									onChangeText={(value) =>
+										setFormData((prev) => ({
+											...prev,
+											weight: value ? parseFloat(value) : null,
+										}))
+									}
+									keyboardType="decimal-pad"
+									style={styles.input}
+								/>
 
+								<TextInput
+									label="Quantity (pieces)"
+									mode="outlined"
+									value={String(formData.quantity || "1")}
+									onChangeText={(value) => {
+										// Only allow positive integers
+										const numericValue = value.replace(/[^0-9]/g, "");
+										// Ensure at least 1
+										const finalValue = numericValue === "" ? "1" : numericValue;
+										setFormData((prev) => ({
+											...prev,
+											quantity: finalValue,
+										}));
+									}}
+									keyboardType="number-pad"
+									style={styles.input}
+								/>
+
+								<View style={styles.priceContainer}>
 									<TextInput
-										label="Weight (carats)"
+										label="Buy price"
 										mode="outlined"
-										value={String(formData.weight || "")}
+										value={String(formData.buy_price || "")}
 										onChangeText={(value) =>
 											setFormData((prev) => ({
 												...prev,
-												weight: value ? parseFloat(value) : null,
+												buy_price: value ? parseFloat(value) : null,
 											}))
 										}
 										keyboardType="decimal-pad"
-										style={styles.input}
-									/>
-
-									<TextInput
-										label="Quantity (pieces)"
-										mode="outlined"
-										value={String(formData.quantity || "1")}
-										onChangeText={(value) => {
-											// Only allow positive integers
-											const numericValue = value.replace(/[^0-9]/g, "");
-											// Ensure at least 1
-											const finalValue =
-												numericValue === "" ? "1" : numericValue;
-											setFormData((prev) => ({
-												...prev,
-												quantity: finalValue,
-											}));
-										}}
-										keyboardType="number-pad"
-										style={styles.input}
-									/>
-
-									<View style={styles.priceContainer}>
-										<TextInput
-											label="Buy price"
-											mode="outlined"
-											value={String(formData.buy_price || "")}
-											onChangeText={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													buy_price: value ? parseFloat(value) : null,
-												}))
-											}
-											keyboardType="decimal-pad"
-											style={styles.priceInput}
-											left={
-												<TextInput.Affix
-													text={
-														formData.buy_currency &&
-														typeof formData.buy_currency === "string" &&
-														Object.values(Currency).includes(
-															formData.buy_currency as any,
-														)
-															? CurrencySymbols[
-																	formData.buy_currency as Currency
-																]
-															: "$"
-													}
-												/>
-											}
-										/>
-										<View style={styles.currencyDropdown}>
-											<Dropdown
-												label="Currency"
-												mode="outlined"
-												hideMenuHeader
-												menuContentStyle={{ top: -40 }}
-												value={formData.buy_currency || Currency.RMB}
-												options={Object.values(Currency).map((currency) => ({
-													label: currency,
-													value: currency,
-												}))}
-												onSelect={(value) =>
-													setFormData((prev) => ({
-														...prev,
-														buy_currency: value as Currency,
-													}))
+										style={styles.priceInput}
+										left={
+											<TextInput.Affix
+												text={
+													formData.buy_currency &&
+													typeof formData.buy_currency === "string" &&
+													Object.values(Currency).includes(
+														formData.buy_currency as any,
+													)
+														? CurrencySymbols[formData.buy_currency as Currency]
+														: "$"
 												}
 											/>
-										</View>
-									</View>
-									<View style={styles.priceContainer}>
-										<TextInput
-											label="Sell price"
-											mode="outlined"
-											value={String(formData.sell_price || "")}
-											onChangeText={(value) =>
-												setFormData((prev) => ({
-													...prev,
-													sell_price: value ? parseFloat(value) : null,
-												}))
-											}
-											keyboardType="decimal-pad"
-											style={styles.priceInput}
-											left={
-												<TextInput.Affix
-													text={
-														formData.sell_currency &&
-														typeof formData.sell_currency === "string" &&
-														Object.values(Currency).includes(
-															formData.sell_currency as any,
-														)
-															? CurrencySymbols[
-																	formData.sell_currency as Currency
-																]
-															: "$"
-													}
-												/>
-											}
-											placeholder="Set price without marking as sold"
-										/>
-										<View style={styles.currencyDropdown}>
-											<Dropdown
-												label="Currency"
-												mode="outlined"
-												hideMenuHeader
-												menuContentStyle={{ top: -40 }}
-												value={formData.sell_currency || Currency.RMB}
-												options={Object.values(Currency).map((currency) => ({
-													label: currency,
-													value: currency,
-												}))}
-												onSelect={(value) =>
-													setFormData((prev) => ({
-														...prev,
-														sell_currency: value as Currency,
-													}))
-												}
-											/>
-										</View>
-									</View>
-									<View style={styles.input}>
-										<DatePickerInput
-											locale="en"
-											label="Sold date"
-											value={
-												formData.sold_at
-													? new Date(formData.sold_at)
-													: undefined
-											}
-											onChange={(date) => {
-												if (date) {
-													// Create a date at noon UTC to avoid timezone issues
-													const utcDate = new Date(
-														Date.UTC(
-															date.getFullYear(),
-															date.getMonth(),
-															date.getDate(),
-															12,
-															0,
-															0,
-														),
-													);
-													setFormData((prev) => ({
-														...prev,
-														sold_at: utcDate.toISOString(),
-													}));
-												} else {
-													setFormData((prev) => ({
-														...prev,
-														sold_at: null,
-													}));
-												}
-											}}
-											inputMode="start"
-											mode="outlined"
-											presentationStyle="pageSheet"
-											withDateFormatInLabel={false}
-										/>
-									</View>
-
-									<TextInput
-										label="Buyer"
-										mode="outlined"
-										value={formData.buyer || ""}
-										onChangeText={(value) =>
-											setFormData((prev) => ({ ...prev, buyer: value }))
 										}
-										style={styles.input}
 									/>
+									<View style={styles.currencyDropdown}>
+										<Dropdown
+											label="Currency"
+											mode="outlined"
+											hideMenuHeader
+											menuContentStyle={{ top: -40 }}
+											value={formData.buy_currency || Currency.RMB}
+											options={Object.values(Currency).map((currency) => ({
+												label: currency,
+												value: currency,
+											}))}
+											onSelect={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													buy_currency: value as Currency,
+												}))
+											}
+										/>
+									</View>
+								</View>
+								<View style={styles.priceContainer}>
 									<TextInput
-										label="Buyer Address"
+										label="Sell price"
 										mode="outlined"
-										value={formData.buyer_address || ""}
+										value={String(formData.sell_price || "")}
 										onChangeText={(value) =>
 											setFormData((prev) => ({
 												...prev,
-												buyer_address: value,
+												sell_price: value ? parseFloat(value) : null,
 											}))
 										}
-										style={styles.input}
-									/>
-
-									<TextInput
-										label="Comments"
-										mode="outlined"
-										value={formData.comment || ""}
-										onChangeText={(value) =>
-											setFormData((prev) => ({ ...prev, comment: value }))
+										keyboardType="decimal-pad"
+										style={styles.priceInput}
+										left={
+											<TextInput.Affix
+												text={
+													formData.sell_currency &&
+													typeof formData.sell_currency === "string" &&
+													Object.values(Currency).includes(
+														formData.sell_currency as any,
+													)
+														? CurrencySymbols[
+																formData.sell_currency as Currency
+															]
+														: "$"
+												}
+											/>
 										}
-										multiline
-										numberOfLines={3}
-										style={[styles.input, { height: 100 }]}
+										placeholder="Set price without marking as sold"
 									/>
-								</>
-							) : (
-								<View style={styles.tableContainer}>
-									<GemstoneHeader
-										name={gemstone.name}
-										shape={gemstone.shape as GemstoneShape}
-										color={gemstone.color as GemstoneColor}
-										gemType={getGemTypeEnum(gemstone.gem_type)}
-									/>
-
-									<View style={styles.tableHeader}>
-										<P style={styles.tableHeaderText}>Property</P>
-										<P style={styles.tableHeaderText}>Value</P>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Bill number</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{gemstone.bill_number}
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Owner</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{gemstone.owner || ""}
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Weight</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{gemstone.weight} carats
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Quantity</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{gemstone.quantity || "1"} pieces
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Buy price</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{getCurrencySymbol(gemstone.buy_currency)}
-												{gemstone.buy_price || 0}
-											</P>
-										</View>
-									</View>
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Sell price</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{getCurrencySymbol(gemstone.sell_currency)}
-												{gemstone.sell_price || 0}
-											</P>
-										</View>
-									</View>
-
-									{gemstone.sold_at && (
-										<View style={styles.tableRow}>
-											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Sold At</P>
-											</View>
-											<View style={styles.tableCell}>
-												<P style={styles.tableCellValue}>
-													{formatDate(gemstone.sold_at)}
-												</P>
-											</View>
-										</View>
-									)}
-
-									{gemstone.buyer && (
-										<View style={styles.tableRow}>
-											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Buyer</P>
-											</View>
-											<View style={styles.tableCell}>
-												<P style={styles.tableCellValue}>{gemstone.buyer}</P>
-											</View>
-										</View>
-									)}
-
-									{gemstone.buyer_address && (
-										<View style={styles.tableRow}>
-											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Buyer Address</P>
-											</View>
-											<View style={styles.tableCell}>
-												<P style={styles.tableCellValue}>
-													{gemstone.buyer_address}
-												</P>
-											</View>
-										</View>
-									)}
-
-									<View style={styles.tableRow}>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Comments</P>
-										</View>
-										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.comment}</P>
-										</View>
+									<View style={styles.currencyDropdown}>
+										<Dropdown
+											label="Currency"
+											mode="outlined"
+											hideMenuHeader
+											menuContentStyle={{ top: -40 }}
+											value={formData.sell_currency || Currency.RMB}
+											options={Object.values(Currency).map((currency) => ({
+												label: currency,
+												value: currency,
+											}))}
+											onSelect={(value) =>
+												setFormData((prev) => ({
+													...prev,
+													sell_currency: value as Currency,
+												}))
+											}
+										/>
 									</View>
 								</View>
-							)}
-						</View>
-					</View>
-				</ScrollView>
-
-				<Portal>
-					<Dialog
-						visible={sellDialogVisible}
-						onDismiss={() => setSellDialogVisible(false)}
-					>
-						<Dialog.Title>Sell Gemstone</Dialog.Title>
-						<Dialog.Content>
-							<View style={styles.priceContainer}>
-								<TextInput
-									label="Sell Price"
-									defaultValue={sellPrice}
-									onChangeText={setSellPrice}
-									keyboardType="decimal-pad"
-									mode="outlined"
-									style={styles.priceInput}
-									left={
-										<TextInput.Affix text={CurrencySymbols[sellCurrency]} />
-									}
-								/>
-								<View style={styles.currencyDropdown}>
-									<Dropdown
-										label="Currency"
+								<View style={styles.input}>
+									<DatePickerInput
+										locale="en"
+										label="Sold date"
+										value={
+											formData.sold_at ? new Date(formData.sold_at) : undefined
+										}
+										onChange={(date) => {
+											if (date) {
+												// Create a date at noon UTC to avoid timezone issues
+												const utcDate = new Date(
+													Date.UTC(
+														date.getFullYear(),
+														date.getMonth(),
+														date.getDate(),
+														12,
+														0,
+														0,
+													),
+												);
+												setFormData((prev) => ({
+													...prev,
+													sold_at: utcDate.toISOString(),
+												}));
+											} else {
+												setFormData((prev) => ({
+													...prev,
+													sold_at: null,
+												}));
+											}
+										}}
+										inputMode="start"
 										mode="outlined"
-										hideMenuHeader
-										menuContentStyle={{ top: -40 }}
-										value={sellCurrency}
-										onSelect={(value) => setSellCurrency(value as Currency)}
-										options={Object.values(Currency).map((currency) => ({
-											label: currency,
-											value: currency,
-										}))}
+										presentationStyle="pageSheet"
+										withDateFormatInLabel={false}
 									/>
+								</View>
+
+								<TextInput
+									label="Buyer"
+									mode="outlined"
+									value={formData.buyer || ""}
+									onChangeText={(value) =>
+										setFormData((prev) => ({ ...prev, buyer: value }))
+									}
+									style={styles.input}
+								/>
+								<TextInput
+									label="Buyer Address"
+									mode="outlined"
+									value={formData.buyer_address || ""}
+									onChangeText={(value) =>
+										setFormData((prev) => ({
+											...prev,
+											buyer_address: value,
+										}))
+									}
+									style={styles.input}
+								/>
+
+								<TextInput
+									label="Comments"
+									mode="outlined"
+									value={formData.comment || ""}
+									onChangeText={(value) =>
+										setFormData((prev) => ({ ...prev, comment: value }))
+									}
+									multiline
+									numberOfLines={3}
+									style={[styles.input, { height: 100 }]}
+								/>
+							</>
+						) : (
+							<View style={styles.tableContainer}>
+								<GemstoneHeader
+									name={gemstone.name}
+									shape={gemstone.shape as GemstoneShape}
+									color={gemstone.color as GemstoneColor}
+									gemType={getGemTypeEnum(gemstone.gem_type)}
+								/>
+
+								<View style={styles.tableHeader}>
+									<P style={styles.tableHeaderText}>Property</P>
+									<P style={styles.tableHeaderText}>Value</P>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Bill number</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>{gemstone.bill_number}</P>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Owner</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>{gemstone.owner || ""}</P>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Weight</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>
+											{gemstone.weight} carats
+										</P>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Quantity</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>
+											{gemstone.quantity || "1"} pieces
+										</P>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Buy price</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>
+											{getCurrencySymbol(gemstone.buy_currency)}
+											{gemstone.buy_price || 0}
+										</P>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Sell price</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>
+											{getCurrencySymbol(gemstone.sell_currency)}
+											{gemstone.sell_price || 0}
+										</P>
+									</View>
+								</View>
+
+								{gemstone.sold_at && (
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Sold At</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{formatDate(gemstone.sold_at)}
+											</P>
+										</View>
+									</View>
+								)}
+
+								{gemstone.buyer && (
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Buyer</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>{gemstone.buyer}</P>
+										</View>
+									</View>
+								)}
+
+								{gemstone.buyer_address && (
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Buyer Address</P>
+										</View>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellValue}>
+												{gemstone.buyer_address}
+											</P>
+										</View>
+									</View>
+								)}
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Comments</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>{gemstone.comment}</P>
+									</View>
 								</View>
 							</View>
+						)}
+					</View>
+				</View>
+			</ScrollView>
 
+			<Portal>
+				<Dialog
+					visible={sellDialogVisible}
+					onDismiss={() => setSellDialogVisible(false)}
+				>
+					<Dialog.Title>Sell Gemstone</Dialog.Title>
+					<Dialog.Content>
+						<View style={styles.priceContainer}>
 							<TextInput
-								label="Buyer"
-								defaultValue={buyer}
-								onChangeText={setBuyer}
+								label="Sell Price"
+								defaultValue={sellPrice}
+								onChangeText={setSellPrice}
+								keyboardType="decimal-pad"
 								mode="outlined"
-								style={{ marginBottom: 10 }}
+								style={styles.priceInput}
+								left={<TextInput.Affix text={CurrencySymbols[sellCurrency]} />}
 							/>
-							<TextInput
-								label="Buyer Address"
-								defaultValue={buyerAddress}
-								onChangeText={setBuyerAddress}
-								mode="outlined"
-								style={{ marginBottom: 10 }}
-							/>
-							<TextInput
-								label="Comment"
-								defaultValue={sellComment}
-								onChangeText={setSellComment}
-								mode="outlined"
-								multiline
-								numberOfLines={3}
-								style={{ height: 80 }}
-							/>
-						</Dialog.Content>
-						<Dialog.Actions>
-							<Button onPress={() => setSellDialogVisible(false)}>
-								Cancel
-							</Button>
-							<Button
-								onPress={handleSellConfirm}
-								loading={updateGemstone.isPending}
-							>
-								Confirm
-							</Button>
-						</Dialog.Actions>
-					</Dialog>
-				</Portal>
-				{!isEditing && (
-					<>
-						<FAB
-							icon="plus"
-							style={styles.fab}
-							onPress={onOpenAddPicture}
-							loading={uploading}
+							<View style={styles.currencyDropdown}>
+								<Dropdown
+									label="Currency"
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: -40 }}
+									value={sellCurrency}
+									onSelect={(value) => setSellCurrency(value as Currency)}
+									options={Object.values(Currency).map((currency) => ({
+										label: currency,
+										value: currency,
+									}))}
+								/>
+							</View>
+						</View>
+
+						<TextInput
+							label="Buyer"
+							defaultValue={buyer}
+							onChangeText={setBuyer}
+							mode="outlined"
+							style={{ marginBottom: 10 }}
 						/>
-						<FAB
-							icon="currency-usd"
-							style={styles.fabSell}
-							onPress={onSellStone}
+						<TextInput
+							label="Buyer Address"
+							defaultValue={buyerAddress}
+							onChangeText={setBuyerAddress}
+							mode="outlined"
+							style={{ marginBottom: 10 }}
+						/>
+						<TextInput
+							label="Comment"
+							defaultValue={sellComment}
+							onChangeText={setSellComment}
+							mode="outlined"
+							multiline
+							numberOfLines={3}
+							style={{ height: 80 }}
+						/>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={() => setSellDialogVisible(false)}>Cancel</Button>
+						<Button
+							onPress={handleSellConfirm}
 							loading={updateGemstone.isPending}
-						/>
-					</>
-				)}
-			</PaperProvider>
+						>
+							Confirm
+						</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
+			{!isEditing && (
+				<>
+					<FAB
+						icon="plus"
+						style={styles.fab}
+						onPress={onOpenAddPicture}
+						loading={uploading}
+					/>
+					<FAB
+						icon="currency-usd"
+						style={styles.fabSell}
+						onPress={onSellStone}
+						loading={updateGemstone.isPending}
+					/>
+				</>
+			)}
 		</SafeAreaProvider>
 	);
 }

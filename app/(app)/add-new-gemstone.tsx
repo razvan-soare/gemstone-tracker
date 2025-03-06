@@ -199,360 +199,348 @@ export default function AddNewGemstone() {
 
 	return (
 		<SafeAreaProvider>
-			<PaperProvider>
-				<ScrollView style={[styles.container, { backgroundColor }]}>
-					<View style={styles.input}>
-						<ComboBox
-							label="Stone type"
-							value={formData.name || ""}
-							options={Object.values(GemstoneType).map((type) => ({
-								label: type,
-								value: type,
-							}))}
-							onChange={(value) => updateField("name", value as GemstoneType)}
-						/>
-					</View>
-
-					<View style={styles.input}>
-						<ComboBox
-							label="Shape"
-							value={formData.shape || ""}
-							options={Object.values(GemstoneShape).map((shape) => ({
-								label: shape,
-								value: shape,
-							}))}
-							onChange={(value) => updateField("shape", value as GemstoneShape)}
-						/>
-					</View>
-
-					<View style={styles.input}>
-						<ComboBox
-							label="Color"
-							value={formData.color || ""}
-							options={Object.values(GemstoneColor).map((color) => ({
-								label: color,
-								value: color,
-							}))}
-							onChange={(value) => updateField("color", value as GemstoneColor)}
-						/>
-					</View>
-
-					<View style={styles.input}>
-						<ComboBox
-							label="Owner"
-							value={formData.owner || ""}
-							options={Object.values(GemstoneOwner).map((owner) => ({
-								label: owner,
-								value: owner,
-							}))}
-							onChange={(value) => updateField("owner", value as GemstoneOwner)}
-						/>
-					</View>
-
-					<TextInput
-						label="Bill number"
-						mode="outlined"
-						value={formData.bill_number}
-						onChangeText={(value) => updateField("bill_number", value)}
-						style={[
-							styles.input,
-							error?.field === "bill_number" && styles.inputError,
-						]}
-						error={error?.field === "bill_number"}
+			<ScrollView style={[styles.container, { backgroundColor }]}>
+				<View style={styles.input}>
+					<ComboBox
+						label="Stone type"
+						value={formData.name || ""}
+						options={Object.values(GemstoneType).map((type) => ({
+							label: type,
+							value: type,
+						}))}
+						onChange={(value) => updateField("name", value as GemstoneType)}
 					/>
+				</View>
 
+				<View style={styles.input}>
+					<ComboBox
+						label="Shape"
+						value={formData.shape || ""}
+						options={Object.values(GemstoneShape).map((shape) => ({
+							label: shape,
+							value: shape,
+						}))}
+						onChange={(value) => updateField("shape", value as GemstoneShape)}
+					/>
+				</View>
+
+				<View style={styles.input}>
+					<ComboBox
+						label="Color"
+						value={formData.color || ""}
+						options={Object.values(GemstoneColor).map((color) => ({
+							label: color,
+							value: color,
+						}))}
+						onChange={(value) => updateField("color", value as GemstoneColor)}
+					/>
+				</View>
+
+				<View style={styles.input}>
+					<ComboBox
+						label="Owner"
+						value={formData.owner || ""}
+						options={Object.values(GemstoneOwner).map((owner) => ({
+							label: owner,
+							value: owner,
+						}))}
+						onChange={(value) => updateField("owner", value as GemstoneOwner)}
+					/>
+				</View>
+
+				<TextInput
+					label="Bill number"
+					mode="outlined"
+					value={formData.bill_number}
+					onChangeText={(value) => updateField("bill_number", value)}
+					style={[
+						styles.input,
+						error?.field === "bill_number" && styles.inputError,
+					]}
+					error={error?.field === "bill_number"}
+				/>
+
+				<TextInput
+					label="Weight (carats)"
+					mode="outlined"
+					value={formData.weight}
+					onChangeText={(value) => handleNumericInput(value, "weight")}
+					keyboardType="decimal-pad"
+					style={[styles.input, error?.field === "weight" && styles.inputError]}
+					error={error?.field === "weight"}
+				/>
+
+				<View style={styles.quantityContainer}>
 					<TextInput
-						label="Weight (carats)"
+						label="Quantity (pieces)"
 						mode="outlined"
-						value={formData.weight}
-						onChangeText={(value) => handleNumericInput(value, "weight")}
+						value={formData.quantity}
+						onChangeText={(value) => {
+							// Only allow positive integers
+							const numericValue = value.replace(/[^0-9]/g, "");
+							// Ensure at least 1
+							const finalValue = numericValue === "" ? "1" : numericValue;
+							updateField("quantity", finalValue);
+						}}
+						keyboardType="number-pad"
+						style={[
+							styles.quantityInput,
+							error?.field === "quantity" && styles.inputError,
+						]}
+						error={error?.field === "quantity"}
+						placeholder="1"
+					/>
+				</View>
+
+				<View style={styles.gemTypeContainer}>
+					<View style={styles.radioGroup}>
+						<TouchableOpacity
+							style={[
+								styles.radioCard,
+								formData.gem_type === GemTypeEnum.NATURAL &&
+									styles.radioCardSelected,
+							]}
+							onPress={() =>
+								setFormData((prev) => ({
+									...prev,
+									gem_type: GemTypeEnum.NATURAL,
+								}))
+							}
+							activeOpacity={0.7}
+						>
+							<View style={styles.radioIconContainer}>
+								<View style={styles.radioOuterCircle}>
+									{formData.gem_type === GemTypeEnum.NATURAL && (
+										<View style={styles.radioInnerCircle} />
+									)}
+								</View>
+							</View>
+							<P
+								style={
+									formData.gem_type === GemTypeEnum.NATURAL
+										? styles.radioTextSelected
+										: styles.radioText
+								}
+							>
+								{GemTypeLabels[GemTypeEnum.NATURAL]}
+							</P>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={[
+								styles.radioCard,
+								formData.gem_type === GemTypeEnum.HEATED &&
+									styles.radioCardSelected,
+							]}
+							onPress={() =>
+								setFormData((prev) => ({
+									...prev,
+									gem_type: GemTypeEnum.HEATED,
+								}))
+							}
+							activeOpacity={0.7}
+						>
+							<View style={styles.radioIconContainer}>
+								<View style={styles.radioOuterCircle}>
+									{formData.gem_type === GemTypeEnum.HEATED && (
+										<View style={styles.radioInnerCircle} />
+									)}
+								</View>
+							</View>
+							<P
+								style={
+									formData.gem_type === GemTypeEnum.HEATED
+										? styles.radioTextSelected
+										: styles.radioText
+								}
+							>
+								{GemTypeLabels[GemTypeEnum.HEATED]}
+							</P>
+						</TouchableOpacity>
+					</View>
+				</View>
+
+				<View style={styles.dimensionsContainer}>
+					<TextInput
+						label="Length"
+						mode="outlined"
+						value={formData.dimensions.length}
+						onChangeText={(value) => handleDimensionInput(value, "length")}
+						keyboardType="decimal-pad"
+						style={styles.dimensionInput}
+					/>
+					<TextInput
+						label="Width"
+						mode="outlined"
+						value={formData.dimensions.width}
+						onChangeText={(value) => handleDimensionInput(value, "width")}
+						keyboardType="decimal-pad"
+						style={styles.dimensionInput}
+					/>
+					<TextInput
+						label="Height"
+						mode="outlined"
+						value={formData.dimensions.height}
+						onChangeText={(value) => handleDimensionInput(value, "height")}
+						keyboardType="decimal-pad"
+						style={styles.dimensionInput}
+					/>
+				</View>
+				<View style={styles.priceContainer}>
+					<TextInput
+						label="Buy price"
+						mode="outlined"
+						value={formData.buy_price.toString()}
+						onChangeText={(value) => updateField("buy_price", value)}
 						keyboardType="decimal-pad"
 						style={[
-							styles.input,
-							error?.field === "weight" && styles.inputError,
+							styles.priceInput,
+							error?.field === "buy_price" && styles.inputError,
 						]}
-						error={error?.field === "weight"}
+						left={
+							<TextInput.Affix text={CurrencySymbols[formData.buy_currency]} />
+						}
 					/>
-
-					<View style={styles.quantityContainer}>
-						<TextInput
-							label="Quantity (pieces)"
+					<View style={styles.currencyDropdown}>
+						<Dropdown
+							label="Currency"
 							mode="outlined"
-							value={formData.quantity}
-							onChangeText={(value) => {
-								// Only allow positive integers
-								const numericValue = value.replace(/[^0-9]/g, "");
-								// Ensure at least 1
-								const finalValue = numericValue === "" ? "1" : numericValue;
-								updateField("quantity", finalValue);
-							}}
-							keyboardType="number-pad"
-							style={[
-								styles.quantityInput,
-								error?.field === "quantity" && styles.inputError,
-							]}
-							error={error?.field === "quantity"}
-							placeholder="1"
+							hideMenuHeader
+							menuContentStyle={{ top: -50 }}
+							value={formData.buy_currency}
+							onSelect={(value) => updateField("buy_currency", value)}
+							options={Object.values(Currency).map((currency) => ({
+								label: currency,
+								value: currency,
+							}))}
 						/>
 					</View>
+				</View>
 
-					<View style={styles.gemTypeContainer}>
-						<View style={styles.radioGroup}>
-							<TouchableOpacity
-								style={[
-									styles.radioCard,
-									formData.gem_type === GemTypeEnum.NATURAL &&
-										styles.radioCardSelected,
-								]}
-								onPress={() =>
-									setFormData((prev) => ({
-										...prev,
-										gem_type: GemTypeEnum.NATURAL,
-									}))
-								}
-								activeOpacity={0.7}
-							>
-								<View style={styles.radioIconContainer}>
-									<View style={styles.radioOuterCircle}>
-										{formData.gem_type === GemTypeEnum.NATURAL && (
-											<View style={styles.radioInnerCircle} />
-										)}
-									</View>
-								</View>
-								<P
-									style={
-										formData.gem_type === GemTypeEnum.NATURAL
-											? styles.radioTextSelected
-											: styles.radioText
-									}
-								>
-									{GemTypeLabels[GemTypeEnum.NATURAL]}
-								</P>
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={[
-									styles.radioCard,
-									formData.gem_type === GemTypeEnum.HEATED &&
-										styles.radioCardSelected,
-								]}
-								onPress={() =>
-									setFormData((prev) => ({
-										...prev,
-										gem_type: GemTypeEnum.HEATED,
-									}))
-								}
-								activeOpacity={0.7}
-							>
-								<View style={styles.radioIconContainer}>
-									<View style={styles.radioOuterCircle}>
-										{formData.gem_type === GemTypeEnum.HEATED && (
-											<View style={styles.radioInnerCircle} />
-										)}
-									</View>
-								</View>
-								<P
-									style={
-										formData.gem_type === GemTypeEnum.HEATED
-											? styles.radioTextSelected
-											: styles.radioText
-									}
-								>
-									{GemTypeLabels[GemTypeEnum.HEATED]}
-								</P>
-							</TouchableOpacity>
-						</View>
-					</View>
-
-					<View style={styles.dimensionsContainer}>
-						<TextInput
-							label="Length"
-							mode="outlined"
-							value={formData.dimensions.length}
-							onChangeText={(value) => handleDimensionInput(value, "length")}
-							keyboardType="decimal-pad"
-							style={styles.dimensionInput}
-						/>
-						<TextInput
-							label="Width"
-							mode="outlined"
-							value={formData.dimensions.width}
-							onChangeText={(value) => handleDimensionInput(value, "width")}
-							keyboardType="decimal-pad"
-							style={styles.dimensionInput}
-						/>
-						<TextInput
-							label="Height"
-							mode="outlined"
-							value={formData.dimensions.height}
-							onChangeText={(value) => handleDimensionInput(value, "height")}
-							keyboardType="decimal-pad"
-							style={styles.dimensionInput}
-						/>
-					</View>
-					<View style={styles.priceContainer}>
-						<TextInput
-							label="Buy price"
-							mode="outlined"
-							value={formData.buy_price.toString()}
-							onChangeText={(value) => updateField("buy_price", value)}
-							keyboardType="decimal-pad"
-							style={[
-								styles.priceInput,
-								error?.field === "buy_price" && styles.inputError,
-							]}
-							left={
-								<TextInput.Affix
-									text={CurrencySymbols[formData.buy_currency]}
-								/>
-							}
-						/>
-						<View style={styles.currencyDropdown}>
-							<Dropdown
-								label="Currency"
-								mode="outlined"
-								hideMenuHeader
-								menuContentStyle={{ top: -50 }}
-								value={formData.buy_currency}
-								onSelect={(value) => updateField("buy_currency", value)}
-								options={Object.values(Currency).map((currency) => ({
-									label: currency,
-									value: currency,
-								}))}
-							/>
-						</View>
-					</View>
-
-					<View style={styles.priceContainer}>
-						<TextInput
-							label="Sell price"
-							mode="outlined"
-							value={formData.sell_price.toString()}
-							onChangeText={(value) => updateField("sell_price", value)}
-							keyboardType="decimal-pad"
-							style={[
-								styles.priceInput,
-								error?.field === "sell_price" && styles.inputError,
-							]}
-							left={
-								<TextInput.Affix
-									text={CurrencySymbols[formData.sell_currency]}
-								/>
-							}
-						/>
-						<View style={styles.currencyDropdown}>
-							<Dropdown
-								label="Currency"
-								mode="outlined"
-								hideMenuHeader
-								menuContentStyle={{ top: -50 }}
-								value={formData.sell_currency}
-								onSelect={(value) => updateField("sell_currency", value)}
-								options={Object.values(Currency).map((currency) => ({
-									label: currency,
-									value: currency,
-								}))}
-							/>
-						</View>
-					</View>
-
+				<View style={styles.priceContainer}>
 					<TextInput
-						label="Buyer"
+						label="Sell price"
 						mode="outlined"
-						value={formData.buyer}
-						onChangeText={(value) => updateField("buyer", value)}
+						value={formData.sell_price.toString()}
+						onChangeText={(value) => updateField("sell_price", value)}
+						keyboardType="decimal-pad"
 						style={[
-							styles.input,
-							error?.field === "buyer" && styles.inputError,
+							styles.priceInput,
+							error?.field === "sell_price" && styles.inputError,
 						]}
-						error={error?.field === "buyer"}
+						left={
+							<TextInput.Affix text={CurrencySymbols[formData.sell_currency]} />
+						}
 					/>
-
-					<TextInput
-						label="Buyer Address"
-						mode="outlined"
-						value={formData.buyer_address}
-						onChangeText={(value) => updateField("buyer_address", value)}
-						style={[
-							styles.input,
-							error?.field === "buyer_address" && styles.inputError,
-						]}
-						error={error?.field === "buyer_address"}
-						multiline
-						numberOfLines={2}
-					/>
-
-					<View style={styles.input}>
-						<DatePickerInput
-							locale="en"
-							label="Sold date"
-							value={formData.sold_at ? new Date(formData.sold_at) : undefined}
-							onChange={(date) => {
-								if (date) {
-									// Create a date at noon UTC to avoid timezone issues
-									const utcDate = new Date(
-										Date.UTC(
-											date.getFullYear(),
-											date.getMonth(),
-											date.getDate(),
-											12,
-											0,
-											0,
-										),
-									);
-									setFormData((prev) => ({
-										...prev,
-										sold_at: utcDate.toISOString(),
-									}));
-								} else {
-									setFormData((prev) => ({
-										...prev,
-										sold_at: null,
-									}));
-								}
-							}}
-							inputMode="start"
+					<View style={styles.currencyDropdown}>
+						<Dropdown
+							label="Currency"
 							mode="outlined"
-							presentationStyle="pageSheet"
-							withDateFormatInLabel={false}
-							error={error?.field === "sold_at"}
+							hideMenuHeader
+							menuContentStyle={{ top: -50 }}
+							value={formData.sell_currency}
+							onSelect={(value) => updateField("sell_currency", value)}
+							options={Object.values(Currency).map((currency) => ({
+								label: currency,
+								value: currency,
+							}))}
 						/>
 					</View>
+				</View>
 
-					<TextInput
-						label="Comments"
+				<TextInput
+					label="Buyer"
+					mode="outlined"
+					value={formData.buyer}
+					onChangeText={(value) => updateField("buyer", value)}
+					style={[styles.input, error?.field === "buyer" && styles.inputError]}
+					error={error?.field === "buyer"}
+				/>
+
+				<TextInput
+					label="Buyer Address"
+					mode="outlined"
+					value={formData.buyer_address}
+					onChangeText={(value) => updateField("buyer_address", value)}
+					style={[
+						styles.input,
+						error?.field === "buyer_address" && styles.inputError,
+					]}
+					error={error?.field === "buyer_address"}
+					multiline
+					numberOfLines={2}
+				/>
+
+				<View style={styles.input}>
+					<DatePickerInput
+						locale="en"
+						label="Sold date"
+						value={formData.sold_at ? new Date(formData.sold_at) : undefined}
+						onChange={(date) => {
+							if (date) {
+								// Create a date at noon UTC to avoid timezone issues
+								const utcDate = new Date(
+									Date.UTC(
+										date.getFullYear(),
+										date.getMonth(),
+										date.getDate(),
+										12,
+										0,
+										0,
+									),
+								);
+								setFormData((prev) => ({
+									...prev,
+									sold_at: utcDate.toISOString(),
+								}));
+							} else {
+								setFormData((prev) => ({
+									...prev,
+									sold_at: null,
+								}));
+							}
+						}}
+						inputMode="start"
 						mode="outlined"
-						value={formData.comment}
-						onChangeText={(value) => updateField("comment", value)}
-						multiline
-						numberOfLines={3}
-						style={styles.input}
+						presentationStyle="pageSheet"
+						withDateFormatInLabel={false}
+						error={error?.field === "sold_at"}
 					/>
+				</View>
 
-					<Button
-						mode="contained"
-						onPress={handleSubmit}
-						loading={createGemstone.isPending}
-						disabled={createGemstone.isPending}
-						style={styles.button}
-					>
-						Add Gemstone
-					</Button>
-				</ScrollView>
-				<Snackbar
-					visible={!!error}
-					onDismiss={() => setError(null)}
-					duration={3000}
-					style={styles.errorSnackbar}
-					theme={{
-						colors: {
-							surface: MD2Colors.red800,
-						},
-					}}
+				<TextInput
+					label="Comments"
+					mode="outlined"
+					value={formData.comment}
+					onChangeText={(value) => updateField("comment", value)}
+					multiline
+					numberOfLines={3}
+					style={styles.input}
+				/>
+
+				<Button
+					mode="contained"
+					onPress={handleSubmit}
+					loading={createGemstone.isPending}
+					disabled={createGemstone.isPending}
+					style={styles.button}
 				>
-					{error?.message || ""}
-				</Snackbar>
-			</PaperProvider>
+					Add Gemstone
+				</Button>
+			</ScrollView>
+			<Snackbar
+				visible={!!error}
+				onDismiss={() => setError(null)}
+				duration={3000}
+				style={styles.errorSnackbar}
+				theme={{
+					colors: {
+						surface: MD2Colors.red800,
+					},
+				}}
+			>
+				{error?.message || ""}
+			</Snackbar>
 		</SafeAreaProvider>
 	);
 }

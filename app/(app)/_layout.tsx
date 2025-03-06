@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { PaperProvider } from "react-native-paper";
+import { PaperProvider, MD3LightTheme, MD3DarkTheme } from "react-native-paper";
 
 export const unstable_settings = {
 	initialRouteName: "(root)",
@@ -12,9 +12,38 @@ export const unstable_settings = {
 export default function AppLayout() {
 	const { colorScheme } = useColorScheme();
 
+	// Create custom themes that match our color palette
+	const lightTheme = {
+		...MD3LightTheme,
+		colors: {
+			...MD3LightTheme.colors,
+			primary: colors.light.primary,
+			background: colors.light.background,
+			surface: colors.light.background,
+			surfaceVariant: colors.light.muted,
+			onSurface: colors.light.foreground,
+			onSurfaceVariant: colors.light.mutedForeground,
+			outline: colors.light.border,
+		},
+	};
+
+	const darkTheme = {
+		...MD3DarkTheme,
+		colors: {
+			...MD3DarkTheme.colors,
+			primary: colors.dark.primary,
+			background: colors.dark.background,
+			surface: colors.dark.background,
+			surfaceVariant: colors.dark.muted,
+			onSurface: colors.dark.foreground,
+			onSurfaceVariant: colors.dark.mutedForeground,
+			outline: colors.dark.border,
+		},
+	};
+
 	return (
 		<ActionSheetProvider>
-			<PaperProvider>
+			<PaperProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
 				<Stack screenOptions={{ headerShown: false }}>
 					<Stack.Screen name="(protected)" />
 					<Stack.Screen name="welcome" />
