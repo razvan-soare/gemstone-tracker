@@ -11,8 +11,10 @@ import {
 import FilterButton from "@/components/FilterButton";
 import GemstoneList from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
+import ColumnSettingsButton from "@/components/ColumnSettingsButton";
 import { colors } from "@/constants/colors";
 import { useGemstones } from "@/hooks/useGemstones";
+import { useColumnPreference } from "@/hooks/useColumnPreference";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { useSupabase } from "@/context/supabase-provider";
 import { H2 } from "@/components/ui/typography";
@@ -27,6 +29,7 @@ export default function Home() {
 	}>({});
 	const { activeOrganization } = useSupabase();
 	const { colorScheme } = useColorScheme();
+	const { columnCount, updateColumnCount } = useColumnPreference();
 
 	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useGemstones({
@@ -57,8 +60,19 @@ export default function Home() {
 			</View>
 
 			<View style={styles.headerButtons}>
-				<SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-				<FilterButton filters={filters} onFiltersChange={setFilters} />
+				<View style={styles.searchContainer}>
+					<SearchBar
+						searchQuery={searchQuery}
+						setSearchQuery={setSearchQuery}
+					/>
+				</View>
+				<View style={styles.rightButtons}>
+					<ColumnSettingsButton
+						columnCount={columnCount}
+						onColumnCountChange={updateColumnCount}
+					/>
+					<FilterButton filters={filters} onFiltersChange={setFilters} />
+				</View>
 			</View>
 
 			<GemstoneList
@@ -67,6 +81,7 @@ export default function Home() {
 				onLoadMore={fetchNextPage}
 				hasNextPage={!!hasNextPage}
 				isFetchingNextPage={isFetchingNextPage}
+				columnCount={columnCount}
 			/>
 			<FAB
 				icon="plus"
@@ -94,6 +109,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "space-between",
 		gap: 8,
+	},
+	searchContainer: {
+		flex: 1,
+	},
+	rightButtons: {
+		flexDirection: "row",
+		alignItems: "center",
 	},
 	fab: {
 		position: "absolute",

@@ -15,6 +15,7 @@ type GemstoneListProps = {
 	onLoadMore: () => void;
 	hasNextPage: boolean;
 	isFetchingNextPage: boolean;
+	columnCount?: number;
 };
 
 const GemstoneList = ({
@@ -23,12 +24,16 @@ const GemstoneList = ({
 	onLoadMore,
 	hasNextPage,
 	isFetchingNextPage,
+	columnCount = 2,
 }: GemstoneListProps) => {
 	const windowWidth = Dimensions.get("window").width;
 	const padding = 16;
 	const spacing = 16;
 	const availableWidth = windowWidth - padding * 2;
-	const columnWidth = (availableWidth - spacing) / 2;
+
+	// Calculate column width based on the number of columns
+	const totalSpacingWidth = spacing * (columnCount - 1);
+	const columnWidth = (availableWidth - totalSpacingWidth) / columnCount;
 
 	if (isLoading && !isFetchingNextPage) {
 		return (
@@ -55,7 +60,7 @@ const GemstoneList = ({
 				<View
 					style={{
 						width: columnWidth,
-						marginRight: spacing,
+						marginRight: (columnCount > 1 && spacing) || 0,
 						marginBottom: spacing,
 					}}
 				>
@@ -64,7 +69,8 @@ const GemstoneList = ({
 			)}
 			keyExtractor={(item) => item.id}
 			contentContainerStyle={styles.listContainer}
-			numColumns={2}
+			numColumns={columnCount}
+			key={`column-${columnCount}`} // Force re-render when column count changes
 			onEndReached={() => {
 				if (hasNextPage && !isFetchingNextPage) {
 					onLoadMore();
