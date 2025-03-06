@@ -63,7 +63,7 @@ export function ComboBox({
 					// Position the dropdown 5px below the input field
 					// Add platform-specific adjustments if needed
 					// const yOffset = Platform.OS === "ios" ? 5 : 5;
-					setMenuPosition({ x, y: y - height });
+					setMenuPosition({ x, y: y + height + 5 });
 					setInputWidth(width);
 					setVisible(true);
 				});

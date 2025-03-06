@@ -110,7 +110,6 @@ export default function AppLayout() {
 					<Stack.Screen
 						name="add-new-gemstone"
 						options={{
-							presentation: "modal",
 							headerShown: true,
 							headerTitle: "Add new gemstone",
 							headerStyle: {

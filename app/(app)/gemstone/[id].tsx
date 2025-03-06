@@ -564,7 +564,7 @@ export default function GemstoneDetail() {
 											label="Currency"
 											mode="outlined"
 											hideMenuHeader
-											menuContentStyle={{ top: -40 }}
+											menuContentStyle={{ top: 60 }}
 											value={formData.buy_currency || Currency.RMB}
 											options={Object.values(Currency).map((currency) => ({
 												label: currency,
@@ -614,7 +614,7 @@ export default function GemstoneDetail() {
 											label="Currency"
 											mode="outlined"
 											hideMenuHeader
-											menuContentStyle={{ top: -40 }}
+											menuContentStyle={{ top: 60 }}
 											value={formData.sell_currency || Currency.RMB}
 											options={Object.values(Currency).map((currency) => ({
 												label: currency,
@@ -834,6 +834,7 @@ export default function GemstoneDetail() {
 				<Dialog
 					visible={sellDialogVisible}
 					onDismiss={() => setSellDialogVisible(false)}
+					style={{ backgroundColor: "#f2f2f2" }}
 				>
 					<Dialog.Title>Sell Gemstone</Dialog.Title>
 					<Dialog.Content>
@@ -852,7 +853,7 @@ export default function GemstoneDetail() {
 									label="Currency"
 									mode="outlined"
 									hideMenuHeader
-									menuContentStyle={{ top: -40 }}
+									menuContentStyle={{ top: 60 }}
 									value={sellCurrency}
 									onSelect={(value) => setSellCurrency(value as Currency)}
 									options={Object.values(Currency).map((currency) => ({

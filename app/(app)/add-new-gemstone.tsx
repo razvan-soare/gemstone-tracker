@@ -406,7 +406,7 @@ export default function AddNewGemstone() {
 							label="Currency"
 							mode="outlined"
 							hideMenuHeader
-							menuContentStyle={{ top: -50 }}
+							menuContentStyle={{ top: 60 }}
 							value={formData.buy_currency}
 							onSelect={(value) => updateField("buy_currency", value)}
 							options={Object.values(Currency).map((currency) => ({
@@ -437,7 +437,7 @@ export default function AddNewGemstone() {
 							label="Currency"
 							mode="outlined"
 							hideMenuHeader
-							menuContentStyle={{ top: -50 }}
+							menuContentStyle={{ top: 60 }}
 							value={formData.sell_currency}
 							onSelect={(value) => updateField("sell_currency", value)}
 							options={Object.values(Currency).map((currency) => ({
