@@ -1,124 +1,62 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { CheckCircle, XCircle } from "lucide-react-native";
+import { useMemo } from "react";
+import { View } from "react-native";
 
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
-import { H1, P } from "@/components/ui/typography";
-import { supabase } from "@/config/supabase";
+import { H2, P } from "@/components/ui/typography";
 
 export default function VerifyAccount() {
-	const router = useRouter();
-	const { type, token_hash } = useLocalSearchParams<{
-		type?: string;
-		token_hash?: string;
-	}>();
+	const local = useLocalSearchParams();
+	const { access_token } = useMemo(() => {
+		const params = new URLSearchParams(local["#"] as string);
 
-	const [verifying, setVerifying] = useState(false);
-	const [verified, setVerified] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		const verifyAccount = async () => {
-			// Only proceed if we have the necessary parameters
-			if (!type || !token_hash) {
-				return;
-			}
-
-			setVerifying(true);
-			setError(null);
-
-			try {
-				// Handle email verification
-				if (type === "email_change" || type === "signup") {
-					// The verification happens automatically when the user clicks the link
-					// We just need to check if the session is valid
-					const { data, error: sessionError } =
-						await supabase.auth.getSession();
-
-					if (sessionError) {
-						throw sessionError;
-					}
-
-					if (data?.session) {
-						setVerified(true);
-					} else {
-						setError(
-							"Verification failed. Please try again or request a new verification link.",
-						);
-					}
-				}
-				// else if (type === "recovery") {
-				// 	// For password recovery, we redirect to a password reset page
-				// 	router.replace({
-				// 		pathname: "/reset-password",
-				// 		params: { token_hash },
-				// 	});
-				// 	return;
-				// }
-			} catch (err: any) {
-				setError(err.message || "An error occurred during verification");
-			} finally {
-				setVerifying(false);
-			}
+		return {
+			access_token: params.get("access_token"),
 		};
+	}, []);
 
-		verifyAccount();
-	}, [type, token_hash, router]);
+	const isVerified = !!access_token;
 
-	const handleContinue = () => {
-		if (verified) {
-			router.replace("/(app)/(protected)");
-		} else {
-			router.replace("/sign-in");
-		}
-	};
-	console.log("hi");
 	return (
-		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
-			<View className="flex-1 justify-center items-center gap-6">
-				<H1 className="text-center">Account Verification</H1>
+		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+			<View className="flex-1 justify-center items-center p-8">
+				<View className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md items-center">
+					{isVerified ? (
+						<CheckCircle size={80} color="#16a34a" className="mb-6" />
+					) : (
+						<XCircle size={80} color="#dc2626" className="mb-6" />
+					)}
 
-				{verifying ? (
-					<View className="items-center gap-4">
-						<ActivityIndicator size="large" />
-						<P className="text-center">Verifying your account...</P>
-					</View>
-				) : error ? (
-					<View className="items-center gap-4">
-						<P className="text-center text-destructive">{error}</P>
-						<Button
-							variant="default"
-							onPress={() => router.replace("/sign-in")}
-						>
-							<Text>Back to Sign In</Text>
-						</Button>
-					</View>
-				) : verified ? (
-					<View className="items-center gap-4">
-						<P className="text-center">
-							Your account has been successfully verified!
+					<H2
+						className={`text-center mb-4 ${isVerified ? "text-green-600" : "text-red-600"}`}
+					>
+						{isVerified
+							? "Your account has been verified!"
+							: "Verification failed"}
+					</H2>
+
+					{isVerified ? (
+						<P className="text-center text-gray-600 mb-8">
+							Your account has been successfully verified. You can now log in to
+							access all features.
 						</P>
-						<Button variant="default" onPress={handleContinue}>
-							<Text>Continue to App</Text>
-						</Button>
-					</View>
-				) : (
-					<View className="items-center gap-4">
-						<P className="text-center">
-							{!type || !token_hash
-								? "Invalid verification link. Please use the link from your email."
-								: "Waiting for verification..."}
+					) : (
+						<P className="text-center text-gray-600 mb-8">
+							We couldn't verify your account. The verification link may have
+							expired or is invalid.
 						</P>
-						<Button
-							variant="default"
-							onPress={() => router.replace("/sign-in")}
-						>
-							<Text>Back to Sign In</Text>
-						</Button>
-					</View>
-				)}
+					)}
+
+					<Button
+						className="w-full text-white"
+						variant={isVerified ? "default" : "destructive"}
+						onPress={() => router.replace("/welcome")}
+					>
+						{isVerified ? "Go to Login" : "Try Again"}
+					</Button>
+				</View>
 			</View>
 		</SafeAreaView>
 	);

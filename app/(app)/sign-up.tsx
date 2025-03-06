@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, View } from "react-native";
 import * as z from "zod";
+import { useState } from "react";
 
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
+import { Alert } from "@/components/ui/alert";
 
 const formSchema = z
 	.object({
@@ -39,6 +41,7 @@ const formSchema = z
 
 export default function SignUp() {
 	const { signUp } = useSupabase();
+	const [verificationSent, setVerificationSent] = useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -52,7 +55,7 @@ export default function SignUp() {
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
 			await signUp(data.email, data.password);
-
+			setVerificationSent(true);
 			form.reset();
 		} catch (error: Error | any) {
 			console.log(error.message);
@@ -64,67 +67,86 @@ export default function SignUp() {
 			<View className="flex-1 gap-4 web:m-4">
 				<H1 className="self-start">Sign Up</H1>
 
-				<Form {...form}>
-					<View className="gap-4">
-						<FormField
-							control={form.control}
-							name="email"
-							render={({ field }) => (
-								<FormInput
-									label="Email"
-									placeholder="Email"
-									autoCapitalize="none"
-									autoComplete="email"
-									autoCorrect={false}
-									keyboardType="email-address"
-									{...field}
-								/>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="password"
-							render={({ field }) => (
-								<FormInput
-									label="Password"
-									placeholder="Password"
-									autoCapitalize="none"
-									autoCorrect={false}
-									secureTextEntry
-									{...field}
-								/>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="confirmPassword"
-							render={({ field }) => (
-								<FormInput
-									label="Confirm Password"
-									placeholder="Confirm password"
-									autoCapitalize="none"
-									autoCorrect={false}
-									secureTextEntry
-									{...field}
-								/>
-							)}
-						/>
-					</View>
-				</Form>
-			</View>
-			<Button
-				size="default"
-				variant="default"
-				onPress={form.handleSubmit(onSubmit)}
-				disabled={form.formState.isSubmitting}
-				className="web:m-4"
-			>
-				{form.formState.isSubmitting ? (
-					<ActivityIndicator size="small" />
+				{verificationSent ? (
+					<Alert
+						title="Verification Email Sent"
+						intent="success"
+						description="Please check your email and follow the verification link to activate your account before signing in."
+					/>
 				) : (
-					<Text>Sign Up</Text>
+					<Form {...form}>
+						<View className="gap-4">
+							<FormField
+								control={form.control}
+								name="email"
+								render={({ field }) => (
+									<FormInput
+										label="Email"
+										placeholder="Email"
+										autoCapitalize="none"
+										autoComplete="email"
+										autoCorrect={false}
+										keyboardType="email-address"
+										{...field}
+									/>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="password"
+								render={({ field }) => (
+									<FormInput
+										label="Password"
+										placeholder="Password"
+										autoCapitalize="none"
+										autoCorrect={false}
+										secureTextEntry
+										{...field}
+									/>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="confirmPassword"
+								render={({ field }) => (
+									<FormInput
+										label="Confirm Password"
+										placeholder="Confirm password"
+										autoCapitalize="none"
+										autoCorrect={false}
+										secureTextEntry
+										{...field}
+									/>
+								)}
+							/>
+						</View>
+					</Form>
 				)}
-			</Button>
+			</View>
+			{verificationSent ? (
+				<Button
+					size="default"
+					variant="outline"
+					onPress={() => setVerificationSent(false)}
+					className="web:m-4"
+				>
+					<Text>Back to Sign Up</Text>
+				</Button>
+			) : (
+				<Button
+					size="default"
+					variant="default"
+					onPress={form.handleSubmit(onSubmit)}
+					disabled={form.formState.isSubmitting}
+					className="web:m-4"
+				>
+					{form.formState.isSubmitting ? (
+						<ActivityIndicator size="small" />
+					) : (
+						<Text>Sign Up</Text>
+					)}
+				</Button>
+			)}
 		</SafeAreaView>
 	);
 }

@@ -122,6 +122,9 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		const { error } = await supabase.auth.signUp({
 			email,
 			password,
+			options: {
+				emailRedirectTo: "http://localhost:8081/verify",
+			},
 		});
 		if (error) {
 			throw error;
