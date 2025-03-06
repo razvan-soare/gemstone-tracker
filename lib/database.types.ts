@@ -92,6 +92,44 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          accepted: boolean | null
+          created_at: string
+          email: string | null
+          id: number
+          invited_by: string | null
+          organization_id: string | null
+          organization_name: string | null
+        }
+        Insert: {
+          accepted?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          invited_by?: string | null
+          organization_id?: string | null
+          organization_name?: string | null
+        }
+        Update: {
+          accepted?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          invited_by?: string | null
+          organization_id?: string | null
+          organization_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string | null

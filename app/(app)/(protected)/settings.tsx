@@ -1,12 +1,22 @@
+import { useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import { List, Modal, Portal, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { H1, H2, H3, Muted } from "@/components/ui/typography";
+import { H2, H3, Muted } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
-
+import {
+	useAcceptInvitation,
+	useCheckPendingInvitations,
+	useCreateInvitation,
+	useDeclineInvitation,
+	useDeleteInvitation,
+	useOrganizationInvitations,
+} from "@/hooks/useInvitations";
+import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function Settings() {
@@ -15,8 +25,82 @@ export default function Settings() {
 		activeOrganization,
 		userOrganizations,
 		onSelectOrganization,
+		user,
 	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
+	const [inviteEmail, setInviteEmail] = useState("");
+	const [inviteModalVisible, setInviteModalVisible] = useState(false);
+	const [inviteError, setInviteError] = useState("");
+
+	// Get pending invitations for the active organization
+	const { data: orgPendingInvitations = [], refetch: refetchInvitations } =
+		useOrganizationInvitations(activeOrganization?.id || null);
+	const { data: pendingInvitations, refetch: refetchPendingInvitations } =
+		useCheckPendingInvitations(user?.email || "");
+
+	const refetchAllInvitations = () => {
+		refetchInvitations();
+		refetchPendingInvitations();
+	};
+
+	// Mutations for invitations
+	const createInvitation = useCreateInvitation();
+	const deleteInvitation = useDeleteInvitation();
+	const acceptInvitation = useAcceptInvitation();
+	const declineInvitation = useDeclineInvitation();
+
+	// Handle sending an invitation
+	const handleSendInvite = async () => {
+		if (!inviteEmail || !activeOrganization?.id || !user?.id) {
+			setInviteError("Please enter a valid email address");
+			return;
+		}
+
+		try {
+			setInviteError("");
+			await createInvitation.mutateAsync({ email: inviteEmail });
+			setInviteEmail("");
+			setInviteModalVisible(false);
+			refetchAllInvitations();
+		} catch (error: any) {
+			setInviteError(error.message || "Failed to send invitation");
+		}
+	};
+
+	// Handle canceling an invitation
+	const handleCancelInvite = async (invitation: Tables<"invitations">) => {
+		if (!activeOrganization?.id) return;
+
+		try {
+			await deleteInvitation.mutateAsync({ invitationId: invitation.id });
+			refetchAllInvitations();
+		} catch (error) {
+			console.error("Error canceling invitation:", error);
+		}
+	};
+
+	const handleAcceptInvite = async (invitation: Tables<"invitations">) => {
+		if (!activeOrganization?.id) return;
+
+		try {
+			await acceptInvitation.mutateAsync({ invitation });
+			refetchAllInvitations();
+		} catch (error) {
+			console.error("Error accepting invitation:", error);
+		}
+	};
+	const handleDeclineInvite = async (invitation: Tables<"invitations">) => {
+		if (!activeOrganization?.id) return;
+
+		try {
+			await declineInvitation.mutateAsync({
+				invitationId: invitation.id,
+			});
+			refetchAllInvitations();
+		} catch (error) {
+			console.error("Error accepting invitation:", error);
+		}
+	};
 
 	return (
 		<SafeAreaView
@@ -64,6 +148,83 @@ export default function Settings() {
 						</View>
 					)}
 
+					{activeOrganization && (
+						<View className="gap-y-2">
+							<H3>Team Members</H3>
+							<Muted>Invite people to join your organization</Muted>
+							<Button
+								className="w-full"
+								size="default"
+								variant="outline"
+								onPress={() => setInviteModalVisible(true)}
+							>
+								<Text>Invite User</Text>
+							</Button>
+
+							{pendingInvitations && pendingInvitations.length > 0 && (
+								<View style={styles.membersCard}>
+									<List.Section>
+										<List.Subheader>Pending Invitations</List.Subheader>
+										{pendingInvitations.map((invitation) => (
+											<List.Item
+												key={invitation.id}
+												title={`${invitation.organization_name} invited you to join`}
+												description="Pending"
+												style={styles.listItem}
+												titleStyle={styles.listItemTitle}
+												descriptionStyle={styles.listItemDescription}
+												right={() => (
+													<View className="flex-row gap-x-2">
+														<Button
+															size="sm"
+															variant="ghost"
+															onPress={() => handleAcceptInvite(invitation)}
+														>
+															<Text>Accept</Text>
+														</Button>
+														<Button
+															size="sm"
+															variant="ghost"
+															onPress={() => handleCancelInvite(invitation)}
+														>
+															<Text>Decline</Text>
+														</Button>
+													</View>
+												)}
+											/>
+										))}
+									</List.Section>
+								</View>
+							)}
+							{orgPendingInvitations.length > 0 && (
+								<View style={styles.membersCard}>
+									<List.Section>
+										<List.Subheader>Invitations Sent</List.Subheader>
+										{orgPendingInvitations.map((invitation) => (
+											<List.Item
+												key={invitation.id}
+												title={invitation.email || ""}
+												description="Pending"
+												style={styles.listItem}
+												titleStyle={styles.listItemTitle}
+												descriptionStyle={styles.listItemDescription}
+												right={() => (
+													<Button
+														size="sm"
+														variant="ghost"
+														onPress={() => handleCancelInvite(invitation)}
+													>
+														<Text>Cancel</Text>
+													</Button>
+												)}
+											/>
+										))}
+									</List.Section>
+								</View>
+							)}
+						</View>
+					)}
+
 					<View className="gap-y-2">
 						<H3>Appearance</H3>
 						<Muted>Change the app's appearance</Muted>
@@ -91,6 +252,65 @@ export default function Settings() {
 					</View>
 				</View>
 			</ScrollView>
+
+			{/* Invite User Modal */}
+			<Portal>
+				<Modal
+					visible={inviteModalVisible}
+					onDismiss={() => {
+						setInviteModalVisible(false);
+						setInviteEmail("");
+						setInviteError("");
+					}}
+					contentContainerStyle={[
+						styles.modalContainer,
+						{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						},
+					]}
+				>
+					<H3>Invite User</H3>
+					<Muted>
+						Enter the email address of the person you want to invite
+					</Muted>
+
+					<TextInput
+						label="Email"
+						onChangeText={setInviteEmail}
+						mode="outlined"
+						style={styles.input}
+						keyboardType="email-address"
+						autoCapitalize="none"
+					/>
+
+					{inviteError ? (
+						<Text style={styles.errorText}>{inviteError}</Text>
+					) : null}
+
+					<View style={styles.modalButtons}>
+						<Button
+							variant="ghost"
+							onPress={() => {
+								setInviteModalVisible(false);
+								setInviteEmail("");
+								setInviteError("");
+							}}
+						>
+							<Text>Cancel</Text>
+						</Button>
+						<Button
+							variant="default"
+							onPress={handleSendInvite}
+							disabled={createInvitation.isPending}
+						>
+							<Text>
+								{createInvitation.isPending ? "Sending..." : "Send Invite"}
+							</Text>
+						</Button>
+					</View>
+				</Modal>
+			</Portal>
 		</SafeAreaView>
 	);
 }
