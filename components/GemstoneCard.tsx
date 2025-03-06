@@ -37,7 +37,7 @@ const GemstoneCard = ({
 					/>
 					{gemstone.sold && (
 						<View style={styles.soldBadge}>
-							<P style={styles.soldBadgeText}>SOLD</P>
+							<P className="text-white font-semibold">SOLD</P>
 						</View>
 					)}
 				</View>
@@ -107,11 +107,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 4,
-	},
-	soldBadgeText: {
-		color: "white",
-		fontWeight: "bold",
-		fontSize: 12,
 	},
 	loadingContainer: {
 		justifyContent: "center",
