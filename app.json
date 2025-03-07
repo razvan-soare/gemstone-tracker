@@ -14,11 +14,7 @@
 			"config": {
 				"usesNonExemptEncryption": false
 			},
-			"web": {
-				"bundler": "metro",
-				"output": "single",
-				"favicon": "./assets/favicon.png"
-			},
+
 			"splash": {
 				"image": "./assets/splash.png",
 				"resizeMode": "cover",
@@ -30,6 +26,11 @@
 				}
 			},
 			"bundleIdentifier": "com.razvansoare.gemtracker"
+		},
+		"web": {
+			"bundler": "metro",
+			"output": "single",
+			"favicon": "./assets/favicon.png"
 		},
 		"android": {
 			"adaptiveIcon": {
