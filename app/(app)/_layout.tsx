@@ -45,8 +45,8 @@ export default function AppLayout() {
 		<ActionSheetProvider>
 			<PaperProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
 				<Stack screenOptions={{ headerShown: false }}>
+					<Stack.Screen name="index" />
 					<Stack.Screen name="(protected)" />
-					<Stack.Screen name="welcome" />
 					<Stack.Screen name="verify" />
 					<Stack.Screen
 						name="gemstone/[id]"

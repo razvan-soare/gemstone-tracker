@@ -6,7 +6,7 @@ import { Image } from "@/components/image";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { H1, Muted } from "@/components/ui/typography";
+import { H1 } from "@/components/ui/typography";
 
 export default function WelcomeScreen() {
 	const router = useRouter();

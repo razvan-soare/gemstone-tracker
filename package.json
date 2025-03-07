@@ -9,8 +9,9 @@
 		"ios": "expo start --ios",
 		"lint": "eslint . --fix",
 		"generate:types": "npx supabase gen types typescript --project-id \"\" --schema public > lib/database.types.ts",
-		"deploy:web": "expo export --platform web && eas deploy --prod",
-		"deploy:ios": "eas build --profile production --platform ios --submit"
+		"web:build": "expo export -p web",
+		"web:deploy": "yarn web:build && eas deploy --prod",
+		"ios:deploy": "eas build --profile production --platform ios --submit"
 	},
 	"dependencies": {
 		"@expo/react-native-action-sheet": "^4.1.1",

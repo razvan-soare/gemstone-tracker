@@ -261,7 +261,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		} else if (session && !inProtectedGroup) {
 			router.replace("/(app)/(protected)");
 		} else if (!session && inProtectedGroup) {
-			router.replace("/(app)/welcome");
+			router.replace("/(app)");
 		}
 
 		/* HACK: Something must be rendered when determining the initial auth state... 
