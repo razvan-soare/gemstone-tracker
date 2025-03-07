@@ -150,7 +150,7 @@ export default function VerifyAccount() {
 					<Button
 						className="w-full text-white"
 						variant={isVerified ? "default" : "destructive"}
-						onPress={() => router.replace("/(app)")}
+						onPress={() => router.replace("/(app)/welcome")}
 						disabled={isCreatingOrg}
 					>
 						<P className="text-white">

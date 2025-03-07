@@ -129,9 +129,6 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		const { error } = await supabase.auth.signUp({
 			email,
 			password,
-			options: {
-				emailRedirectTo: "http://localhost:8081/verify",
-			},
 		});
 		if (error) {
 			throw error;
@@ -263,7 +260,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		} else if (session && !inProtectedGroup) {
 			router.replace("/(app)/(protected)");
 		} else if (!session && inProtectedGroup) {
-			router.replace("/(app)");
+			router.replace("/(app)/welcome");
 		}
 
 		/* HACK: Something must be rendered when determining the initial auth state... 
