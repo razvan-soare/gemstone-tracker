@@ -30,6 +30,7 @@ type SupabaseContextProps = {
 		userId: string,
 		email: string,
 	) => Promise<Tables<"organizations"> | null>;
+	updateActiveOrganization: (organization: Tables<"organizations">) => void;
 };
 
 type SupabaseProviderProps = {
@@ -48,6 +49,7 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	userOrganizations: [],
 	onSelectOrganization: async () => {},
 	createOrganizationForUser: async () => null,
+	updateActiveOrganization: () => {},
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -274,6 +276,19 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}, 500);
 	}, [initialized, session]);
 
+	const updateActiveOrganization = (organization: Tables<"organizations">) => {
+		setActiveOrganization(organization);
+		try {
+			AsyncStorage.setItem(ACTIVE_ORGANIZATION_KEY, organization.id).catch(
+				(error) => console.error("Error saving active organization:", error),
+			);
+		} catch (error) {
+			console.error("Error saving active organization:", error);
+		}
+		queryClient.invalidateQueries({ queryKey: ["gemstone"] });
+		queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+	};
+
 	return (
 		<SupabaseContext.Provider
 			value={{
@@ -288,6 +303,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				userOrganizations,
 				onSelectOrganization,
 				createOrganizationForUser,
+				updateActiveOrganization,
 			}}
 		>
 			{children}

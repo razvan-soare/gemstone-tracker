@@ -22,6 +22,7 @@ import {
 } from "@/hooks/useOrganizationMemberships";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useDialog } from "@/hooks/useDialog";
 
 export default function Settings() {
 	const {
@@ -29,6 +30,7 @@ export default function Settings() {
 		activeOrganization,
 		userOrganizations,
 		onSelectOrganization,
+		updateActiveOrganization,
 		user,
 		session,
 	} = useSupabase();
@@ -36,9 +38,14 @@ export default function Settings() {
 	const [inviteEmail, setInviteEmail] = useState("");
 	const [inviteModalVisible, setInviteModalVisible] = useState(false);
 	const [inviteError, setInviteError] = useState("");
-	const [orgNameModalVisible, setOrgNameModalVisible] = useState(false);
 	const [orgName, setOrgName] = useState("");
 	const [orgNameError, setOrgNameError] = useState("");
+	const {
+		open: orgNameDialogOpen,
+		onOpen: openOrgNameDialog,
+		onClose: closeOrgNameDialog,
+		key: orgNameDialogKey,
+	} = useDialog();
 
 	// Get pending invitations for the active organization
 	const { data: orgPendingInvitations = [], refetch: refetchInvitations } =
@@ -130,11 +137,18 @@ export default function Settings() {
 
 		try {
 			setOrgNameError("");
-			await updateOrganization.mutateAsync({
+			const updatedOrg = await updateOrganization.mutateAsync({
 				organizationId: activeOrganization.id,
 				name: orgName,
 			});
-			setOrgNameModalVisible(false);
+
+			// Update the active organization with the updated name
+			if (updatedOrg) {
+				// Update the active organization directly
+				updateActiveOrganization(updatedOrg);
+			}
+
+			closeOrgNameDialog();
 		} catch (error: any) {
 			setOrgNameError(error.message || "Failed to update organization name");
 		}
@@ -144,7 +158,7 @@ export default function Settings() {
 	const openOrgNameModal = () => {
 		if (activeOrganization) {
 			setOrgName(activeOrganization.name);
-			setOrgNameModalVisible(true);
+			openOrgNameDialog();
 		}
 	};
 
@@ -371,9 +385,10 @@ export default function Settings() {
 			{/* Edit Organization Name Modal */}
 			<Portal>
 				<Modal
-					visible={orgNameModalVisible}
+					key={orgNameDialogKey}
+					visible={orgNameDialogOpen}
 					onDismiss={() => {
-						setOrgNameModalVisible(false);
+						closeOrgNameDialog();
 						setOrgName("");
 						setOrgNameError("");
 					}}
@@ -404,7 +419,7 @@ export default function Settings() {
 						<Button
 							variant="ghost"
 							onPress={() => {
-								setOrgNameModalVisible(false);
+								closeOrgNameDialog();
 								setOrgName("");
 								setOrgNameError("");
 							}}
