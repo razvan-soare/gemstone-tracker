@@ -16,6 +16,10 @@ import {
 	useDeleteInvitation,
 	useOrganizationInvitations,
 } from "@/hooks/useInvitations";
+import {
+	useOrganizationMemberships,
+	useUpdateOrganization,
+} from "@/hooks/useOrganizationMemberships";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 
@@ -26,17 +30,31 @@ export default function Settings() {
 		userOrganizations,
 		onSelectOrganization,
 		user,
+		session,
 	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
 	const [inviteEmail, setInviteEmail] = useState("");
 	const [inviteModalVisible, setInviteModalVisible] = useState(false);
 	const [inviteError, setInviteError] = useState("");
+	const [orgNameModalVisible, setOrgNameModalVisible] = useState(false);
+	const [orgName, setOrgName] = useState("");
+	const [orgNameError, setOrgNameError] = useState("");
 
 	// Get pending invitations for the active organization
 	const { data: orgPendingInvitations = [], refetch: refetchInvitations } =
 		useOrganizationInvitations(activeOrganization?.id || null);
 	const { data: pendingInvitations, refetch: refetchPendingInvitations } =
 		useCheckPendingInvitations(user?.email || "");
+
+	// Get organization memberships to check if user is owner
+	const { data: organizationMemberships = [] } =
+		useOrganizationMemberships(session);
+	const isOrgOwner = organizationMemberships.some(
+		(membership) =>
+			membership.organization_id === activeOrganization?.id &&
+			membership.user_id === user?.id &&
+			membership.role === "owner",
+	);
 
 	const refetchAllInvitations = () => {
 		refetchInvitations();
@@ -48,6 +66,7 @@ export default function Settings() {
 	const deleteInvitation = useDeleteInvitation();
 	const acceptInvitation = useAcceptInvitation();
 	const declineInvitation = useDeclineInvitation();
+	const updateOrganization = useUpdateOrganization();
 
 	// Handle sending an invitation
 	const handleSendInvite = async () => {
@@ -102,6 +121,33 @@ export default function Settings() {
 		}
 	};
 
+	// Handle updating organization name
+	const handleUpdateOrgName = async () => {
+		if (!orgName || !activeOrganization?.id) {
+			setOrgNameError("Please enter a valid organization name");
+			return;
+		}
+
+		try {
+			setOrgNameError("");
+			await updateOrganization.mutateAsync({
+				organizationId: activeOrganization.id,
+				name: orgName,
+			});
+			setOrgNameModalVisible(false);
+		} catch (error: any) {
+			setOrgNameError(error.message || "Failed to update organization name");
+		}
+	};
+
+	// Open organization name edit modal
+	const openOrgNameModal = () => {
+		if (activeOrganization) {
+			setOrgName(activeOrganization.name);
+			setOrgNameModalVisible(true);
+		}
+	};
+
 	return (
 		<SafeAreaView
 			style={[
@@ -145,6 +191,16 @@ export default function Settings() {
 									}))}
 								/>
 							</View>
+							{isOrgOwner && activeOrganization && (
+								<Button
+									className="w-full mt-2"
+									size="default"
+									variant="outline"
+									onPress={openOrgNameModal}
+								>
+									<Text>Edit Organization Name</Text>
+								</Button>
+							)}
 						</View>
 					)}
 
@@ -306,6 +362,62 @@ export default function Settings() {
 						>
 							<Text>
 								{createInvitation.isPending ? "Sending..." : "Send Invite"}
+							</Text>
+						</Button>
+					</View>
+				</Modal>
+			</Portal>
+
+			{/* Edit Organization Name Modal */}
+			<Portal>
+				<Modal
+					visible={orgNameModalVisible}
+					onDismiss={() => {
+						setOrgNameModalVisible(false);
+						setOrgName("");
+						setOrgNameError("");
+					}}
+					contentContainerStyle={[
+						styles.modalContainer,
+						{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						},
+					]}
+				>
+					<H3>Edit Organization Name</H3>
+					<Muted>Enter a new name for your organization</Muted>
+
+					<TextInput
+						label="Organization Name"
+						defaultValue={orgName}
+						onChangeText={setOrgName}
+						mode="outlined"
+						style={styles.input}
+					/>
+
+					{orgNameError ? (
+						<Text style={styles.errorText}>{orgNameError}</Text>
+					) : null}
+
+					<View style={styles.modalButtons}>
+						<Button
+							variant="ghost"
+							onPress={() => {
+								setOrgNameModalVisible(false);
+								setOrgName("");
+								setOrgNameError("");
+							}}
+						>
+							<Text>Cancel</Text>
+						</Button>
+						<Button
+							variant="default"
+							onPress={handleUpdateOrgName}
+							disabled={updateOrganization.isPending}
+						>
+							<Text>
+								{updateOrganization.isPending ? "Updating..." : "Update Name"}
 							</Text>
 						</Button>
 					</View>
