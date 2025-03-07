@@ -258,24 +258,15 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
 		const inProtectedGroup = segments[1] === "(protected)";
 
-		// Check if any segment contains a Supabase auth token
-		const hasAuthToken = segments.some(
-			(segment) =>
-				segment &&
-				segment.includes("access_token=") &&
-				segment.includes("refresh_token="),
-		);
 		const isVerifyPage = segments.some(
 			(segment) => segment && segment.includes("verify"),
 		);
-
-		if (hasAuthToken) {
-			// Redirect to verify page if auth token is present in URL
-			router.replace("/(app)/verify");
-		} else if (!isVerifyPage && session && !inProtectedGroup) {
-			router.replace("/(app)/(protected)");
-		} else if (!isVerifyPage && !session && inProtectedGroup) {
-			router.replace("/(app)/welcome");
+		if (!isVerifyPage) {
+			if (session && !inProtectedGroup) {
+				router.replace("/(app)/(protected)");
+			} else if (!session && inProtectedGroup) {
+				router.replace("/(app)/welcome");
+			}
 		}
 
 		/* HACK: Something must be rendered when determining the initial auth state... 
