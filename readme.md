@@ -1,4 +1,4 @@
-# Gemstone tracker
+# Gemstone tracker 🚀
 
 `yarn install`
 `yarn start`
