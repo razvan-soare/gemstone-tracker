@@ -17,13 +17,7 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import {
-	Button,
-	MD2Colors,
-	PaperProvider,
-	Snackbar,
-	TextInput,
-} from "react-native-paper";
+import { Button, MD2Colors, Snackbar, TextInput } from "react-native-paper";
 import {
 	DatePickerInput,
 	enGB,
@@ -205,8 +199,8 @@ export default function AddNewGemstone() {
 						label="Stone type"
 						value={formData.name || ""}
 						options={Object.values(GemstoneType).map((type) => ({
-							label: type,
-							value: type,
+							id: type,
+							title: type,
 						}))}
 						onChange={(value) => updateField("name", value as GemstoneType)}
 					/>
@@ -217,8 +211,8 @@ export default function AddNewGemstone() {
 						label="Shape"
 						value={formData.shape || ""}
 						options={Object.values(GemstoneShape).map((shape) => ({
-							label: shape,
-							value: shape,
+							id: shape,
+							title: shape,
 						}))}
 						onChange={(value) => updateField("shape", value as GemstoneShape)}
 					/>
@@ -229,8 +223,8 @@ export default function AddNewGemstone() {
 						label="Color"
 						value={formData.color || ""}
 						options={Object.values(GemstoneColor).map((color) => ({
-							label: color,
-							value: color,
+							id: color,
+							title: color,
 						}))}
 						onChange={(value) => updateField("color", value as GemstoneColor)}
 					/>
@@ -241,8 +235,8 @@ export default function AddNewGemstone() {
 						label="Owner"
 						value={formData.owner || ""}
 						options={Object.values(GemstoneOwner).map((owner) => ({
-							label: owner,
-							value: owner,
+							id: owner,
+							title: owner,
 						}))}
 						onChange={(value) => updateField("owner", value as GemstoneOwner)}
 					/>

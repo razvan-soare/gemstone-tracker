@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { PaperProvider, MD3LightTheme, MD3DarkTheme } from "react-native-paper";
+import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 
 export const unstable_settings = {
 	initialRouteName: "(root)",
@@ -42,91 +43,93 @@ export default function AppLayout() {
 	};
 
 	return (
-		<ActionSheetProvider>
-			<PaperProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
-				<Stack screenOptions={{ headerShown: false }}>
-					<Stack.Screen name="welcome" />
-					<Stack.Screen name="(protected)" />
-					<Stack.Screen name="verify" />
-					<Stack.Screen
-						name="gemstone/[id]"
-						options={{
-							presentation: "card",
-							headerShown: true,
-							title: "",
-							headerBackTitle: "Back",
-							headerStyle: {
-								backgroundColor:
+		<AutocompleteDropdownContextProvider>
+			<ActionSheetProvider>
+				<PaperProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
+					<Stack screenOptions={{ headerShown: false }}>
+						<Stack.Screen name="welcome" />
+						<Stack.Screen name="(protected)" />
+						<Stack.Screen name="verify" />
+						<Stack.Screen
+							name="gemstone/[id]"
+							options={{
+								presentation: "card",
+								headerShown: true,
+								title: "",
+								headerBackTitle: "Back",
+								headerStyle: {
+									backgroundColor:
+										colorScheme === "dark"
+											? colors.dark.background
+											: colors.light.background,
+								},
+								headerTintColor:
 									colorScheme === "dark"
-										? colors.dark.background
-										: colors.light.background,
-							},
-							headerTintColor:
-								colorScheme === "dark"
-									? colors.dark.foreground
-									: colors.light.foreground,
-							gestureEnabled: true,
-						}}
-					/>
-					<Stack.Screen
-						name="sign-up"
-						options={{
-							presentation: "modal",
-							headerShown: true,
-							headerTitle: "Sign Up",
-							headerStyle: {
-								backgroundColor:
+										? colors.dark.foreground
+										: colors.light.foreground,
+								gestureEnabled: true,
+							}}
+						/>
+						<Stack.Screen
+							name="sign-up"
+							options={{
+								presentation: "modal",
+								headerShown: true,
+								headerTitle: "Sign Up",
+								headerStyle: {
+									backgroundColor:
+										colorScheme === "dark"
+											? colors.dark.background
+											: colors.light.background,
+								},
+								headerTintColor:
 									colorScheme === "dark"
-										? colors.dark.background
-										: colors.light.background,
-							},
-							headerTintColor:
-								colorScheme === "dark"
-									? colors.dark.foreground
-									: colors.light.foreground,
-							gestureEnabled: true,
-						}}
-					/>
-					<Stack.Screen
-						name="sign-in"
-						options={{
-							presentation: "modal",
-							headerShown: true,
-							headerTitle: "Sign In",
-							headerStyle: {
-								backgroundColor:
+										? colors.dark.foreground
+										: colors.light.foreground,
+								gestureEnabled: true,
+							}}
+						/>
+						<Stack.Screen
+							name="sign-in"
+							options={{
+								presentation: "modal",
+								headerShown: true,
+								headerTitle: "Sign In",
+								headerStyle: {
+									backgroundColor:
+										colorScheme === "dark"
+											? colors.dark.background
+											: colors.light.background,
+								},
+								headerTintColor:
 									colorScheme === "dark"
-										? colors.dark.background
-										: colors.light.background,
-							},
-							headerTintColor:
-								colorScheme === "dark"
-									? colors.dark.foreground
-									: colors.light.foreground,
-							gestureEnabled: true,
-						}}
-					/>
+										? colors.dark.foreground
+										: colors.light.foreground,
+								gestureEnabled: true,
+							}}
+						/>
 
-					<Stack.Screen
-						name="add-new-gemstone"
-						options={{
-							headerShown: true,
-							headerTitle: "Add new gemstone",
-							headerStyle: {
-								backgroundColor:
+						<Stack.Screen
+							name="add-new-gemstone"
+							options={{
+								headerShown: true,
+								headerTitle: "Add new gemstone",
+								headerStyle: {
+									backgroundColor:
+										colorScheme === "dark"
+											? colors.dark.background
+											: colors.light.background,
+								},
+								headerTintColor:
 									colorScheme === "dark"
-										? colors.dark.background
-										: colors.light.background,
-							},
-							headerTintColor:
-								colorScheme === "dark"
-									? colors.dark.foreground
-									: colors.light.foreground,
-							gestureEnabled: true,
-						}}
-					/>
-				</Stack>
-			</PaperProvider>
-		</ActionSheetProvider>
+										? colors.dark.foreground
+										: colors.light.foreground,
+								gestureEnabled: true,
+							}}
+						/>
+					</Stack>
+				</PaperProvider>
+			</ActionSheetProvider>
+		</AutocompleteDropdownContextProvider>
 	);
 }
