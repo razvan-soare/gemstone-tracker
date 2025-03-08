@@ -1,0 +1,221 @@
+---
+description: This rule defines standards for creating new UI components. All components should primarily use Tailwind CSS classes for styling rather than custom CSS or inline styles unless absolutely necessary.
+globs: *.tsx, *.jsx
+alwaysApply: false
+---
+ # Component Generation with Tailwind CSS
+
+## Overview
+
+This rule defines standards for creating new UI components. All components should primarily use Tailwind CSS classes for styling rather than custom CSS or inline styles unless absolutely necessary.
+
+## Requirements
+
+- Use Tailwind CSS classes for all styling needs
+- Follow component structure best practices
+- Maintain consistent naming conventions
+- Ensure components are responsive and accessible
+- Only use custom CSS when Tailwind cannot achieve the desired result
+
+## Component Structure
+
+### Basic Component Template
+
+```jsx
+import React from 'react';
+
+interface ComponentProps {
+  // Define props here
+}
+
+const Component: React.FC<ComponentProps> = ({ /* destructured props */ }) => {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-lg shadow-md">
+      {/* Component content with Tailwind classes */}
+    </div>
+  );
+};
+
+export default Component;
+```
+
+## Tailwind CSS Usage Guidelines
+
+### Prioritize Tailwind Classes
+
+- Use Tailwind utility classes for all styling needs
+- Group related utility classes together for readability
+- Follow the order: layout → positioning → spacing → sizing → typography → visual styles
+
+```jsx
+// Good example
+<div className="flex flex-col items-center p-4 mt-2 text-lg font-medium text-gray-800 bg-white rounded-lg shadow-md hover:shadow-lg">
+  {/* Content */}
+</div>
+```
+
+### When to Use Custom CSS
+
+Only use custom CSS in these specific scenarios:
+
+1. Complex animations that can't be achieved with Tailwind
+2. Highly specific styling requirements not covered by Tailwind
+3. Dynamic styles that require JavaScript interpolation
+4. Third-party component integration that requires specific styling
+
+When custom CSS is necessary, use CSS modules or styled-components and document why Tailwind couldn't be used.
+
+## Common Tailwind Patterns
+
+### Layout Patterns
+
+```jsx
+// Flex container
+<div className="flex items-center justify-between">
+
+// Grid layout
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+// Responsive container
+<div className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+```
+
+### Spacing and Sizing
+
+```jsx
+// Margin and padding
+<div className="m-4 p-6">
+
+// Width and height
+<div className="w-full h-64 md:w-1/2 lg:w-1/3">
+
+// Max/min constraints
+<div className="min-h-screen max-w-md">
+```
+
+### Typography
+
+```jsx
+// Text styling
+<p className="text-lg font-medium text-gray-800 leading-relaxed">
+
+// Text alignment
+<p className="text-center md:text-left">
+
+// Text truncation
+<p className="truncate max-w-xs">
+```
+
+### Visual Styles
+
+```jsx
+// Backgrounds and borders
+<div className="bg-white border border-gray-200 rounded-lg">
+
+// Shadows and effects
+<div className="shadow-md hover:shadow-lg transition-shadow duration-300">
+
+// States
+<button className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 focus:ring-2 focus:ring-blue-300">
+```
+
+## Responsive Design
+
+Always design components to be responsive using Tailwind's breakpoint prefixes:
+
+```jsx
+<div className="w-full md:w-1/2 lg:w-1/3 p-4 md:p-6">
+  <h2 className="text-xl md:text-2xl lg:text-3xl">Responsive Heading</h2>
+</div>
+```
+
+## Accessibility
+
+Ensure components are accessible by:
+
+- Using semantic HTML elements
+- Including proper ARIA attributes when needed
+- Ensuring sufficient color contrast
+- Supporting keyboard navigation
+
+```jsx
+<button 
+  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+  aria-label="Submit form"
+>
+  Submit
+</button>
+```
+
+## Dark Mode Support
+
+Support dark mode using Tailwind's dark mode variant:
+
+```jsx
+<div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white">
+  Dark mode compatible content
+</div>
+```
+
+## Component Examples
+
+### Button Component
+
+```jsx
+const Button: React.FC<ButtonProps> = ({ 
+  children, 
+  variant = 'primary', 
+  size = 'medium',
+  className,
+  ...props 
+}) => {
+  const baseClasses = "font-medium rounded focus:outline-none focus:ring-2 transition-colors";
+  
+  const variantClasses = {
+    primary: "bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-300",
+    secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-300",
+    danger: "bg-red-500 text-white hover:bg-red-600 focus:ring-red-300",
+  };
+  
+  const sizeClasses = {
+    small: "px-2 py-1 text-sm",
+    medium: "px-4 py-2",
+    large: "px-6 py-3 text-lg",
+  };
+  
+  return (
+    <button
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className || ''}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+```
+
+### Card Component
+
+```jsx
+const Card: React.FC<CardProps> = ({ title, children, className, ...props }) => {
+  return (
+    <div 
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden ${className || ''}`}
+      {...props}
+    >
+      {title && (
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-medium text-gray-800 dark:text-white">{title}</h3>
+        </div>
+      )}
+      <div className="p-4">
+        {children}
+      </div>
+    </div>
+  );
+};
+```
+
+## Conclusion
+
+By following these guidelines, we ensure that all components maintain a consistent styling approach using Tailwind CSS, resulting in a more maintainable and cohesive UI. Custom CSS should only be used as a last resort when Tailwind classes cannot achieve the desired styling.
