@@ -134,18 +134,27 @@ export const uploadFiles = async ({
 	pickerResult: ImagePicker.ImagePickerResult;
 }) => {
 	const uploadedFiles: {
-		original: string;
+		original?: string;
 		thumbnail: string;
 		medium: string;
+		stone_id?: string;
+		organization_id?: string;
 	}[] = [];
 
 	if (!pickerResult.assets?.length) return;
 
 	const { data: dataSession } = await supabase.auth.getSession();
 
-	const allUploads = pickerResult.assets.map(
+	// Process and upload all images (thumbnail and medium only first)
+	const priorityUploads = pickerResult.assets.map(
 		(file: ImagePicker.ImagePickerAsset) => {
-			return new Promise<void>(async (resolve, reject) => {
+			return new Promise<{
+				thumbnailPath: string;
+				mediumPath: string;
+				originalUri: string;
+				extension: string;
+				safeFilename: string;
+			}>(async (resolve, reject) => {
 				try {
 					const extension = getFileExtension(file.uri);
 					// Ensure filename has no spaces or special characters
@@ -154,70 +163,135 @@ export const uploadFiles = async ({
 					// Process image into multiple sizes
 					const processedImages = await processImage(file.uri);
 
-					// Upload each size
-					const uploadPromises = Object.entries(processedImages).map(
-						([size, result]) =>
-							uploadSingleImage({
-								uri: result.uri,
-								bucketName,
-								path,
-								size,
-								extension,
-								safeFilename,
-								dataSession,
-							}),
+					// Upload only thumbnail and medium first
+					const priorityUploadPromises = [
+						uploadSingleImage({
+							uri: processedImages.thumbnail.uri,
+							bucketName,
+							path,
+							size: "thumbnail",
+							extension,
+							safeFilename,
+							dataSession,
+						}),
+						uploadSingleImage({
+							uri: processedImages.medium.uri,
+							bucketName,
+							path,
+							size: "medium",
+							extension,
+							safeFilename,
+							dataSession,
+						}),
+					];
+
+					// Wait for thumbnail and medium to upload
+					const [thumbnailPath, mediumPath] = await Promise.all(
+						priorityUploadPromises,
 					);
 
-					// Wait for all sizes to upload
-					const uploadedPaths = await Promise.all(uploadPromises);
-
-					// Create a record of all uploaded sizes
-					const originalPath = uploadedPaths[2]; // The original is the third item
-					const thumbnailPath = uploadedPaths[0];
-					const mediumPath = uploadedPaths[1];
-
-					uploadedFiles.push({
-						thumbnail: thumbnailPath,
-						medium: mediumPath,
-						original: originalPath,
+					resolve({
+						thumbnailPath,
+						mediumPath,
+						originalUri: processedImages.original.uri,
+						extension,
+						safeFilename,
 					});
-
-					resolve();
 				} catch (error) {
-					console.error("Error processing and uploading image:", error);
+					console.error(
+						"Error processing and uploading priority images:",
+						error,
+					);
 					reject(error);
 				}
 			});
 		},
 	);
 
-	await Promise.allSettled(allUploads);
+	// Wait for all priority uploads to complete
+	const priorityResults = await Promise.allSettled(priorityUploads);
+
+	// Process successful priority uploads
+	for (const result of priorityResults) {
+		if (result.status === "fulfilled") {
+			uploadedFiles.push({
+				thumbnail: result.value.thumbnailPath,
+				medium: result.value.mediumPath,
+			});
+		}
+	}
 
 	if (uploadedFiles.length === 0) return;
 
-	const gemstoneId = uploadedFiles[0].original.split("/")[1];
+	// Extract gemstone ID from the first thumbnail path
+	const gemstoneId = uploadedFiles[0].thumbnail.split("/")[1];
 
+	// Get stone information
 	const { data: stone } = await supabase
 		.from("stones")
 		.select("*")
 		.eq("id", gemstoneId)
 		.single();
 
+	// Insert records with thumbnail and medium URLs
 	const { data, error } = await supabase
 		.from("images")
 		.insert(
 			uploadedFiles.map((file) => ({
 				stone_id: gemstoneId,
 				organization_id: stone?.organization_id,
-				original: file.original,
 				thumbnail: file.thumbnail,
 				medium: file.medium,
+				// original will be updated later
+				original: null,
 			})),
 		)
 		.select();
+
 	if (error) {
 		throw error;
 	}
+
+	// Start background uploads for original images
+	const backgroundUploads = priorityResults
+		.filter(
+			(result): result is PromiseFulfilledResult<any> =>
+				result.status === "fulfilled",
+		)
+		.map((result, index) => {
+			return new Promise<void>(async (resolve) => {
+				try {
+					// Upload original in background
+					const originalPath = await uploadSingleImage({
+						uri: result.value.originalUri,
+						bucketName,
+						path,
+						size: "original",
+						extension: result.value.extension,
+						safeFilename: result.value.safeFilename,
+						dataSession,
+					});
+
+					// Update the database with the original URL
+					if (data && data[index]) {
+						await supabase
+							.from("images")
+							.update({ original: originalPath })
+							.eq("id", data[index].id);
+					}
+
+					resolve();
+				} catch (error) {
+					console.error("Error uploading original image in background:", error);
+					resolve(); // Resolve anyway to not block other operations
+				}
+			});
+		});
+
+	// Start background uploads but don't wait for them
+	Promise.allSettled(backgroundUploads).catch((error) => {
+		console.error("Error in background uploads:", error);
+	});
 
 	return data;
 };

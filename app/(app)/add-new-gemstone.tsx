@@ -215,6 +215,7 @@ export default function AddNewGemstone() {
 				} finally {
 					setIsUploadingImages(false);
 					await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+					await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
 				}
 			} else {
 				// No images to upload, just navigate back

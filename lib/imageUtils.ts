@@ -8,6 +8,9 @@ import { Tables } from "./database.types";
 export async function getSignedImageUrl(
 	pictureUrl: string,
 ): Promise<string | null> {
+	if (!pictureUrl) {
+		return null;
+	}
 	try {
 		// Get signed URL for original
 		const { data: originalData, error: originalError } = await supabase.storage
