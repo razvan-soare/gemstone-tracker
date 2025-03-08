@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import * as React from "react";
+import { useEffect } from "react";
 import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
 
@@ -18,7 +19,7 @@ export type ComboBoxProps = {
 	allowCustom?: boolean;
 };
 
-const ComboBoxComponent = ({
+export const ComboBox = ({
 	value,
 	options,
 	onChange,
@@ -32,6 +33,12 @@ const ComboBoxComponent = ({
 	const [inputText, setInputText] = React.useState("");
 	const [displayOptions, setDisplayOptions] =
 		React.useState<ComboBoxOption[]>(options);
+
+	useEffect(() => {
+		if (!value) {
+			setInputText("");
+		}
+	}, [value]);
 
 	// Define colors based on theme
 	const colors = {
@@ -107,6 +114,7 @@ const ComboBoxComponent = ({
 					style: {
 						color: colors.text,
 					},
+					value: inputText,
 				}}
 				inputContainerStyle={{
 					backgroundColor: colors.background,
@@ -126,6 +134,7 @@ const ComboBoxComponent = ({
 				onSelectItem={(item) => {
 					if (item) {
 						onChange(item.title || "");
+						setInputText(item.title || "");
 					}
 				}}
 				EmptyResultComponent={EmptyResultComponent}
@@ -134,20 +143,3 @@ const ComboBoxComponent = ({
 		</View>
 	);
 };
-
-// Memoize the component to prevent unnecessary re-renders
-export const ComboBox = React.memo(
-	ComboBoxComponent,
-	(prevProps, nextProps) => {
-		// Custom comparison function to determine if re-render is needed
-		// Return true if props are equal (no re-render needed)
-		return (
-			prevProps.value === nextProps.value &&
-			prevProps.placeholder === nextProps.placeholder &&
-			prevProps.label === nextProps.label &&
-			prevProps.className === nextProps.className &&
-			prevProps.allowCustom === nextProps.allowCustom &&
-			JSON.stringify(prevProps.options) === JSON.stringify(nextProps.options)
-		);
-	},
-);

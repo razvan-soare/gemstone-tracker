@@ -50,7 +50,9 @@ export default function FilterDrawer({
 	const textColor =
 		colorScheme === "dark" ? colors.dark.foreground : colors.light.foreground;
 
-	const [tempFilters, setTempFilters] = React.useState({
+	// We no longer need tempFilters since we apply directly
+	// Instead, we'll work directly with the filters from props
+	const [currentFilters, setCurrentFilters] = React.useState({
 		shape: filters.shape,
 		color: filters.color,
 		size: filters.size,
@@ -58,31 +60,38 @@ export default function FilterDrawer({
 		owner: filters.owner,
 	});
 
-	const handleApply = () => {
-		onApplyFilters(tempFilters);
-		onDismiss();
+	// Update filters when a change is made
+	const updateFilter = <K extends keyof typeof currentFilters>(
+		key: K,
+		value: (typeof currentFilters)[K],
+	) => {
+		const newFilters = {
+			...currentFilters,
+			[key]: value,
+		};
+		setCurrentFilters(newFilters);
+		onApplyFilters(newFilters);
 	};
 
 	const handleReset = () => {
-		setTempFilters({
+		const resetFilters = {
 			shape: undefined,
 			color: undefined,
 			size: undefined,
 			sold: undefined,
 			owner: undefined,
-		});
+		};
+		setCurrentFilters(resetFilters);
+		onApplyFilters(resetFilters);
 	};
 
-	const removeFilter = (filterKey: keyof typeof tempFilters) => {
-		setTempFilters((prev) => ({
-			...prev,
-			[filterKey]: undefined,
-		}));
+	const removeFilter = (filterKey: keyof typeof currentFilters) => {
+		updateFilter(filterKey, undefined);
 	};
 
 	React.useEffect(() => {
-		// Update temp filters when the parent filters change
-		setTempFilters({
+		// Update current filters when the parent filters change
+		setCurrentFilters({
 			shape: filters.shape,
 			color: filters.color,
 			size: filters.size,
@@ -113,7 +122,7 @@ export default function FilterDrawer({
 	}));
 
 	// Get active filters for chips
-	const activeFilters = Object.entries(tempFilters)
+	const activeFilters = Object.entries(currentFilters)
 		.filter(([_, value]) => !!value)
 		.map(([key, value]) => {
 			if (key === "sold" && value === true) {
@@ -149,8 +158,12 @@ export default function FilterDrawer({
 								<Chip
 									key={key}
 									mode="outlined"
-									onPress={() => removeFilter(key as keyof typeof tempFilters)}
-									onClose={() => removeFilter(key as keyof typeof tempFilters)}
+									onPress={() =>
+										removeFilter(key as keyof typeof currentFilters)
+									}
+									onClose={() =>
+										removeFilter(key as keyof typeof currentFilters)
+									}
 									style={styles.chip}
 									textStyle={styles.chipText}
 									compact
@@ -169,13 +182,10 @@ export default function FilterDrawer({
 						<ComboBox
 							label="Shape"
 							placeholder="Select Shape"
-							value={tempFilters.shape || ""}
+							value={currentFilters.shape || ""}
 							options={shapeOptions}
 							onChange={(value) =>
-								setTempFilters((prev) => ({
-									...prev,
-									shape: value as GemstoneShape,
-								}))
+								updateFilter("shape", value as GemstoneShape)
 							}
 							allowCustom
 						/>
@@ -185,13 +195,10 @@ export default function FilterDrawer({
 						<ComboBox
 							label="Color"
 							placeholder="Select Color"
-							value={tempFilters.color || ""}
+							value={currentFilters.color || ""}
 							options={colorOptions}
 							onChange={(value) =>
-								setTempFilters((prev) => ({
-									...prev,
-									color: value as GemstoneColor,
-								}))
+								updateFilter("color", value as GemstoneColor)
 							}
 							allowCustom
 						/>
@@ -201,14 +208,9 @@ export default function FilterDrawer({
 						<ComboBox
 							label="Size"
 							placeholder="Select Size"
-							value={tempFilters.size || ""}
+							value={currentFilters.size || ""}
 							options={sizeOptions}
-							onChange={(value) =>
-								setTempFilters((prev) => ({
-									...prev,
-									size: value as GemstoneSize,
-								}))
-							}
+							onChange={(value) => updateFilter("size", value as GemstoneSize)}
 							allowCustom
 						/>
 					</View>
@@ -217,13 +219,10 @@ export default function FilterDrawer({
 						<ComboBox
 							label="Owner"
 							placeholder="Select Owner"
-							value={tempFilters.owner || ""}
+							value={currentFilters.owner || ""}
 							options={ownerOptions}
 							onChange={(value) =>
-								setTempFilters((prev) => ({
-									...prev,
-									owner: value as GemstoneOwner,
-								}))
+								updateFilter("owner", value as GemstoneOwner)
 							}
 							allowCustom
 						/>
@@ -233,12 +232,9 @@ export default function FilterDrawer({
 						<View style={styles.switchRow}>
 							<Text>Show only sold gemstones</Text>
 							<Switch
-								value={tempFilters.sold === true}
+								value={currentFilters.sold === true}
 								onValueChange={(value) =>
-									setTempFilters((prev) => ({
-										...prev,
-										sold: value ? true : undefined,
-									}))
+									updateFilter("sold", value ? true : undefined)
 								}
 							/>
 						</View>
@@ -248,18 +244,11 @@ export default function FilterDrawer({
 				<Divider />
 				<View style={styles.footer}>
 					<Button
-						mode="outlined"
-						onPress={onDismiss}
-						style={styles.footerButton}
-					>
-						Cancel
-					</Button>
-					<Button
 						mode="contained"
-						onPress={handleApply}
-						style={styles.footerButton}
+						onPress={onDismiss}
+						style={styles.doneButton}
 					>
-						Apply
+						Done
 					</Button>
 				</View>
 			</Modal>
@@ -290,12 +279,11 @@ const styles = StyleSheet.create({
 	},
 	footer: {
 		flexDirection: "row",
-		justifyContent: "flex-end",
+		justifyContent: "center",
 		padding: 16,
-		gap: 8,
 	},
-	footerButton: {
-		minWidth: 100,
+	doneButton: {
+		minWidth: 120,
 	},
 	switchContainer: {
 		marginBottom: 24,
