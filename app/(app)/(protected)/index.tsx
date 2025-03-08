@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	headerButtons: {
+		marginTop: 16,
 		paddingHorizontal: 16,
 		paddingBottom: 8,
 		flexDirection: "row",

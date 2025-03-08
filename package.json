@@ -11,9 +11,12 @@
 		"generate:types": "npx supabase gen types typescript --project-id \"\" --schema public > lib/database.types.ts",
 		"web:build": "expo export -p web",
 		"ios:deploy": "yarn version:patch && eas build --profile production --platform ios --submit",
-		"version:patch": "yarn version --patch",
-		"version:minor": "yarn version --minor",
-		"version:major": "yarn version --major"
+		"version:patch": "sh ./scripts/incrementVersion.sh patch",
+		"version:minor": "sh ./scripts/incrementVersion.sh minor",
+		"version:major": "sh ./scripts/incrementVersion.sh major",
+		"deploy:preview": "eas update --branch preview --message \"Update preview\"",
+		"deploy:production": "eas update --branch production --message \"Update production\"",
+		"deploy:all": "yarn version:patch && yarn deploy:preview && yarn deploy:production"
 	},
 	"dependencies": {
 		"@expo/react-native-action-sheet": "^4.1.1",
