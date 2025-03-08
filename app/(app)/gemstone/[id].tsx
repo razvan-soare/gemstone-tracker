@@ -312,8 +312,7 @@ export default function GemstoneDetail() {
 											buy_currency: gemstone.buy_currency || Currency.RMB,
 											sell_currency: gemstone.sell_currency || Currency.RMB,
 											sold_at: gemstone.sold_at,
-											purchase_date:
-												gemstone.purchase_date || gemstone.created_at,
+											purchase_date: gemstone.purchase_date,
 											buyer: gemstone.buyer,
 											buyer_address: gemstone.buyer_address,
 											owner: gemstone.owner,
@@ -640,9 +639,7 @@ export default function GemstoneDetail() {
 										value={(() => {
 											const dateValue = formData.purchase_date
 												? new Date(formData.purchase_date)
-												: formData.created_at
-													? new Date(formData.created_at)
-													: undefined;
+												: undefined;
 											return dateValue;
 										})()}
 										onChange={(date) => {
@@ -831,10 +828,8 @@ export default function GemstoneDetail() {
 									</View>
 									<View style={styles.tableCell}>
 										<P style={styles.tableCellValue}>
-											{gemstone.purchase_date || gemstone.created_at
-												? formatDate(
-														gemstone.purchase_date || gemstone.created_at || "",
-													)
+											{gemstone.purchase_date
+												? formatDate(gemstone.purchase_date)
 												: "N/A"}
 										</P>
 									</View>

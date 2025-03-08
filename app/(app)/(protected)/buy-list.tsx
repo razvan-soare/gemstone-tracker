@@ -10,14 +10,13 @@ import {
 import { List, SegmentedButtons, Surface, Text } from "react-native-paper";
 
 import { Currency, CurrencySymbols } from "@/app/types/gemstone";
+import ExportButton from "@/components/ExportButton";
 import { H2, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
-import { useSupabase } from "@/context/supabase-provider";
 import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
-import ExportButton from "@/components/ExportButton";
 
 type GemstoneItemProps = {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
@@ -124,7 +123,6 @@ const GemstoneListView = ({
 
 export default function BuyList() {
 	const { colorScheme } = useColorScheme();
-	const { activeOrganization } = useSupabase();
 	const [activeTab, setActiveTab] = useState<GemstoneFilter>("purchased");
 
 	const backgroundColor =

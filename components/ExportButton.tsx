@@ -79,7 +79,7 @@ const ExportButton = ({ style }: ExportButtonProps) => {
 			// Filter by date range
 			const gemstoneDate = gemstone.date
 				? new Date(gemstone.date)
-				: new Date(gemstone.created_at || Date.now());
+				: new Date(gemstone.purchase_date || Date.now());
 			const isInDateRange = isWithinInterval(gemstoneDate, {
 				start: startOfDay(filters.startDate),
 				end: endOfDay(filters.endDate),

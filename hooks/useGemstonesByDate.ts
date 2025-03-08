@@ -35,7 +35,7 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "purchased") => {
 				// This is the original behavior
 			}
 
-			const { data, error } = await query.order("created_at", {
+			const { data, error } = await query.order("purchase_date", {
 				ascending: false,
 			});
 
@@ -47,10 +47,10 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "purchased") => {
 			const gemstonesByDate: Record<string, GemstoneWithDate[]> = {};
 
 			data.forEach((gemstone) => {
-				// Use created_at as the purchase date for purchased filter
+				// Use purchase_date as the purchase date for purchased filter
 				// Use sold_at as the date for sold filter
 				const dateField =
-					filter === "sold" ? gemstone.sold_at : gemstone.created_at;
+					filter === "sold" ? gemstone.sold_at : gemstone.purchase_date;
 				const date = dateField ? new Date(dateField) : new Date();
 
 				const formattedDate = date.toLocaleDateString(undefined, {
