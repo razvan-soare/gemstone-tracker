@@ -114,7 +114,7 @@ export default function FilterDrawer({
 
 	// Get active filters for chips
 	const activeFilters = Object.entries(tempFilters)
-		.filter(([_, value]) => value !== undefined)
+		.filter(([_, value]) => !!value)
 		.map(([key, value]) => {
 			if (key === "sold" && value === true) {
 				return { key, label: "Sold Only" };
