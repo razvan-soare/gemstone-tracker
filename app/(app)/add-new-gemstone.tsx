@@ -196,6 +196,7 @@ export default function AddNewGemstone() {
 			<ScrollView style={[styles.container, { backgroundColor }]}>
 				<View style={styles.input}>
 					<ComboBox
+						allowCustom
 						label="Stone type"
 						value={formData.name || ""}
 						options={Object.values(GemstoneType).map((type) => ({
@@ -209,6 +210,7 @@ export default function AddNewGemstone() {
 				<View style={styles.input}>
 					<ComboBox
 						label="Shape"
+						allowCustom
 						value={formData.shape || ""}
 						options={Object.values(GemstoneShape).map((shape) => ({
 							id: shape,
@@ -221,6 +223,7 @@ export default function AddNewGemstone() {
 				<View style={styles.input}>
 					<ComboBox
 						label="Color"
+						allowCustom
 						value={formData.color || ""}
 						options={Object.values(GemstoneColor).map((color) => ({
 							id: color,
@@ -232,6 +235,7 @@ export default function AddNewGemstone() {
 
 				<View style={styles.input}>
 					<ComboBox
+						allowCustom
 						label="Owner"
 						value={formData.owner || ""}
 						options={Object.values(GemstoneOwner).map((owner) => ({

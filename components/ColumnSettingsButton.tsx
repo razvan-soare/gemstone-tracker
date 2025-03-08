@@ -29,27 +29,27 @@ const ColumnSettingsButton: React.FC<ColumnSettingsButtonProps> = ({
 				anchor={<IconButton icon="view-grid" size={24} onPress={openMenu} />}
 			>
 				<Menu.Item
-					leadingIcon={columnCount === 1 ? "check" : undefined}
+					trailingIcon={columnCount === 1 ? "check" : undefined}
 					onPress={() => handleColumnSelect(1)}
 					title="1 Column"
 				/>
 				<Menu.Item
-					leadingIcon={columnCount === 2 ? "check" : undefined}
+					trailingIcon={columnCount === 2 ? "check" : undefined}
 					onPress={() => handleColumnSelect(2)}
 					title="2 Columns"
 				/>
 				<Menu.Item
-					leadingIcon={columnCount === 3 ? "check" : undefined}
+					trailingIcon={columnCount === 3 ? "check" : undefined}
 					onPress={() => handleColumnSelect(3)}
 					title="3 Columns"
 				/>
 				<Menu.Item
-					leadingIcon={columnCount === 4 ? "check" : undefined}
+					trailingIcon={columnCount === 4 ? "check" : undefined}
 					onPress={() => handleColumnSelect(4)}
 					title="4 Columns"
 				/>
 				<Menu.Item
-					leadingIcon={columnCount === 5 ? "check" : undefined}
+					trailingIcon={columnCount === 5 ? "check" : undefined}
 					onPress={() => handleColumnSelect(5)}
 					title="5 Columns"
 				/>

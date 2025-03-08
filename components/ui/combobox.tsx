@@ -15,6 +15,7 @@ export type ComboBoxProps = {
 	placeholder?: string;
 	label?: string;
 	className?: string;
+	allowCustom?: boolean;
 };
 
 const ComboBoxComponent = ({
@@ -24,6 +25,7 @@ const ComboBoxComponent = ({
 	placeholder = "Select or type...",
 	label,
 	className,
+	allowCustom = false,
 }: ComboBoxProps) => {
 	const colorScheme = useColorScheme();
 	const isDark = colorScheme === "dark";
@@ -48,7 +50,7 @@ const ComboBoxComponent = ({
 				</Text>
 			)}
 			<AutocompleteDropdown
-				// initialValue={value ? { id: value } : undefined}
+				initialValue={value ? { id: value } : undefined}
 				clearOnFocus={false}
 				closeOnBlur={true}
 				textInputProps={{
@@ -71,7 +73,7 @@ const ComboBoxComponent = ({
 					color: colors.text,
 				}}
 				closeOnSubmit={false}
-				onChangeText={(text) => onChange(text)}
+				onChangeText={(text) => (allowCustom ? onChange(text) : null)}
 				onSelectItem={(value) => onChange(value?.title || "")}
 				dataSet={options}
 			/>

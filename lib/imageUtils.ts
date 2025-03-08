@@ -111,5 +111,5 @@ export async function getOptimizedImageSource({
 }
 
 export const getDefaultStoneImage = () => {
-	return "https://fhcuxusbbaodghkiqxhe.supabase.co/storage/v1/object/public/default-stones//a7c5d834ef210a4ea20e73216397a922.webp";
+	return "https://placehold.co/1x1?text=No-image";
 };
