@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import {
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	View,
+	Pressable,
+} from "react-native";
 import { List, Modal, Portal, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 
@@ -24,6 +30,7 @@ import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { useDialog } from "@/hooks/useDialog";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 
 export default function Settings() {
 	const {
@@ -41,6 +48,9 @@ export default function Settings() {
 	const [inviteError, setInviteError] = useState("");
 	const [orgName, setOrgName] = useState("");
 	const [orgNameError, setOrgNameError] = useState("");
+	const [showDevOptions, setShowDevOptions] = useState(false);
+	const [devTapCount, setDevTapCount] = useState(0);
+	const router = useRouter();
 	const {
 		open: orgNameDialogOpen,
 		onOpen: openOrgNameDialog,
@@ -323,11 +333,59 @@ export default function Settings() {
 					</View>
 				</View>
 
-				{/* App Version Information */}
-				<View className="mt-8 items-center">
-					<H3>App Information</H3>
-					<Muted>Version: {Constants.expoConfig?.version || "Unknown"}</Muted>
+				{/* App Info Section */}
+				<View className="gap-y-2 mt-4">
+					<H3>App Info</H3>
+
+					{/* Version number that can be tapped to reveal developer options */}
+					<Pressable
+						onPress={() => {
+							const newCount = devTapCount + 1;
+							setDevTapCount(newCount);
+
+							// Show developer options after 7 taps
+							if (newCount >= 7) {
+								setShowDevOptions(true);
+								setDevTapCount(0);
+							}
+
+							// Reset count after 3 seconds
+							setTimeout(() => {
+								setDevTapCount(0);
+							}, 3000);
+						}}
+					>
+						<Text className="text-sm text-gray-500">
+							Build: {Constants.expoConfig?.ios?.buildNumber || "Unknown"}
+						</Text>
+					</Pressable>
 				</View>
+
+				{/* Developer Options - Only shown after activating */}
+				{showDevOptions && (
+					<View className="gap-y-2 mt-4 border-t border-gray-200 pt-4">
+						<H3>Developer Options</H3>
+						<Muted>Tools for debugging and development</Muted>
+
+						<Button
+							className="w-full mt-2"
+							size="default"
+							variant="outline"
+							onPress={() => router.push("/debug")}
+						>
+							<Text>Debug Tools</Text>
+						</Button>
+
+						<Button
+							className="w-full mt-2"
+							size="default"
+							variant="outline"
+							onPress={() => setShowDevOptions(false)}
+						>
+							<Text>Hide Developer Options</Text>
+						</Button>
+					</View>
+				)}
 			</ScrollView>
 
 			{/* Invite User Modal */}

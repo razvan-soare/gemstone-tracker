@@ -4,19 +4,59 @@ import Constants from "expo-constants";
 import { supabase } from "@/config/supabase";
 
 /**
+ * Helper function to check if updates are supported in the current environment
+ * Returns an object with:
+ * - supported: boolean indicating if updates are supported
+ * - reason: string explaining why updates are not supported (if applicable)
+ */
+function areUpdatesSupported(): { supported: boolean; reason?: string } {
+	// Skip updates on web platform
+	if (Platform.OS === "web") {
+		return {
+			supported: false,
+			reason: "Updates not supported on web platform",
+		};
+	}
+
+	// Skip updates in development mode
+	if (__DEV__) {
+		return { supported: false, reason: "Updates skipped in development mode" };
+	}
+
+	// Skip updates in Expo Go
+	const isExpoGo = Constants.appOwnership === "expo";
+	if (isExpoGo) {
+		return { supported: false, reason: "Updates skipped in Expo Go" };
+	}
+
+	return { supported: true };
+}
+
+/**
  * Checks for available updates and returns true if an update was downloaded and is ready to be applied
  */
 export async function checkForUpdates(): Promise<boolean> {
 	try {
-		if (Platform.OS === "web") {
+		const { supported, reason } = areUpdatesSupported();
+		if (!supported) {
+			console.log(reason);
 			return false;
 		}
 
+		console.log("Checking for updates...");
+		console.log(`Current runtime version: ${Updates.runtimeVersion}`);
+		console.log(`Update channel: ${Updates.channel}`);
+
 		const update = await Updates.checkForUpdateAsync();
+		console.log("Update check result:", update);
 
 		if (update.isAvailable) {
-			await Updates.fetchUpdateAsync();
+			console.log("Update available, downloading...");
+			const result = await Updates.fetchUpdateAsync();
+			console.log("Update downloaded:", result);
 			return true;
+		} else {
+			console.log("No updates available");
 		}
 
 		return false;
@@ -31,6 +71,13 @@ export async function checkForUpdates(): Promise<boolean> {
  */
 export async function applyUpdate(): Promise<void> {
 	try {
+		const { supported, reason } = areUpdatesSupported();
+		if (!supported) {
+			console.log(reason);
+			return;
+		}
+
+		console.log("Applying update and reloading app...");
 		await Updates.reloadAsync();
 	} catch (error) {
 		console.error("Error applying update:", error);
@@ -43,13 +90,23 @@ export async function applyUpdate(): Promise<void> {
  */
 export async function checkAndApplyUpdates(): Promise<boolean> {
 	try {
+		console.log("Starting update check and apply process...");
+
+		const { supported, reason } = areUpdatesSupported();
+		if (!supported) {
+			console.log(reason);
+			return false;
+		}
+
 		const updateAvailable = await checkForUpdates();
 
 		if (updateAvailable) {
+			console.log("Update is available and downloaded, applying now...");
 			await applyUpdate();
 			return true;
 		}
 
+		console.log("No updates to apply");
 		return false;
 	} catch (error) {
 		console.error("Error checking and applying updates:", error);

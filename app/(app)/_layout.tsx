@@ -50,6 +50,7 @@ export default function AppLayout() {
 						<Stack.Screen name="welcome" />
 						<Stack.Screen name="(protected)" />
 						<Stack.Screen name="verify" />
+						<Stack.Screen name="debug" />
 						<Stack.Screen
 							name="gemstone/[id]"
 							options={{

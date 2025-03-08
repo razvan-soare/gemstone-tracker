@@ -3,7 +3,7 @@
     "name": "Gemstone tracker",
     "slug": "gem-tracker",
     "scheme": "gemstone-tracker",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -27,7 +27,7 @@
         }
       },
       "bundleIdentifier": "com.razvansoare.gemtracker",
-      "buildNumber": "1.0.3"
+      "buildNumber": "1.0.4"
     },
     "web": {
       "bundler": "metro",
@@ -49,7 +49,7 @@
           "image": "./assets/splash.png"
         }
       },
-      "versionCode": 49010003
+      "versionCode": 49010004
     },
     "experiments": {
       "typedRoutes": true
