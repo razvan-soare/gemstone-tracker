@@ -23,6 +23,7 @@ import {
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { useDialog } from "@/hooks/useDialog";
+import Constants from "expo-constants";
 
 export default function Settings() {
 	const {
@@ -320,6 +321,12 @@ export default function Settings() {
 							<Text>Sign Out</Text>
 						</Button>
 					</View>
+				</View>
+
+				{/* App Version Information */}
+				<View className="mt-8 items-center">
+					<H3>App Information</H3>
+					<Muted>Version: {Constants.expoConfig?.version || "Unknown"}</Muted>
 				</View>
 			</ScrollView>
 
