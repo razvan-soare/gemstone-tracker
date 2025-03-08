@@ -22,3 +22,6 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 .vercel
+.cursor/mcp.json
+# Private individual user cursor rules
+.cursor/rules/_*.mdc
