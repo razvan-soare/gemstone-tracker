@@ -297,7 +297,7 @@ export default function GemstoneDetail() {
 								<IconButton
 									icon="pencil"
 									onPress={() => {
-										setFormData({
+										const formDataToSet = {
 											name: gemstone.name,
 											shape: gemstone.shape,
 											color: gemstone.color,
@@ -312,10 +312,14 @@ export default function GemstoneDetail() {
 											buy_currency: gemstone.buy_currency || Currency.RMB,
 											sell_currency: gemstone.sell_currency || Currency.RMB,
 											sold_at: gemstone.sold_at,
+											purchase_date:
+												gemstone.purchase_date || gemstone.created_at,
 											buyer: gemstone.buyer,
 											buyer_address: gemstone.buyer_address,
 											owner: gemstone.owner,
-										});
+										};
+
+										setFormData(formDataToSet);
 										setIsEditing(true);
 									}}
 								/>
@@ -352,8 +356,8 @@ export default function GemstoneDetail() {
 										label="Stone type"
 										value={formData.name || ""}
 										options={Object.values(GemstoneType).map((type) => ({
-											label: type,
-											value: type,
+											id: type,
+											title: type,
 										}))}
 										onChange={(value) =>
 											setFormData((prev) => ({
@@ -445,8 +449,8 @@ export default function GemstoneDetail() {
 										label="Shape"
 										value={formData.shape || ""}
 										options={Object.values(GemstoneShape).map((shape) => ({
-											label: shape,
-											value: shape,
+											id: shape,
+											title: shape,
 										}))}
 										onChange={(value) =>
 											setFormData((prev) => ({
@@ -462,8 +466,8 @@ export default function GemstoneDetail() {
 										label="Color"
 										value={formData.color || ""}
 										options={Object.values(GemstoneColor).map((color) => ({
-											label: color,
-											value: color,
+											id: color,
+											title: color,
 										}))}
 										onChange={(value) =>
 											setFormData((prev) => ({
@@ -480,15 +484,15 @@ export default function GemstoneDetail() {
 										value={formData.owner || ""}
 										options={[
 											...Object.values(GemstoneOwner).map((owner) => ({
-												label: owner,
-												value: owner,
+												id: owner,
+												title: owner,
 											})),
 											// Allow free text input by adding the current value if it's not in the enum
 											...(formData.owner &&
 											!Object.values(GemstoneOwner).includes(
 												formData.owner as any,
 											)
-												? [{ label: formData.owner, value: formData.owner }]
+												? [{ id: formData.owner, title: formData.owner }]
 												: []),
 										]}
 										onChange={(value) =>
@@ -628,6 +632,48 @@ export default function GemstoneDetail() {
 											}
 										/>
 									</View>
+								</View>
+								<View style={styles.input}>
+									<DatePickerInput
+										locale="en"
+										label="Purchase date"
+										value={(() => {
+											const dateValue = formData.purchase_date
+												? new Date(formData.purchase_date)
+												: formData.created_at
+													? new Date(formData.created_at)
+													: undefined;
+											return dateValue;
+										})()}
+										onChange={(date) => {
+											if (date) {
+												// Create a date at noon UTC to avoid timezone issues
+												const utcDate = new Date(
+													Date.UTC(
+														date.getFullYear(),
+														date.getMonth(),
+														date.getDate(),
+														12,
+														0,
+														0,
+													),
+												);
+												setFormData((prev) => ({
+													...prev,
+													purchase_date: utcDate.toISOString(),
+												}));
+											} else {
+												setFormData((prev) => ({
+													...prev,
+													purchase_date: null,
+												}));
+											}
+										}}
+										inputMode="start"
+										mode="outlined"
+										presentationStyle="pageSheet"
+										withDateFormatInLabel={false}
+									/>
 								</View>
 								<View style={styles.input}>
 									<DatePickerInput
@@ -775,6 +821,21 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellValue}>
 											{getCurrencySymbol(gemstone.sell_currency)}
 											{gemstone.sell_price || 0}
+										</P>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Purchase date</P>
+									</View>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellValue}>
+											{gemstone.purchase_date || gemstone.created_at
+												? formatDate(
+														gemstone.purchase_date || gemstone.created_at || "",
+													)
+												: "N/A"}
 										</P>
 									</View>
 								</View>

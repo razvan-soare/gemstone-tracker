@@ -58,6 +58,7 @@ export default function AddNewGemstone() {
 		sell_price: 0,
 		buy_currency: Currency.RMB,
 		sell_currency: Currency.RMB,
+		purchase_date: new Date().toISOString().split("T")[0],
 		sold_at: null as string | null,
 		buyer: "",
 		buyer_address: "",
@@ -164,7 +165,8 @@ export default function AddNewGemstone() {
 				dimensions: Object.values(formData.dimensions).some((v) => v)
 					? formData.dimensions
 					: null,
-				sold_at: formData.sold_at || null,
+				purchase_date: formData.purchase_date || null,
+				sold_at: null,
 				buy_currency: formData.buy_currency,
 				sell_currency: formData.sell_currency,
 				gem_type: formData.gem_type,
@@ -472,8 +474,12 @@ export default function AddNewGemstone() {
 				<View style={styles.input}>
 					<DatePickerInput
 						locale="en"
-						label="Sold date"
-						value={formData.sold_at ? new Date(formData.sold_at) : undefined}
+						label="Purchase date"
+						value={
+							formData.purchase_date
+								? new Date(formData.purchase_date)
+								: undefined
+						}
 						onChange={(date) => {
 							if (date) {
 								// Create a date at noon UTC to avoid timezone issues

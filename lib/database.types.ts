@@ -206,6 +206,7 @@ export type Database = {
           organization_id: string | null
           owner: string | null
           pictures: string[] | null
+          purchase_date: string | null
           quantity: string | null
           sell_currency: string | null
           sell_price: number | null
@@ -234,6 +235,7 @@ export type Database = {
           organization_id?: string | null
           owner?: string | null
           pictures?: string[] | null
+          purchase_date?: string | null
           quantity?: string | null
           sell_currency?: string | null
           sell_price?: number | null
@@ -262,6 +264,7 @@ export type Database = {
           organization_id?: string | null
           owner?: string | null
           pictures?: string[] | null
+          purchase_date?: string | null
           quantity?: string | null
           sell_currency?: string | null
           sell_price?: number | null
