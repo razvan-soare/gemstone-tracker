@@ -1,6 +1,6 @@
 {
 	"name": "expo-supabase-starter",
-	"version": "1.0.2",
+	"version": "1.0.1",
 	"main": "expo-router/entry",
 	"scripts": {
 		"start": "expo start",
@@ -10,7 +10,7 @@
 		"lint": "eslint . --fix",
 		"generate:types": "npx supabase gen types typescript --project-id \"\" --schema public > lib/database.types.ts",
 		"web:build": "expo export -p web",
-		"ios:deploy": "eas build --profile production --platform ios --submit",
+		"ios:deploy": "yarn version:patch && eas build --profile production --platform ios --submit",
 		"version:patch": "yarn version --patch",
 		"version:minor": "yarn version --minor",
 		"version:major": "yarn version --major"
