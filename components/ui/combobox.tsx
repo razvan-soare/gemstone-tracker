@@ -28,6 +28,7 @@ export const ComboBox = ({
 	className,
 	allowCustom = false,
 }: ComboBoxProps) => {
+	const [keyValue, setKeyValue] = React.useState(0);
 	const colorScheme = useColorScheme();
 	const isDark = colorScheme === "dark";
 	const [inputText, setInputText] = React.useState("");
@@ -37,6 +38,7 @@ export const ComboBox = ({
 	useEffect(() => {
 		if (!value) {
 			setInputText("");
+			setKeyValue(keyValue + 1);
 		}
 	}, [value]);
 
@@ -104,6 +106,7 @@ export const ComboBox = ({
 				</Text>
 			)}
 			<AutocompleteDropdown
+				key={keyValue}
 				initialValue={value ? { id: value, title: value } : undefined}
 				clearOnFocus={false}
 				closeOnBlur={true}
@@ -114,7 +117,6 @@ export const ComboBox = ({
 					style: {
 						color: colors.text,
 					},
-					value: inputText,
 				}}
 				inputContainerStyle={{
 					backgroundColor: colors.background,

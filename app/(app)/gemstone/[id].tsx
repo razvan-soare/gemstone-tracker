@@ -15,6 +15,7 @@ import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 import { GemstoneCarousel } from "@/components/Carousel";
 import { GemstoneHeader } from "@/components/GemstoneHeader";
 import { ComboBox } from "@/components/ui/combobox";
+import { EditFieldDialog } from "@/components/EditFieldDialog";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
@@ -111,6 +112,23 @@ export default function GemstoneDetail() {
 	const [buyer, setBuyer] = useState("");
 	const [buyerAddress, setBuyerAddress] = useState("");
 	const [sellComment, setSellComment] = useState("");
+
+	// New state for field editing dialog
+	const [editFieldDialogVisible, setEditFieldDialogVisible] = useState(false);
+	const [currentField, setCurrentField] = useState<{
+		name: string;
+		label: string;
+		type:
+			| "text"
+			| "number"
+			| "date"
+			| "currency"
+			| "shape"
+			| "color"
+			| "owner"
+			| "gem_type";
+		value: any;
+	}>({ name: "", label: "", type: "text", value: null });
 
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
@@ -258,6 +276,50 @@ export default function GemstoneDetail() {
 			await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 		} catch (error) {
 			console.error("Error updating gemstone sell price:", error);
+		}
+	};
+
+	// Handle opening the edit field dialog
+	const handleEditField = (
+		fieldName: string,
+		fieldLabel: string,
+		fieldType:
+			| "text"
+			| "number"
+			| "date"
+			| "currency"
+			| "shape"
+			| "color"
+			| "owner"
+			| "gem_type",
+		fieldValue: any,
+	) => {
+		setCurrentField({
+			name: fieldName,
+			label: fieldLabel,
+			type: fieldType,
+			value: fieldValue,
+		});
+		setEditFieldDialogVisible(true);
+	};
+
+	// Handle saving the edited field
+	const handleSaveField = async (value: any) => {
+		try {
+			// Create update object with just the field being edited
+			const updateData: Partial<Tables<"stones">> = {
+				[currentField.name]: value,
+			};
+
+			await updateGemstone.mutateAsync({
+				id: gemstone.id,
+				...updateData,
+			});
+
+			// Refresh data
+			await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
+		} catch (error) {
+			console.error(`Error updating ${currentField.name}:`, error);
 		}
 	};
 
@@ -763,7 +825,20 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Bill number</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>{gemstone.bill_number}</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"bill_number",
+													"Bill Number",
+													"text",
+													gemstone.bill_number,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.bill_number}
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -772,7 +847,20 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Owner</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>{gemstone.owner || ""}</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"owner",
+													"Owner",
+													"owner",
+													gemstone.owner,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.owner || ""}
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -781,9 +869,20 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Weight</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>
-											{gemstone.weight} carats
-										</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"weight",
+													"Weight (carats)",
+													"number",
+													gemstone.weight,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.weight} carats
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -792,9 +891,20 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Quantity</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>
-											{gemstone.quantity || "1"} pieces
-										</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"quantity",
+													"Quantity (pieces)",
+													"number",
+													gemstone.quantity,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.quantity || "1"} pieces
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -803,10 +913,21 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Buy price</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>
-											{getCurrencySymbol(gemstone.buy_currency)}
-											{gemstone.buy_price || 0}
-										</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"buy_price",
+													"Buy Price",
+													"number",
+													gemstone.buy_price,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{getCurrencySymbol(gemstone.buy_currency)}
+												{gemstone.buy_price || 0}
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -815,10 +936,21 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Sell price</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>
-											{getCurrencySymbol(gemstone.sell_currency)}
-											{gemstone.sell_price || 0}
-										</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"sell_price",
+													"Sell Price",
+													"number",
+													gemstone.sell_price,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{getCurrencySymbol(gemstone.sell_currency)}
+												{gemstone.sell_price || 0}
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -827,11 +959,22 @@ export default function GemstoneDetail() {
 										<P style={styles.tableCellLabel}>Purchase date</P>
 									</View>
 									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>
-											{gemstone.purchase_date
-												? formatDate(gemstone.purchase_date)
-												: "N/A"}
-										</P>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"purchase_date",
+													"Purchase Date",
+													"date",
+													gemstone.purchase_date,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.purchase_date
+													? formatDate(gemstone.purchase_date)
+													: "N/A"}
+											</P>
+										</TouchableOpacity>
 									</View>
 								</View>
 
@@ -841,12 +984,91 @@ export default function GemstoneDetail() {
 											<P style={styles.tableCellLabel}>Sold At</P>
 										</View>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{formatDate(gemstone.sold_at)}
-											</P>
+											<TouchableOpacity
+												onPress={() =>
+													handleEditField(
+														"sold_at",
+														"Sold At",
+														"date",
+														gemstone.sold_at,
+													)
+												}
+											>
+												<P style={styles.tableCellValue}>
+													{formatDate(gemstone.sold_at)}
+												</P>
+											</TouchableOpacity>
 										</View>
 									</View>
 								)}
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Shape</P>
+									</View>
+									<View style={styles.tableCell}>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"shape",
+													"Shape",
+													"shape",
+													gemstone.shape,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.shape || ""}
+											</P>
+										</TouchableOpacity>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Color</P>
+									</View>
+									<View style={styles.tableCell}>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"color",
+													"Color",
+													"color",
+													gemstone.color,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.color || ""}
+											</P>
+										</TouchableOpacity>
+									</View>
+								</View>
+
+								<View style={styles.tableRow}>
+									<View style={styles.tableCell}>
+										<P style={styles.tableCellLabel}>Gem Type</P>
+									</View>
+									<View style={styles.tableCell}>
+										<TouchableOpacity
+											onPress={() =>
+												handleEditField(
+													"gem_type",
+													"Gem Type",
+													"gem_type",
+													gemstone.gem_type,
+												)
+											}
+										>
+											<P style={styles.tableCellValue}>
+												{gemstone.gem_type
+													? GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]
+													: GemTypeLabels[GemTypeEnum.NATURAL]}
+											</P>
+										</TouchableOpacity>
+									</View>
+								</View>
 
 								{gemstone.buyer && (
 									<View style={styles.tableRow}>
@@ -854,7 +1076,18 @@ export default function GemstoneDetail() {
 											<P style={styles.tableCellLabel}>Buyer</P>
 										</View>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>{gemstone.buyer}</P>
+											<TouchableOpacity
+												onPress={() =>
+													handleEditField(
+														"buyer",
+														"Buyer",
+														"text",
+														gemstone.buyer,
+													)
+												}
+											>
+												<P style={styles.tableCellValue}>{gemstone.buyer}</P>
+											</TouchableOpacity>
 										</View>
 									</View>
 								)}
@@ -865,27 +1098,63 @@ export default function GemstoneDetail() {
 											<P style={styles.tableCellLabel}>Buyer Address</P>
 										</View>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellValue}>
-												{gemstone.buyer_address}
-											</P>
+											<TouchableOpacity
+												onPress={() =>
+													handleEditField(
+														"buyer_address",
+														"Buyer Address",
+														"text",
+														gemstone.buyer_address,
+													)
+												}
+											>
+												<P style={styles.tableCellValue}>
+													{gemstone.buyer_address}
+												</P>
+											</TouchableOpacity>
 										</View>
 									</View>
 								)}
 
-								<View style={styles.tableRow}>
-									<View style={styles.tableCell}>
-										<P style={styles.tableCellLabel}>Comments</P>
+								{gemstone.comment && (
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Comments</P>
+										</View>
+										<View style={styles.tableCell}>
+											<TouchableOpacity
+												onPress={() =>
+													handleEditField(
+														"comment",
+														"Comments",
+														"text",
+														gemstone.comment,
+													)
+												}
+											>
+												<P style={styles.tableCellValue}>{gemstone.comment}</P>
+											</TouchableOpacity>
+										</View>
 									</View>
-									<View style={styles.tableCell}>
-										<P style={styles.tableCellValue}>{gemstone.comment}</P>
-									</View>
-								</View>
+								)}
 							</View>
 						)}
 					</View>
 				</View>
 			</ScrollView>
 
+			{/* Edit Field Dialog */}
+			<EditFieldDialog
+				visible={editFieldDialogVisible}
+				onDismiss={() => setEditFieldDialogVisible(false)}
+				fieldName={currentField.name}
+				fieldLabel={currentField.label}
+				fieldType={currentField.type}
+				currentValue={currentField.value}
+				onSave={handleSaveField}
+			/>
+
+			{/* Sell Dialog */}
 			<Portal>
 				<Dialog
 					visible={sellDialogVisible}
@@ -1172,6 +1441,5 @@ const styles = StyleSheet.create({
 	},
 	tableCellValue: {
 		fontSize: 16,
-		color: "#333",
 	},
 });
