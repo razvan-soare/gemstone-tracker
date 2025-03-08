@@ -13,11 +13,26 @@ import { H3, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
+import { uploadFiles } from "@/lib/tus";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Button, MD2Colors, Snackbar, TextInput } from "react-native-paper";
+import {
+	Image,
+	ScrollView,
+	StyleSheet,
+	TouchableOpacity,
+	View,
+} from "react-native";
+import {
+	Button,
+	IconButton,
+	MD2Colors,
+	Snackbar,
+	TextInput,
+} from "react-native-paper";
 import {
 	DatePickerInput,
 	enGB,
@@ -41,6 +56,12 @@ export default function AddNewGemstone() {
 	const { colorScheme } = useColorScheme();
 	const backgroundColor =
 		colorScheme === "dark" ? colors.dark.background : colors.light.background;
+	const [selectedImages, setSelectedImages] = useState<
+		ImagePicker.ImagePickerAsset[]
+	>([]);
+	const [isUploadingImages, setIsUploadingImages] = useState(false);
+
+	const queryClient = useQueryClient();
 
 	const [formData, setFormData] = useState({
 		name: "",
@@ -157,7 +178,8 @@ export default function AddNewGemstone() {
 		}
 
 		try {
-			await createGemstone.mutateAsync({
+			// Create the gemstone first
+			const gemstone = await createGemstone.mutateAsync({
 				...formData,
 				organization_id: activeOrganization.id,
 				pictures: [],
@@ -173,7 +195,31 @@ export default function AddNewGemstone() {
 				sold: false,
 				owner: formData.owner,
 			});
-			router.back();
+
+			// If there are selected images, upload them in the background
+			if (selectedImages.length > 0) {
+				setIsUploadingImages(true);
+
+				// Navigate back to the previous screen
+				router.back();
+
+				// Upload images in the background
+				try {
+					await uploadFiles({
+						bucketName: "tus",
+						path: `${activeOrganization.id}/${gemstone.id}`,
+						pickerResult: { assets: selectedImages, canceled: false },
+					});
+				} catch (uploadError) {
+					console.error("Error uploading images:", uploadError);
+				} finally {
+					setIsUploadingImages(false);
+					await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+				}
+			} else {
+				// No images to upload, just navigate back
+				router.back();
+			}
 		} catch (error) {
 			setError({
 				field: "submit",
@@ -181,6 +227,58 @@ export default function AddNewGemstone() {
 			});
 			console.error("Error creating gemstone:", error);
 		}
+	};
+
+	const pickImage = async () => {
+		try {
+			const { status } =
+				await ImagePicker.requestMediaLibraryPermissionsAsync();
+			if (status !== "granted") {
+				alert("We need your permission to access your media library");
+				return;
+			}
+
+			const result = await ImagePicker.launchImageLibraryAsync({
+				quality: 1,
+				allowsMultipleSelection: true,
+				selectionLimit: 10,
+				mediaTypes: ImagePicker.MediaTypeOptions.Images,
+			});
+
+			if (!result.canceled && result.assets) {
+				setSelectedImages([...selectedImages, ...result.assets]);
+			}
+		} catch (error) {
+			console.error("Error picking images:", error);
+		}
+	};
+
+	const takePhoto = async () => {
+		try {
+			const { status } = await ImagePicker.requestCameraPermissionsAsync();
+			if (status !== "granted") {
+				alert("We need your permission to access your camera");
+				return;
+			}
+
+			const result = await ImagePicker.launchCameraAsync({
+				quality: 1,
+				allowsEditing: true,
+				aspect: [4, 3],
+			});
+
+			if (!result.canceled && result.assets) {
+				setSelectedImages([...selectedImages, ...result.assets]);
+			}
+		} catch (error) {
+			console.error("Error taking photo:", error);
+		}
+	};
+
+	const removeImage = (index: number) => {
+		const newImages = [...selectedImages];
+		newImages.splice(index, 1);
+		setSelectedImages(newImages);
 	};
 
 	if (!activeOrganization) {
@@ -512,6 +610,52 @@ export default function AddNewGemstone() {
 					/>
 				</View>
 
+				<View style={styles.imagesContainer}>
+					<P style={styles.imagesTitle}>Images</P>
+					<View style={styles.imageActions}>
+						<Button
+							mode="outlined"
+							onPress={pickImage}
+							icon="image"
+							style={styles.imageButton}
+						>
+							Select Images
+						</Button>
+						<Button
+							mode="outlined"
+							onPress={takePhoto}
+							icon="camera"
+							style={styles.imageButton}
+						>
+							Take Photo
+						</Button>
+					</View>
+
+					{selectedImages.length > 0 && (
+						<View style={styles.imagePreviewContainer}>
+							<P style={styles.previewTitle}>
+								Selected Images ({selectedImages.length})
+							</P>
+							<ScrollView horizontal style={styles.imagePreviewScroll}>
+								{selectedImages.map((image, index) => (
+									<View key={index} style={styles.imagePreview}>
+										<Image
+											source={{ uri: image.uri }}
+											style={styles.previewImage}
+										/>
+										<IconButton
+											icon="close"
+											size={20}
+											onPress={() => removeImage(index)}
+											style={styles.removeImageButton}
+										/>
+									</View>
+								))}
+							</ScrollView>
+						</View>
+					)}
+				</View>
+
 				<TextInput
 					label="Comments"
 					mode="outlined"
@@ -529,7 +673,9 @@ export default function AddNewGemstone() {
 					disabled={createGemstone.isPending}
 					style={styles.button}
 				>
-					Add Gemstone
+					{selectedImages.length > 0
+						? "Add Gemstone & Upload Images"
+						: "Add Gemstone"}
 				</Button>
 			</ScrollView>
 			<Snackbar
@@ -544,6 +690,14 @@ export default function AddNewGemstone() {
 				}}
 			>
 				{error?.message || ""}
+			</Snackbar>
+			<Snackbar
+				visible={isUploadingImages}
+				onDismiss={() => {}}
+				duration={Infinity}
+				style={styles.uploadingSnackbar}
+			>
+				Uploading images in background...
 			</Snackbar>
 		</SafeAreaProvider>
 	);
@@ -659,5 +813,53 @@ const styles = StyleSheet.create({
 		height: 10,
 		borderRadius: 5,
 		backgroundColor: "#6200EE",
+	},
+	imagesContainer: {
+		marginBottom: 16,
+	},
+	imagesTitle: {
+		fontSize: 16,
+		fontWeight: "bold",
+		marginBottom: 8,
+	},
+	imageActions: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginBottom: 8,
+	},
+	imageButton: {
+		flex: 1,
+		marginHorizontal: 4,
+	},
+	imagePreviewContainer: {
+		marginTop: 8,
+	},
+	previewTitle: {
+		fontSize: 14,
+		marginBottom: 4,
+	},
+	imagePreviewScroll: {
+		flexDirection: "row",
+	},
+	imagePreview: {
+		position: "relative",
+		marginRight: 8,
+	},
+	previewImage: {
+		width: 80,
+		height: 80,
+		borderRadius: 4,
+	},
+	removeImageButton: {
+		position: "absolute",
+		top: -8,
+		right: -8,
+		backgroundColor: "rgba(0,0,0,0.5)",
+		borderRadius: 12,
+		width: 24,
+		height: 24,
+	},
+	uploadingSnackbar: {
+		backgroundColor: MD2Colors.blue800,
 	},
 });
