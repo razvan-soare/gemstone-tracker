@@ -48,18 +48,26 @@ const GemstoneCard = ({
 						<Muted className="font-bold">{gemstone.bill_number}</Muted>
 					</View>
 					<View style={styles.chipsWrapper}>
-						<Badge variant="outline" style={styles.chipBox}>
-							<P style={styles.chip}>{gemstone.shape}</P>
-						</Badge>
-						<Badge variant="outline" style={styles.chipBox}>
-							<P style={styles.chip}>{gemstone.weight} ct</P>
-						</Badge>
-						<Badge variant="outline" style={styles.chipBox}>
-							<P style={styles.chip}>{gemstone.color}</P>
-						</Badge>
-						<Badge variant="outline" style={styles.chipBox}>
-							<P style={styles.chip}>{gemstone.cut}</P>
-						</Badge>
+						{gemstone.shape && (
+							<Badge variant="outline" style={styles.chipBox}>
+								<P style={styles.chip}>{gemstone.shape}</P>
+							</Badge>
+						)}
+						{gemstone.weight && (
+							<Badge variant="outline" style={styles.chipBox}>
+								<P style={styles.chip}>{gemstone.weight} ct</P>
+							</Badge>
+						)}
+						{gemstone.color && (
+							<Badge variant="outline" style={styles.chipBox}>
+								<P style={styles.chip}>{gemstone.color}</P>
+							</Badge>
+						)}
+						{gemstone.cut && (
+							<Badge variant="outline" style={styles.chipBox}>
+								<P style={styles.chip}>{gemstone.cut}</P>
+							</Badge>
+						)}
 					</View>
 
 					<View style={styles.priceContainer}>
