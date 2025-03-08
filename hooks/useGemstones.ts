@@ -23,10 +23,16 @@ const ITEMS_PER_PAGE = 20;
 const buildSearchQuery = (term: string) => {
 	const isNumber = !Number.isNaN(Number(term));
 	if (isNumber) {
-		return `weight.eq.${Number(term).toFixed(2)}`;
+		return (
+			`weight.eq.${Number(term).toFixed(2)},` +
+			`name.ilike.%${term}%,` +
+			`bill_number.ilike.%${term}%`
+		);
 	}
 	return (
 		`name.ilike.%${term}%,` +
+		`bill_number.ilike.%${term}%,` +
+		`gem_type.ilike.%${term}%,` +
 		`shape.ilike.%${term}%,` +
 		`color.ilike.%${term}%,` +
 		`cut.ilike.%${term}%`

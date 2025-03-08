@@ -33,27 +33,31 @@ export const GemstoneHeader: React.FC<GemstoneHeaderProps> = ({
 					justifyContent: "flex-start",
 				}}
 			>
-				<Badge
-					style={[
-						styles.badge,
-						{
-							backgroundColor:
-								gemType === GemTypeEnum.HEATED ? "#f70000" : "#81C784",
-						},
-					]}
-				>
-					{GemTypeLabels[gemType]}
-				</Badge>
-				<Badge
-					style={[
-						styles.badge,
-						{
-							backgroundColor: getBgColor(color),
-						},
-					]}
-				>
-					{color}
-				</Badge>
+				{gemType && (
+					<Badge
+						style={[
+							styles.badge,
+							{
+								backgroundColor:
+									gemType === GemTypeEnum.HEATED ? "#f70000" : "#81C784",
+							},
+						]}
+					>
+						{GemTypeLabels[gemType]}
+					</Badge>
+				)}
+				{color && (
+					<Badge
+						style={[
+							styles.badge,
+							{
+								backgroundColor: getBgColor(color),
+							},
+						]}
+					>
+						{color}
+					</Badge>
+				)}
 			</View>
 			<View style={styles.shapeContainer}>
 				<P>{shape}</P>
