@@ -52,7 +52,14 @@ export const EditFieldDialog = ({
 
 	// Handle save button click
 	const handleSave = () => {
-		onSave(value);
+		let valueToSave = value;
+
+		// Parse numeric values before saving
+		if (fieldType === "number" && fieldName !== "quantity") {
+			valueToSave = value === "" ? null : parseFloat(value);
+		}
+
+		onSave(valueToSave);
 		onDismiss();
 	};
 
@@ -85,8 +92,11 @@ export const EditFieldDialog = ({
 								const finalValue = numericValue === "" ? "1" : numericValue;
 								setValue(finalValue);
 							} else {
-								// For other numeric fields like weight, allow decimal values
-								setValue(text ? parseFloat(text) : null);
+								// For other numeric fields like weight, store as string and validate
+								const numericValue = text.replace(/[^0-9.]/g, "");
+								// Prevent multiple decimal points
+								if (numericValue.split(".").length > 2) return;
+								setValue(numericValue); // Store as string instead of parsing to float
 							}
 						}}
 						keyboardType="decimal-pad"

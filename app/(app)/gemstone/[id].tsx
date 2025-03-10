@@ -103,7 +103,11 @@ export default function GemstoneDetail() {
 		colorScheme === "dark" ? colors.dark.background : colors.light.background;
 
 	const [isEditing, setIsEditing] = useState(false);
-	const [formData, setFormData] = useState<Partial<Tables<"stones">>>({});
+	// Type for form data during editing
+	type EditFormData = Partial<
+		Omit<Tables<"stones">, "weight"> & { weight: string | number | null }
+	>;
+	const [formData, setFormData] = useState<EditFormData>({});
 	const [tempImagePreviews, setTempImagePreviews] = useState<
 		ImagePicker.ImagePickerAsset[]
 	>([]);
@@ -189,8 +193,17 @@ export default function GemstoneDetail() {
 
 	const handleSave = async () => {
 		try {
-			// Create update object
-			const updateData = { ...formData };
+			// Create update object and convert types for API
+			const updateData: Partial<Tables<"stones">> = {
+				...formData,
+				// Convert weight to number if it's a string
+				weight:
+					typeof formData.weight === "string"
+						? formData.weight === ""
+							? null
+							: parseFloat(formData.weight)
+						: formData.weight,
+			};
 
 			// If we're updating sell_price but the item isn't sold yet,
 			// make sure we don't accidentally mark it as sold
@@ -592,12 +605,16 @@ export default function GemstoneDetail() {
 										label="Weight (carats)"
 										mode="outlined"
 										value={String(formData.weight || "")}
-										onChangeText={(value) =>
+										onChangeText={(value) => {
+											// Only allow numbers and decimal point
+											const numericValue = value.replace(/[^0-9.]/g, "");
+											// Prevent multiple decimal points
+											if (numericValue.split(".").length > 2) return;
 											setFormData((prev) => ({
 												...prev,
-												weight: value ? parseFloat(value) : null,
-											}))
-										}
+												weight: numericValue, // Store as string instead of parsing immediately
+											}));
+										}}
 										keyboardType="decimal-pad"
 										style={styles.input}
 									/>
