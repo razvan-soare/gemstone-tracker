@@ -10,6 +10,7 @@
 		"lint": "eslint . --fix",
 		"generate:types": "npx supabase gen types typescript --project-id \"\" --schema public > lib/database.types.ts",
 		"web:build": "expo export -p web",
+		"ios:build": "eas build --platform ios --profile production",
 		"ios:deploy": "yarn version:patch && eas build --profile production --platform ios --submit",
 		"version:patch": "sh ./scripts/incrementVersion.sh patch",
 		"version:minor": "sh ./scripts/incrementVersion.sh minor",

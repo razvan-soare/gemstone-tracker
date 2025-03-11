@@ -36,6 +36,7 @@ interface GemstoneCarouselProps {
 	tempImagePreviews?: ImagePicker.ImagePickerAsset[];
 	width?: number;
 	height?: number;
+	onAddImage?: () => void;
 }
 
 // Full-size image viewer component
@@ -223,6 +224,7 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 	tempImagePreviews = [],
 	width = Dimensions.get("window").width - 30,
 	height = 250,
+	onAddImage,
 }) => {
 	const { colorScheme } = useColorScheme();
 	const backgroundColor =
@@ -251,15 +253,29 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 		setImageViewerVisible(true);
 	};
 
+	// If there are no images, show a placeholder with an upload button overlay
 	if (allItems.length === 0) {
 		return (
-			<View style={[styles.emptyContainer, { width, height, backgroundColor }]}>
-				<OptimizedImage
-					image={null as any}
-					placeholder={getDefaultStoneImage()}
-					style={styles.emptyImage}
+			<TouchableOpacity
+				onPress={onAddImage}
+				style={[
+					styles.placeholderContainer,
+					{
+						width,
+						height,
+						backgroundColor,
+					},
+				]}
+			>
+				<Image
+					source={getDefaultStoneImage()}
+					style={styles.placeholderImage}
+					contentFit="cover"
 				/>
-			</View>
+				<View style={styles.uploadOverlay}>
+					<IconButton icon="camera-plus" size={40} iconColor="#fff" />
+				</View>
+			</TouchableOpacity>
 		);
 	}
 
@@ -439,5 +455,20 @@ const styles = StyleSheet.create({
 		bottom: 40,
 		left: 0,
 		right: 0,
+	},
+	placeholderContainer: {
+		justifyContent: "center",
+		alignItems: "center",
+		borderRadius: 8,
+		overflow: "hidden",
+	},
+	placeholderImage: {
+		width: "100%",
+		height: "100%",
+	},
+	uploadOverlay: {
+		...StyleSheet.absoluteFillObject,
+		justifyContent: "center",
+		alignItems: "center",
 	},
 });

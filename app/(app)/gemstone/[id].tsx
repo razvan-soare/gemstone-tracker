@@ -26,7 +26,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	Dimensions,
 	ScrollView,
@@ -442,6 +442,7 @@ export default function GemstoneDetail() {
 								tempImagePreviews={tempImagePreviews}
 								height={200}
 								width={screenWidth}
+								onAddImage={onOpenAddPicture}
 							/>
 						</View>
 
