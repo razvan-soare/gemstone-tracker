@@ -16,7 +16,13 @@
 		"version:minor": "sh ./scripts/incrementVersion.sh minor",
 		"version:major": "sh ./scripts/incrementVersion.sh major",
 		"deploy:preview": "eas update --branch preview --message \"Update preview\"",
-		"deploy:production": "eas update --branch production --message \"Update production\""
+		"deploy:production": "eas update --branch production --message \"Update production\"",
+		"supabase:reset": "supabase db reset",
+		"supabase:push": "supabase db push",
+		"supabase:pull": "supabase db pull",
+		"supabase:start": "supabase start",
+		"supabase:stop": "supabase stop",
+		"supabase:create-migration": "supabase migration new"
 	},
 	"dependencies": {
 		"@expo/react-native-action-sheet": "^4.1.1",

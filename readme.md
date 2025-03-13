@@ -97,6 +97,31 @@ yarn deploy:production
 yarn deploy:all
 ```
 
+## Supabase
+
+Access Supabase Studio at http://127.0.0.1:54323
+
+# Reset local database (applies all migrations)
+
+supabase db reset
+
+# To apply the new migration to your local database:
+
+supabase migration up
+
+# Push changes to production (after approval)
+
+supabase db push
+
+# Pull production schema
+
+supabase db pull
+
+# Start/Stop local instance
+
+supabase start
+supabase stop
+
 ## Project Structure
 
 - `/app` - Expo Router application routes

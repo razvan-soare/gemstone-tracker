@@ -1,0 +1,46 @@
+---
+description: USE MCP when MODIFYING_SUPABASE to ENSURE_DB_STRUCTURE_AND_MIGRATIONS
+globs: **/*.{ts,tsx}
+---
+
+# Supabase Database Management through MCP
+
+## Context
+- When making any modifications to the Supabase database structure
+- When creating or modifying database queries
+- When adding new tables or columns
+- When modifying existing database schema
+
+## Requirements
+- MUST use MCP server to verify database structure before making changes
+- MUST create new migrations for all database modifications
+- MUST wait for user approval before applying any database changes
+- MUST validate schema changes through MCP queries first
+- MUST document all proposed changes in the migration file
+- MUST include rollback procedures in migrations
+
+## Examples
+<example>
+// Good: Using MCP to verify and create migration
+1. Query current structure through MCP
+2. Propose changes with migration file
+3. Wait for user approval
+4. Apply changes after confirmation
+</example>
+
+<example type="invalid">
+// Bad: Direct database modification without MCP
+1. Directly modifying Supabase schema
+2. Skipping migration creation
+3. Not verifying structure through MCP
+</example>
+
+## Process Flow
+1. Use MCP__query to check current database structure
+2. Create migration file with proposed changes
+3. Validate changes through MCP
+4. Present changes to user for approval
+5. Apply approved changes
+6. Verify successful application
+
+<version>1.0.0</version> 
