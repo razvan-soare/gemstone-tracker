@@ -1,0 +1,101 @@
+---
+description: USE nativewind/tailwind for styling and CHECK components folder BEFORE using react-native-paper
+globs: **/*.{tsx,jsx}
+---
+
+# Styling and Component Selection Guidelines
+
+<version>1.0.0</version>
+
+## Context
+- When creating or modifying UI components
+- When styling components in the React Native application
+- When selecting components for use in the application
+
+## Requirements
+- Use NativeWind/TailwindCSS for styling all new components
+- Check the project's components folder first before using external libraries
+- If a suitable component is not found in the components folder, use React Native Paper
+- Avoid using StyleSheet from React Native when possible
+- Prioritize components with Expo compatibility
+
+## Examples
+
+<example>
+// Good: Using NativeWind/Tailwind for styling
+import { View, Text } from "react-native";
+import { styled } from "nativewind";
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
+
+export function MyComponent() {
+  return (
+    <StyledView className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+      <StyledText className="text-lg font-bold text-gray-900 dark:text-white">
+        Hello World
+      </StyledText>
+    </StyledView>
+  );
+}
+</example>
+
+<example type="invalid">
+// Bad: Using StyleSheet from React Native
+import { View, Text, StyleSheet } from "react-native";
+
+export function MyComponent() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Hello World</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+});
+</example>
+
+<example>
+// Good: Checking components folder first, then using React Native Paper
+import { CustomButton } from "@/components/CustomButton";
+import { Button } from "react-native-paper";
+
+export function MyScreen() {
+  // First check if we have a custom component
+  if (needsCustomButton) {
+    return <CustomButton onPress={handlePress} label="Submit" />;
+  }
+  
+  // If no suitable custom component exists, use React Native Paper
+  return <Button mode="contained" onPress={handlePress}>Submit</Button>;
+}
+</example>
+
+<example>
+// Good: Prioritizing Expo-compatible components
+import { Image } from "expo-image"; // Using Expo Image instead of React Native Image
+import { styled } from "nativewind";
+
+const StyledImage = styled(Image);
+
+export function MyImageComponent({ source }) {
+  return (
+    <StyledImage
+      source={source}
+      className="w-full h-64 rounded-lg"
+      contentFit="cover"
+    />
+  );
+}
+</example> 
