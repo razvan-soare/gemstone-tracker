@@ -22,7 +22,8 @@
 		"supabase:pull": "supabase db pull",
 		"supabase:start": "supabase start",
 		"supabase:stop": "supabase stop",
-		"supabase:create-migration": "supabase migration new"
+		"supabase:create-migration": "supabase migration new",
+		"supabase:seed": "node supabase/seeder/initial.js"
 	},
 	"dependencies": {
 		"@expo/react-native-action-sheet": "^4.1.1",
