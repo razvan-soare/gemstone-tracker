@@ -1,4 +1,5 @@
 import { GemstoneOwner } from "@/app/types/gemstone";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -40,6 +41,7 @@ const ExportDialog = ({ visible, onDismiss, onConfirm }: ExportDialogProps) => {
 		"all",
 	);
 	const [owner, setOwner] = useState<GemstoneOwner | "all">("all");
+	const { owners } = useOrganizationOwners();
 
 	// Dropdown menu visibility states
 	const [soldStatusMenuVisible, setSoldStatusMenuVisible] = useState(false);
@@ -74,18 +76,10 @@ const ExportDialog = ({ visible, onDismiss, onConfirm }: ExportDialogProps) => {
 	};
 
 	const getOwnerDisplayText = () => {
-		switch (owner) {
-			case "all":
-				return "All Owners";
-			case GemstoneOwner.NUO:
-				return "Nuo";
-			case GemstoneOwner.HAN:
-				return "Han";
-			case GemstoneOwner.HULU:
-				return "Hulu";
-			default:
-				return "All Owners";
+		if (owner === "all") {
+			return "All Owners";
 		}
+		return owner;
 	};
 
 	return (
@@ -201,27 +195,16 @@ const ExportDialog = ({ visible, onDismiss, onConfirm }: ExportDialogProps) => {
 										}}
 										title="All Owners"
 									/>
-									<Menu.Item
-										onPress={() => {
-											setOwner(GemstoneOwner.NUO);
-											setOwnerMenuVisible(false);
-										}}
-										title="Nuo"
-									/>
-									<Menu.Item
-										onPress={() => {
-											setOwner(GemstoneOwner.HAN);
-											setOwnerMenuVisible(false);
-										}}
-										title="Han"
-									/>
-									<Menu.Item
-										onPress={() => {
-											setOwner(GemstoneOwner.HULU);
-											setOwnerMenuVisible(false);
-										}}
-										title="Hulu"
-									/>
+									{owners.map((ownerItem) => (
+										<Menu.Item
+											key={ownerItem.id}
+											onPress={() => {
+												setOwner(ownerItem.name);
+												setOwnerMenuVisible(false);
+											}}
+											title={ownerItem.name}
+										/>
+									))}
 								</Menu>
 							</View>
 						</View>

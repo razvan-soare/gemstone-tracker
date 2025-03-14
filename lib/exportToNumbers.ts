@@ -11,20 +11,24 @@ export const exportToNumbers = async (
 	filters?: ExportFilters,
 ) => {
 	try {
-		// Define the CSV header
+		// First, get all unique owners from the gemstones
+		const uniqueOwners = Array.from(
+			new Set(gemstones.map((gemstone) => gemstone.owner).filter(Boolean))
+		).sort();
+
+		// Create the header with dynamic owner columns
 		const header = [
 			"Date",
 			"Bill Number",
-			"Stone Name + Color",
-			"Weight",
-			"WeChat Name (Buyer Name)",
+			"Stone Name & Color",
+			"Weight (ct)",
+			"Buyer",
 			"Buyer Address",
 			"Sell Price",
 			"Buy Price",
-			"Note",
-			"Owner 1 (Nuo)",
-			"Owner 2 (Han)",
-			"Owner 3 (Hulu)",
+			"Comment",
+			// Add a column for each unique owner
+			...uniqueOwners.map((owner) => `${owner} Buy Price`),
 		].join(",");
 
 		// Format the data rows
@@ -34,7 +38,9 @@ export const exportToNumbers = async (
 			const formattedDate = format(date, "yyyy-MM-dd");
 
 			// Format stone name and color
-			const stoneNameColor = `${gemstone.name}${gemstone.color ? ` - ${gemstone.color}` : ""}`;
+			const stoneNameColor = `${gemstone.name}${
+				gemstone.color ? ` - ${gemstone.color}` : ""
+			}`;
 
 			// Format sell price with currency
 			const sellPrice = gemstone.sell_price
@@ -46,10 +52,10 @@ export const exportToNumbers = async (
 				? `${gemstone.buy_currency || ""} ${gemstone.buy_price}`
 				: "";
 
-			// Calculate owner values based on ownership
-			const ownerNuo = gemstone.owner === "Nuo" ? buyPrice : "";
-			const ownerHan = gemstone.owner === "Han" ? buyPrice : "";
-			const ownerHulu = gemstone.owner === "Hulu" ? buyPrice : "";
+			// Create owner columns - only the matching owner gets the buy price
+			const ownerValues = uniqueOwners.map((owner) =>
+				gemstone.owner === owner ? buyPrice : ""
+			);
 
 			// Create the row
 			return [
@@ -62,9 +68,7 @@ export const exportToNumbers = async (
 				sellPrice,
 				buyPrice,
 				gemstone.comment || "",
-				ownerNuo,
-				ownerHan,
-				ownerHulu,
+				...ownerValues,
 			]
 				.map((value) => {
 					// Escape quotes and wrap fields with commas, quotes, or newlines in quotes
@@ -76,7 +80,9 @@ export const exportToNumbers = async (
 							value.includes("\r"))
 					) {
 						// Replace newlines with space and double up quotes for CSV escaping
-						return `"${value.replace(/\r?\n|\r/g, " ").replace(/"/g, '""')}"`;
+						return `"${value
+							.replace(/\r?\n|\r/g, " ")
+							.replace(/"/g, '""')}"`;
 					}
 					return value;
 				})

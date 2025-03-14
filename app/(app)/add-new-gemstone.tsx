@@ -40,6 +40,7 @@ import {
 } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Register the English locale
 registerTranslation("en", enGB);
@@ -62,6 +63,8 @@ export default function AddNewGemstone() {
 	const [isUploadingImages, setIsUploadingImages] = useState(false);
 
 	const queryClient = useQueryClient();
+
+	const { owners, addOwner } = useOrganizationOwners();
 
 	const [formData, setFormData] = useState({
 		name: "",
@@ -339,11 +342,14 @@ export default function AddNewGemstone() {
 						allowCustom
 						label="Owner"
 						value={formData.owner || ""}
-						options={Object.values(GemstoneOwner).map((owner) => ({
-							id: owner,
-							title: owner,
+						options={owners.map((owner) => ({
+							id: owner.name,
+							title: owner.name,
 						}))}
 						onChange={(value) => updateField("owner", value as GemstoneOwner)}
+						onCreateNewOption={async (value) => {
+							await addOwner.mutateAsync(value);
+						}}
 					/>
 				</View>
 

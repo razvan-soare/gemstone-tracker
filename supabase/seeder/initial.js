@@ -31,6 +31,9 @@ const TEST_ORGANIZATION = {
 	name: "Test Organization",
 };
 
+// Default owners for new organizations
+const DEFAULT_OWNERS = ["Nuo", "Han", "Hulu"];
+
 // Test stone
 const TEST_STONE = {
 	name: "Test Diamond",
@@ -135,7 +138,30 @@ async function seed() {
 			}
 
 			console.log(`Added user as organization owner`);
+
+			// Add default owners for the new organization
+			for (const ownerName of DEFAULT_OWNERS) {
+				const { error: ownerError } = await supabase
+					.from("organization_owners")
+					.insert({
+						organization_id: organizationId,
+						name: ownerName,
+					});
+
+				if (ownerError) {
+					console.warn(
+						`Error adding default owner ${ownerName}:`,
+						ownerError.message,
+					);
+				}
+			}
+
+			console.log(`Added default owners to the organization`);
 		}
+
+		await supabase.from("app_settings").insert({
+			min_version: "1.0.0",
+		});
 
 		// Step 3: Check if the organization already has stones
 		const { data: existingStones, error: stonesError } = await supabase

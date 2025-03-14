@@ -5,6 +5,7 @@ import {
 	GemstoneSize,
 } from "@/app/types/gemstone";
 import { colors } from "@/constants/colors";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import { useColorScheme } from "@/lib/useColorScheme";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -49,6 +50,7 @@ export default function FilterDrawer({
 		colorScheme === "dark" ? colors.dark.background : colors.light.background;
 	const textColor =
 		colorScheme === "dark" ? colors.dark.foreground : colors.light.foreground;
+	const { owners, addOwner } = useOrganizationOwners();
 
 	// We no longer need tempFilters since we apply directly
 	// Instead, we'll work directly with the filters from props
@@ -116,66 +118,81 @@ export default function FilterDrawer({
 		title: size,
 	}));
 
-	const ownerOptions = Object.values(GemstoneOwner).map((owner) => ({
-		id: owner,
-		title: owner,
+	const ownerOptions = owners.map((owner) => ({
+		id: owner.name,
+		title: owner.name,
 	}));
-
-	// Get active filters for chips
-	const activeFilters = Object.entries(currentFilters)
-		.filter(([_, value]) => !!value)
-		.map(([key, value]) => {
-			if (key === "sold" && value === true) {
-				return { key, label: "Sold Only" };
-			}
-			return { key, label: value as string };
-		});
 
 	return (
 		<Portal>
 			<Modal
 				visible={visible}
 				onDismiss={onDismiss}
-				contentContainerStyle={[styles.modalContainer, { backgroundColor }]}
+				contentContainerStyle={[
+					styles.modalContent,
+					{ backgroundColor: backgroundColor },
+				]}
 			>
 				<View style={styles.header}>
-					<Text variant="titleLarge">Filters</Text>
+					<Text
+						variant="titleLarge"
+						style={[styles.title, { color: textColor }]}
+					>
+						Filters
+					</Text>
 					<Button onPress={handleReset}>Reset</Button>
 				</View>
+
 				<Divider />
 
-				{activeFilters.length > 0 && (
-					<View style={styles.chipsContainer}>
-						<Text style={[styles.chipsLabel, { color: textColor }]}>
-							Active Filters:
-						</Text>
-						<ScrollView
-							horizontal
-							showsHorizontalScrollIndicator={false}
-							style={styles.chipsScrollView}
+				{/* Active filters */}
+				<View style={styles.activeFiltersContainer}>
+					{currentFilters.shape && (
+						<Chip
+							mode="outlined"
+							onClose={() => removeFilter("shape")}
+							style={styles.filterChip}
 						>
-							{activeFilters.map(({ key, label }) => (
-								<Chip
-									key={key}
-									mode="outlined"
-									onPress={() =>
-										removeFilter(key as keyof typeof currentFilters)
-									}
-									onClose={() =>
-										removeFilter(key as keyof typeof currentFilters)
-									}
-									style={styles.chip}
-									textStyle={styles.chipText}
-									compact
-									closeIcon="close-circle"
-									elevated={false}
-								>
-									{label}
-								</Chip>
-							))}
-						</ScrollView>
-					</View>
-				)}
+							Shape: {currentFilters.shape}
+						</Chip>
+					)}
+					{currentFilters.color && (
+						<Chip
+							mode="outlined"
+							onClose={() => removeFilter("color")}
+							style={styles.filterChip}
+						>
+							Color: {currentFilters.color}
+						</Chip>
+					)}
+					{currentFilters.size && (
+						<Chip
+							mode="outlined"
+							onClose={() => removeFilter("size")}
+							style={styles.filterChip}
+						>
+							Size: {currentFilters.size}
+						</Chip>
+					)}
+					{currentFilters.owner && (
+						<Chip
+							mode="outlined"
+							onClose={() => removeFilter("owner")}
+							style={styles.filterChip}
+						>
+							Owner: {currentFilters.owner}
+						</Chip>
+					)}
+					{currentFilters.sold === true && (
+						<Chip
+							mode="outlined"
+							onClose={() => removeFilter("sold")}
+							style={styles.filterChip}
+						>
+							Sold Only
+						</Chip>
+					)}
+				</View>
 
 				<ScrollView style={styles.scrollView}>
 					<View style={styles.dropdownContainer}>
@@ -225,6 +242,9 @@ export default function FilterDrawer({
 								updateFilter("owner", value as GemstoneOwner)
 							}
 							allowCustom
+							onCreateNewOption={async (value) => {
+								await addOwner.mutateAsync(value);
+							}}
 						/>
 					</View>
 
@@ -257,10 +277,12 @@ export default function FilterDrawer({
 }
 
 const styles = StyleSheet.create({
-	modalContainer: {
+	modalContent: {
 		margin: 20,
 		borderRadius: 8,
-		display: "flex",
+		height: "80%",
+		width: "90%",
+		alignSelf: "center",
 	},
 	header: {
 		flexDirection: "row",
@@ -268,51 +290,40 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		padding: 16,
 	},
+	title: {
+		fontWeight: "bold",
+	},
+	activeFiltersContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		padding: 8,
+		gap: 8,
+	},
+	filterChip: {
+		marginRight: 8,
+		marginBottom: 8,
+	},
 	scrollView: {
-		flexGrow: 1,
+		flex: 1,
 		padding: 16,
 	},
 	dropdownContainer: {
 		marginBottom: 16,
-		position: "relative",
-		zIndex: 1,
-	},
-	footer: {
-		flexDirection: "row",
-		justifyContent: "center",
-		padding: 16,
-	},
-	doneButton: {
-		minWidth: 120,
 	},
 	switchContainer: {
-		marginBottom: 24,
+		marginTop: 8,
 	},
 	switchRow: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginTop: 8,
+		marginVertical: 8,
 	},
-	chipsContainer: {
+	footer: {
 		padding: 16,
-		paddingBottom: 0,
+		alignItems: "flex-end",
 	},
-	chipsLabel: {
-		marginBottom: 8,
-		fontWeight: "500",
-	},
-	chipsScrollView: {
-		flexDirection: "row",
-	},
-	chip: {
-		marginRight: 8,
-		marginBottom: 8,
-		height: 32,
-		paddingVertical: 0,
-		paddingHorizontal: 0,
-	},
-	chipText: {
-		fontSize: 12,
+	doneButton: {
+		width: 100,
 	},
 });

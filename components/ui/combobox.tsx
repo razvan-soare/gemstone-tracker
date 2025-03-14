@@ -17,6 +17,7 @@ export type ComboBoxProps = {
 	label?: string;
 	className?: string;
 	allowCustom?: boolean;
+	onCreateNewOption?: (value: string) => Promise<void>;
 };
 
 export const ComboBox = ({
@@ -27,6 +28,7 @@ export const ComboBox = ({
 	label,
 	className,
 	allowCustom = false,
+	onCreateNewOption,
 }: ComboBoxProps) => {
 	const [keyValue, setKeyValue] = React.useState(0);
 	const colorScheme = useColorScheme();
@@ -69,6 +71,28 @@ export const ComboBox = ({
 		setDisplayOptions(newOptions);
 	}, [value, options]);
 
+	// Handle change with option creation
+	const handleChange = async (selectedValue: string) => {
+		onChange(selectedValue);
+
+		// If this is a new value and we have a handler for creating new options
+		if (
+			selectedValue &&
+			!options.some(
+				(option) =>
+					option.id === selectedValue || option.title === selectedValue,
+			) &&
+			onCreateNewOption &&
+			allowCustom
+		) {
+			try {
+				await onCreateNewOption(selectedValue);
+			} catch (error) {
+				console.error("Error creating new option:", error);
+			}
+		}
+	};
+
 	// Custom EmptyResultView component
 	const EmptyResultComponent = React.useMemo(() => {
 		if (!inputText || !allowCustom) return undefined;
@@ -77,7 +101,7 @@ export const ComboBox = ({
 			<View style={{ padding: 10, alignItems: "center" }}>
 				<TouchableOpacity
 					onPress={() => {
-						onChange(inputText);
+						handleChange(inputText);
 					}}
 					style={{
 						backgroundColor: colors.buttonBackground,
@@ -93,7 +117,7 @@ export const ComboBox = ({
 				</TouchableOpacity>
 			</View>
 		);
-	}, [inputText, allowCustom, colors, onChange]);
+	}, [inputText, allowCustom, colors, handleChange]);
 
 	return (
 		<View className={cn("w-full", className)}>
@@ -135,7 +159,7 @@ export const ComboBox = ({
 				}}
 				onSelectItem={(item) => {
 					if (item) {
-						onChange(item.title || "");
+						handleChange(item.title || "");
 						setInputText(item.title || "");
 					}
 				}}

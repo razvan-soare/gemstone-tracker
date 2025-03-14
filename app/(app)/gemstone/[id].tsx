@@ -47,6 +47,7 @@ import {
 import { DatePickerInput } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Helper function to format dates consistently
 const formatDate = (dateString: string) => {
@@ -140,6 +141,8 @@ export default function GemstoneDetail() {
 	const { uploading, takePhoto, pickImage } = useImageUpload(
 		`${activeOrganization?.id}/${gemstone?.id}`,
 	);
+
+	const { owners, addOwner } = useOrganizationOwners();
 
 	const handleTakePhoto = async () => {
 		await takePhoto({
@@ -580,25 +583,20 @@ export default function GemstoneDetail() {
 										<ComboBox
 											label="Owner"
 											value={formData.owner || ""}
-											options={[
-												...Object.values(GemstoneOwner).map((owner) => ({
-													id: owner,
-													title: owner,
-												})),
-												// Allow free text input by adding the current value if it's not in the enum
-												...(formData.owner &&
-												!Object.values(GemstoneOwner).includes(
-													formData.owner as any,
-												)
-													? [{ id: formData.owner, title: formData.owner }]
-													: []),
-											]}
+											options={owners.map((owner) => ({
+												id: owner.name,
+												title: owner.name,
+											}))}
 											onChange={(value) =>
 												setFormData((prev) => ({
 													...prev,
 													owner: value,
 												}))
 											}
+											allowCustom={true}
+											onCreateNewOption={async (value) => {
+												await addOwner.mutateAsync(value);
+											}}
 										/>
 									</View>
 

@@ -7,6 +7,7 @@ import {
 	GemTypeLabels,
 } from "@/app/types/gemstone";
 import { ComboBox } from "@/components/ui/combobox";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, Portal, TextInput } from "react-native-paper";
@@ -23,7 +24,7 @@ type FieldType =
 	| "owner"
 	| "gem_type";
 
-interface EditFieldDialogProps {
+type EditFieldDialogProps = {
 	visible: boolean;
 	onDismiss: () => void;
 	fieldName: string;
@@ -31,7 +32,7 @@ interface EditFieldDialogProps {
 	fieldType: FieldType;
 	currentValue: any;
 	onSave: (value: any) => void;
-}
+};
 
 export const EditFieldDialog = ({
 	visible,
@@ -42,62 +43,33 @@ export const EditFieldDialog = ({
 	currentValue,
 	onSave,
 }: EditFieldDialogProps) => {
-	// State to hold the edited value
 	const [value, setValue] = useState<any>(currentValue);
+	const { owners, addOwner } = useOrganizationOwners();
 
-	// Reset value when dialog opens with new field
+	// Update value when currentValue changes
 	useEffect(() => {
 		setValue(currentValue);
-	}, [currentValue, fieldName, visible]);
+	}, [currentValue]);
 
-	// Handle save button click
 	const handleSave = () => {
-		let valueToSave = value;
-
-		// Parse numeric values before saving
-		if (fieldType === "number" && fieldName !== "quantity") {
-			valueToSave = value === "" ? null : parseFloat(value);
-		}
-
-		onSave(valueToSave);
+		onSave(value);
 		onDismiss();
 	};
 
-	// Render the appropriate input component based on field type
 	const renderInputComponent = () => {
 		switch (fieldType) {
-			case "text":
-				return (
-					<TextInput
-						// label={fieldLabel}
-						mode="outlined"
-						autoFocus={true}
-						value={value || ""}
-						onChangeText={(text) => setValue(text)}
-						style={styles.input}
-					/>
-				);
-
 			case "number":
 				return (
 					<TextInput
-						// label={fieldLabel}
+						label={fieldLabel}
 						mode="outlined"
-						autoFocus={true}
 						value={String(value || "")}
 						onChangeText={(text) => {
-							// For quantity, ensure it's a positive integer
-							if (fieldName === "quantity") {
-								const numericValue = text.replace(/[^0-9]/g, "");
-								const finalValue = numericValue === "" ? "1" : numericValue;
-								setValue(finalValue);
-							} else {
-								// For other numeric fields like weight, store as string and validate
-								const numericValue = text.replace(/[^0-9.]/g, "");
-								// Prevent multiple decimal points
-								if (numericValue.split(".").length > 2) return;
-								setValue(numericValue); // Store as string instead of parsing to float
-							}
+							// Only allow numbers and decimal point
+							const numericValue = text.replace(/[^0-9.]/g, "");
+							// Prevent multiple decimal points
+							if (numericValue.split(".").length > 2) return;
+							setValue(numericValue);
 						}}
 						keyboardType="decimal-pad"
 						style={styles.input}
@@ -173,19 +145,15 @@ export const EditFieldDialog = ({
 						<ComboBox
 							// label={fieldLabel}
 							value={value || ""}
-							options={[
-								...Object.values(GemstoneOwner).map((owner) => ({
-									id: owner,
-									title: owner,
-								})),
-								// Allow custom owner values
-								...(value &&
-								!Object.values(GemstoneOwner).includes(value as any)
-									? [{ id: value, title: value }]
-									: []),
-							]}
+							options={owners.map((owner) => ({
+								id: owner.name,
+								title: owner.name,
+							}))}
 							allowCustom={true}
 							onChange={(selectedValue) => setValue(selectedValue)}
+							onCreateNewOption={async (newValue) => {
+								await addOwner.mutateAsync(newValue);
+							}}
 						/>
 					</View>
 				);
@@ -234,10 +202,9 @@ export const EditFieldDialog = ({
 
 const styles = StyleSheet.create({
 	dialog: {
-		borderRadius: 8,
+		padding: 10,
 	},
 	input: {
-		marginTop: 8,
-		marginBottom: 8,
+		marginBottom: 10,
 	},
 });
