@@ -2,7 +2,10 @@ import { cn } from "@/lib/utils";
 import * as React from "react";
 import { useEffect } from "react";
 import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
-import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
+import {
+	AutocompleteDropdown,
+	AutocompleteDropdownItem,
+} from "react-native-autocomplete-dropdown";
 
 export type ComboBoxOption = {
 	id: string;
@@ -36,13 +39,19 @@ export const ComboBox = ({
 	const [inputText, setInputText] = React.useState("");
 	const [displayOptions, setDisplayOptions] =
 		React.useState<ComboBoxOption[]>(options);
+	const [selectedItem, setSelectedItem] = React.useState<
+		AutocompleteDropdownItem | undefined
+	>(value ? { id: value, title: value } : undefined);
 
 	useEffect(() => {
 		if (!value) {
 			setInputText("");
+			setSelectedItem(undefined);
 			setKeyValue(keyValue + 1);
+		} else if (value && (!selectedItem || selectedItem.title !== value)) {
+			setSelectedItem({ id: value, title: value });
 		}
-	}, [value]);
+	}, [value, selectedItem]);
 
 	// Define colors based on theme
 	const colors = {
@@ -93,6 +102,26 @@ export const ComboBox = ({
 		}
 	};
 
+	// Handle blur event
+	const handleBlur = () => {
+		if (allowCustom && inputText) {
+			// Create a new item based on the input text
+			const newItem: AutocompleteDropdownItem = {
+				id: inputText,
+				title: inputText,
+			};
+
+			// Update the selected item
+			setSelectedItem(newItem);
+
+			// Call handleChange to update the parent component
+			handleChange(inputText);
+
+			// Force a refresh of the component to ensure the selected value is displayed
+			setKeyValue((prev) => prev + 1);
+		}
+	};
+
 	// Custom EmptyResultView component
 	const EmptyResultComponent = React.useMemo(() => {
 		if (!inputText || !allowCustom) return undefined;
@@ -101,6 +130,11 @@ export const ComboBox = ({
 			<View style={{ padding: 10, alignItems: "center" }}>
 				<TouchableOpacity
 					onPress={() => {
+						const newItem: AutocompleteDropdownItem = {
+							id: inputText,
+							title: inputText,
+						};
+						setSelectedItem(newItem);
 						handleChange(inputText);
 					}}
 					style={{
@@ -131,10 +165,11 @@ export const ComboBox = ({
 			)}
 			<AutocompleteDropdown
 				key={keyValue}
-				initialValue={value ? { id: value, title: value } : undefined}
+				initialValue={selectedItem}
 				clearOnFocus={false}
 				closeOnBlur={true}
 				closeOnSubmit={false}
+				onBlur={handleBlur}
 				textInputProps={{
 					placeholder,
 					placeholderTextColor: colors.placeholderText,
@@ -159,6 +194,7 @@ export const ComboBox = ({
 				}}
 				onSelectItem={(item) => {
 					if (item) {
+						setSelectedItem(item);
 						handleChange(item.title || "");
 						setInputText(item.title || "");
 					}
