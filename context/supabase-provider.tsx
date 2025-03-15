@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Sentry from "@sentry/react-native";
 import { Session, User } from "@supabase/supabase-js";
 import { SplashScreen, useRouter, useSegments } from "expo-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
@@ -143,7 +144,10 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			email,
 			password,
 		});
-
+		Sentry.captureMessage("Signed in with password");
+		Sentry.captureMessage(`Email: ${email}`);
+		Sentry.captureMessage(`Data: ${JSON.stringify(data)}`);
+		Sentry.captureMessage(`Error: ${JSON.stringify(error)}`);
 		if (error) {
 			throw error;
 		}

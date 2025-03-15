@@ -7,6 +7,14 @@ import { Slot } from "expo-router";
 import { useEffect, useState } from "react";
 import { UpdateRequiredModal } from "@/components/UpdateRequiredModal";
 import { SplashScreen } from "expo-router";
+import * as Sentry from "@sentry/react-native";
+
+Sentry.init({
+	dsn: "https://51fc8167bd38775d4511e5ea025b66e4@o4508983038377984.ingest.de.sentry.io/4508983039295568",
+
+	// uncomment the line below to enable Spotlight (https://spotlightjs.com)
+	// spotlight: __DEV__,
+});
 
 // Create a client
 const queryClient = new QueryClient({
@@ -18,7 +26,7 @@ const queryClient = new QueryClient({
 	},
 });
 
-export default function AppLayout() {
+export default Sentry.wrap(function AppLayout() {
 	const [versionCheck, setVersionCheck] = useState<{
 		needsUpdate: boolean;
 		currentVersion: string;
@@ -72,4 +80,4 @@ export default function AppLayout() {
 			</SupabaseProvider>
 		</QueryClientProvider>
 	);
-}
+});
