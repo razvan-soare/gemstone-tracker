@@ -1,2 +1,6 @@
 # Project notes and templates
 xnotes/
+
+.env
+.env.development
+.env.production

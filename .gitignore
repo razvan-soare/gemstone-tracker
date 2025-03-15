@@ -10,7 +10,10 @@ npm-debug.*
 *.orig.*
 web-build/
 
+# Environment files
 .env
+.env.*
+!.env.example
 
 .cursorrules
 
@@ -26,4 +29,5 @@ expo-env.d.ts
 # Private individual user cursor rules
 .cursor/rules/_*.mdc
 
+# Documentation
 docs/

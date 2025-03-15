@@ -12,6 +12,7 @@ import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
+import { Alert } from "@/components/ui/alert";
 
 const formSchema = z.object({
 	email: z.string().email("Please enter a valid email address."),
@@ -25,6 +26,8 @@ export default function SignIn() {
 	const { signInWithPassword } = useSupabase();
 	const [devTapCount, setDevTapCount] = useState(0);
 	const router = useRouter();
+	const [loginError, setLoginError] = useState<string | null>(null);
+	const environment = process.env.EXPO_PUBLIC_ENV || "development";
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -36,11 +39,16 @@ export default function SignIn() {
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
+			setLoginError(null);
+			console.log("data", data);
 			await signInWithPassword(data.email, data.password);
-
 			form.reset();
 		} catch (error: Error | any) {
 			console.log(error.message);
+			setLoginError(
+				error.message ||
+					"Invalid login credentials. Please check your email and password.",
+			);
 		}
 	}
 
@@ -64,6 +72,7 @@ export default function SignIn() {
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
 				<H1 className="self-start ">Login</H1>
+
 				<Form {...form}>
 					<View className="gap-4">
 						<FormField
@@ -97,7 +106,11 @@ export default function SignIn() {
 						/>
 					</View>
 				</Form>
+				{loginError && (
+					<Alert title="Login Failed" intent="error" description={loginError} />
+				)}
 			</View>
+
 			<View className="web:m-4 gap-2">
 				<Button
 					size="default"
@@ -114,6 +127,8 @@ export default function SignIn() {
 				<Pressable onPress={handleBuildNumberPress}>
 					<Text className="text-sm text-gray-500 text-center">
 						Build: {Constants.expoConfig?.ios?.buildNumber || "Unknown"}
+						{environment !== "production" && ` (${environment})`}
+						{process.env.EXPO_PUBLIC_SUPABASE_URL}
 					</Text>
 				</Pressable>
 			</View>
