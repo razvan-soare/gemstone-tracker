@@ -90,7 +90,6 @@ export default function AddNewGemstone() {
 	});
 
 	const updateField = (field: string, value?: string | GemTypeEnum) => {
-		if (!value) return;
 		setFormData((prev) => ({
 			...prev,
 			[field]: value,

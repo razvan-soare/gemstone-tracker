@@ -175,7 +175,6 @@ export const EditFieldDialog = ({
 					<View style={{ marginTop: 30, marginBottom: 30 }}>
 						<DatePickerInput
 							locale="en"
-							// label={fieldLabel}
 							value={value ? new Date(value) : undefined}
 							onChange={(date) => {
 								setValue(date ? date.toISOString() : null);
