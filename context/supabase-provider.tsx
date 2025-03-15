@@ -230,8 +230,58 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				return null;
 			}
 
+			// Add default gemstone types for the new organization
+			const defaultGemstoneTypes = [
+				"Ruby",
+				"Sapphire",
+				"Emerald",
+				"Diamond",
+				"Amethyst",
+				"Aquamarine",
+				"Topaz",
+				"Opal",
+				"Garnet",
+				"Peridot",
+				"Tanzanite",
+				"Tourmaline",
+				"Citrine",
+				"Morganite",
+				"Alexandrite",
+				"Turquoise",
+				"Jade",
+				"Lapis Lazuli",
+				"Moonstone",
+				"Onyx",
+				"Pearl",
+				"Spinel",
+				"Zircon",
+				"Other",
+			];
+
+			// Create batch insert data
+			const gemstoneTypesData = defaultGemstoneTypes.map((name) => ({
+				organization_id: organization.id,
+				name,
+			}));
+
+			// Insert default gemstone types
+			const { error: gemstoneTypesError } = await supabase
+				.from("organization_gemstone_types")
+				.insert(gemstoneTypesData);
+
+			if (gemstoneTypesError) {
+				console.error(
+					"Error adding default gemstone types:",
+					gemstoneTypesError,
+				);
+				// Continue even if there's an error with gemstone types
+			}
+
 			// Invalidate queries to refresh data
 			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
+			queryClient.invalidateQueries({
+				queryKey: ["organization-gemstone-types"],
+			});
 
 			return organization;
 		} catch (error) {

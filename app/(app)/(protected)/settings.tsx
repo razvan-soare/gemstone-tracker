@@ -32,6 +32,7 @@ import { useDialog } from "@/hooks/useDialog";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { OwnersDialog } from "@/components/OwnersDialog";
+import { GemstoneTypesDialog } from "@/components/GemstoneTypesDialog";
 
 export default function Settings() {
 	const {
@@ -52,6 +53,8 @@ export default function Settings() {
 	const [showDevOptions, setShowDevOptions] = useState(false);
 	const [devTapCount, setDevTapCount] = useState(0);
 	const [ownersDialogVisible, setOwnersDialogVisible] = useState(false);
+	const [gemstoneTypesDialogVisible, setGemstoneTypesDialogVisible] =
+		useState(false);
 	const router = useRouter();
 	const {
 		open: orgNameDialogOpen,
@@ -231,6 +234,14 @@ export default function Settings() {
 										onPress={() => setOwnersDialogVisible(true)}
 									>
 										<Text>Manage Owners</Text>
+									</Button>
+									<Button
+										className="w-full mt-2"
+										size="default"
+										variant="outline"
+										onPress={() => setGemstoneTypesDialogVisible(true)}
+									>
+										<Text>Manage Gemstone Types</Text>
 									</Button>
 								</>
 							)}
@@ -516,6 +527,12 @@ export default function Settings() {
 			<OwnersDialog
 				visible={ownersDialogVisible}
 				onDismiss={() => setOwnersDialogVisible(false)}
+			/>
+
+			{/* Gemstone Types Dialog */}
+			<GemstoneTypesDialog
+				visible={gemstoneTypesDialogVisible}
+				onDismiss={() => setGemstoneTypesDialogVisible(false)}
 			/>
 		</SafeAreaView>
 	);

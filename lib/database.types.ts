@@ -176,6 +176,38 @@ export type Database = {
           },
         ]
       }
+      organization_gemstone_types: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_gemstone_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string | null
@@ -279,6 +311,7 @@ export type Database = {
           date: string | null
           dimensions: Json | null
           gem_type: string | null
+          gem_type_id: string | null
           id: string
           name: string
           organization_id: string | null
@@ -308,6 +341,7 @@ export type Database = {
           date?: string | null
           dimensions?: Json | null
           gem_type?: string | null
+          gem_type_id?: string | null
           id?: string
           name: string
           organization_id?: string | null
@@ -337,6 +371,7 @@ export type Database = {
           date?: string | null
           dimensions?: Json | null
           gem_type?: string | null
+          gem_type_id?: string | null
           id?: string
           name?: string
           organization_id?: string | null
@@ -358,6 +393,13 @@ export type Database = {
             columns: ["certificate_id"]
             isOneToOne: false
             referencedRelation: "certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stones_gem_type_id_fkey"
+            columns: ["gem_type_id"]
+            isOneToOne: false
+            referencedRelation: "organization_gemstone_types"
             referencedColumns: ["id"]
           },
           {

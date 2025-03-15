@@ -41,6 +41,7 @@ import {
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
+import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
 
 // Register the English locale
 registerTranslation("en", enGB);
@@ -65,6 +66,7 @@ export default function AddNewGemstone() {
 	const queryClient = useQueryClient();
 
 	const { owners, addOwner } = useOrganizationOwners();
+	const { gemstoneTypes, addGemstoneType } = useOrganizationGemstoneTypes();
 
 	const [formData, setFormData] = useState({
 		name: "",
@@ -196,6 +198,9 @@ export default function AddNewGemstone() {
 				gem_type: formData.gem_type,
 				sold: false,
 				owner: formData.owner,
+				// Find the gemstone type ID based on the name
+				gem_type_id:
+					gemstoneTypes.find((type) => type.name === formData.name)?.id || null,
 			});
 
 			// If there are selected images, upload them in the background
@@ -302,11 +307,14 @@ export default function AddNewGemstone() {
 						allowCustom
 						label="Stone type"
 						value={formData.name || ""}
-						options={Object.values(GemstoneType).map((type) => ({
-							id: type,
-							title: type,
+						options={gemstoneTypes.map((type) => ({
+							id: type.name,
+							title: type.name,
 						}))}
-						onChange={(value) => updateField("name", value as GemstoneType)}
+						onChange={(value) => updateField("name", value)}
+						onCreateNewOption={async (newValue) => {
+							await addGemstoneType.mutateAsync(newValue);
+						}}
 					/>
 				</View>
 

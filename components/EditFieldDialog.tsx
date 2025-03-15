@@ -9,6 +9,7 @@ import {
 } from "@/app/types/gemstone";
 import { ComboBox } from "@/components/ui/combobox";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
+import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, Portal, TextInput } from "react-native-paper";
@@ -26,7 +27,8 @@ type FieldType =
 	| "owner"
 	| "gem_type"
 	| "buy_price"
-	| "sell_price";
+	| "sell_price"
+	| "name";
 
 type EditFieldDialogProps = {
 	visible: boolean;
@@ -54,6 +56,7 @@ export const EditFieldDialog = ({
 		currentCurrency || Currency.RMB,
 	);
 	const { owners, addOwner } = useOrganizationOwners();
+	const { gemstoneTypes, addGemstoneType } = useOrganizationGemstoneTypes();
 
 	// Update value when currentValue changes
 	useEffect(() => {
@@ -262,6 +265,24 @@ export const EditFieldDialog = ({
 								title: GemTypeLabels[type],
 							}))}
 							onChange={(selectedValue) => setValue(selectedValue)}
+						/>
+					</View>
+				);
+
+			case "name":
+				return (
+					<View style={styles.input}>
+						<ComboBox
+							value={value || ""}
+							options={gemstoneTypes.map((type) => ({
+								id: type.name,
+								title: type.name,
+							}))}
+							allowCustom={true}
+							onChange={(selectedValue) => setValue(selectedValue)}
+							onCreateNewOption={async (newValue) => {
+								await addGemstoneType.mutateAsync(newValue);
+							}}
 						/>
 					</View>
 				);

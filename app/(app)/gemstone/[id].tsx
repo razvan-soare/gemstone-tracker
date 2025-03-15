@@ -136,7 +136,8 @@ export default function GemstoneDetail() {
 			| "owner"
 			| "gem_type"
 			| "buy_price"
-			| "sell_price";
+			| "sell_price"
+			| "name";
 		value: any;
 	}>({ name: "", label: "", type: "text", value: null });
 
@@ -314,7 +315,8 @@ export default function GemstoneDetail() {
 			| "owner"
 			| "gem_type"
 			| "buy_price"
-			| "sell_price",
+			| "sell_price"
+			| "name",
 		fieldValue: any,
 	) => {
 		setCurrentField({
@@ -881,6 +883,26 @@ export default function GemstoneDetail() {
 									<View style={styles.tableHeader}>
 										<P style={styles.tableHeaderText}>Property</P>
 										<P style={styles.tableHeaderText}>Value</P>
+									</View>
+
+									<View style={styles.tableRow}>
+										<View style={styles.tableCell}>
+											<P style={styles.tableCellLabel}>Name</P>
+										</View>
+										<View style={styles.tableCell}>
+											<TouchableOpacity
+												onPress={() =>
+													handleEditField(
+														"name",
+														"Stone Type",
+														"name",
+														gemstone.name,
+													)
+												}
+											>
+												<P style={styles.tableCellValue}>{gemstone.name}</P>
+											</TouchableOpacity>
+										</View>
 									</View>
 
 									<View style={styles.tableRow}>

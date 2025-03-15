@@ -28,6 +28,7 @@
 		"supabase:pull": "supabase db pull",
 		"supabase:start": "supabase start",
 		"supabase:stop": "supabase stop",
+		"supabase:migration:up": "supabase migration up",
 		"supabase:create-migration": "supabase migration new",
 		"supabase:seed": "node supabase/seeder/initial.js"
 	},

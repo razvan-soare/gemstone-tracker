@@ -157,6 +157,54 @@ async function seed() {
 			}
 
 			console.log(`Added default owners to the organization`);
+
+			// Add default gemstone types for the new organization
+			const DEFAULT_GEMSTONE_TYPES = [
+				"Ruby",
+				"Sapphire",
+				"Emerald",
+				"Diamond",
+				"Amethyst",
+				"Aquamarine",
+				"Topaz",
+				"Opal",
+				"Garnet",
+				"Peridot",
+				"Tanzanite",
+				"Tourmaline",
+				"Citrine",
+				"Morganite",
+				"Alexandrite",
+				"Turquoise",
+				"Jade",
+				"Lapis Lazuli",
+				"Moonstone",
+				"Onyx",
+				"Pearl",
+				"Spinel",
+				"Zircon",
+				"Other",
+			];
+
+			// Create batch insert data
+			const gemstoneTypesData = DEFAULT_GEMSTONE_TYPES.map((name) => ({
+				organization_id: organizationId,
+				name,
+			}));
+
+			// Insert default gemstone types
+			const { error: gemstoneTypesError } = await supabase
+				.from("organization_gemstone_types")
+				.insert(gemstoneTypesData);
+
+			if (gemstoneTypesError) {
+				console.warn(
+					"Error adding default gemstone types:",
+					gemstoneTypesError.message,
+				);
+			} else {
+				console.log(`Added default gemstone types to the organization`);
+			}
 		}
 
 		await supabase.from("app_settings").insert({
