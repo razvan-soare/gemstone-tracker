@@ -25,3 +25,5 @@ expo-env.d.ts
 .cursor/mcp.json
 # Private individual user cursor rules
 .cursor/rules/_*.mdc
+
+docs/

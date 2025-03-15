@@ -1,5 +1,6 @@
 import {
 	Currency,
+	CurrencySymbols,
 	GemstoneColor,
 	GemstoneOwner,
 	GemstoneShape,
@@ -12,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, Portal, TextInput } from "react-native-paper";
 import { DatePickerInput } from "react-native-paper-dates";
+import { Dropdown } from "react-native-paper-dropdown";
 
 // Define field types for different input components
 type FieldType =
@@ -22,7 +24,9 @@ type FieldType =
 	| "shape"
 	| "color"
 	| "owner"
-	| "gem_type";
+	| "gem_type"
+	| "buy_price"
+	| "sell_price";
 
 type EditFieldDialogProps = {
 	visible: boolean;
@@ -32,6 +36,7 @@ type EditFieldDialogProps = {
 	fieldType: FieldType;
 	currentValue: any;
 	onSave: (value: any) => void;
+	currentCurrency?: Currency;
 };
 
 export const EditFieldDialog = ({
@@ -42,22 +47,111 @@ export const EditFieldDialog = ({
 	fieldType,
 	currentValue,
 	onSave,
+	currentCurrency,
 }: EditFieldDialogProps) => {
 	const [value, setValue] = useState<any>(currentValue);
+	const [currency, setCurrency] = useState<Currency>(
+		currentCurrency || Currency.RMB,
+	);
 	const { owners, addOwner } = useOrganizationOwners();
 
 	// Update value when currentValue changes
 	useEffect(() => {
 		setValue(currentValue);
-	}, [currentValue]);
+		if (currentCurrency) {
+			setCurrency(currentCurrency);
+		}
+	}, [currentValue, currentCurrency]);
 
 	const handleSave = () => {
-		onSave(value);
+		if (fieldType === "buy_price" || fieldType === "sell_price") {
+			// For price fields, we need to save both the price and currency
+			onSave({
+				price: parseFloat(value),
+				currency: currency,
+			});
+		} else {
+			onSave(value);
+		}
 		onDismiss();
 	};
 
 	const renderInputComponent = () => {
 		switch (fieldType) {
+			case "buy_price":
+				return (
+					<View>
+						<View style={styles.priceContainer}>
+							<TextInput
+								label={fieldLabel}
+								mode="outlined"
+								value={String(value || "")}
+								onChangeText={(text) => {
+									// Only allow numbers and decimal point
+									const numericValue = text.replace(/[^0-9.]/g, "");
+									// Prevent multiple decimal points
+									if (numericValue.split(".").length > 2) return;
+									setValue(numericValue);
+								}}
+								keyboardType="decimal-pad"
+								style={styles.priceInput}
+								left={<TextInput.Affix text={CurrencySymbols[currency]} />}
+							/>
+							<View style={styles.currencyDropdown}>
+								<Dropdown
+									label="Currency"
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: 60 }}
+									value={currency}
+									options={Object.values(Currency).map((curr) => ({
+										label: curr,
+										value: curr,
+									}))}
+									onSelect={(value) => setCurrency(value as Currency)}
+								/>
+							</View>
+						</View>
+					</View>
+				);
+
+			case "sell_price":
+				return (
+					<View>
+						<View style={styles.priceContainer}>
+							<TextInput
+								label={fieldLabel}
+								mode="outlined"
+								value={String(value || "")}
+								onChangeText={(text) => {
+									// Only allow numbers and decimal point
+									const numericValue = text.replace(/[^0-9.]/g, "");
+									// Prevent multiple decimal points
+									if (numericValue.split(".").length > 2) return;
+									setValue(numericValue);
+								}}
+								keyboardType="decimal-pad"
+								style={styles.priceInput}
+								left={<TextInput.Affix text={CurrencySymbols[currency]} />}
+							/>
+							<View style={styles.currencyDropdown}>
+								<Dropdown
+									label="Currency"
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: 60 }}
+									value={currency}
+									options={Object.values(Currency).map((curr) => ({
+										label: curr,
+										value: curr,
+									}))}
+									onSelect={(value) => setCurrency(value as Currency)}
+								/>
+							</View>
+						</View>
+					</View>
+				);
+
 			case "number":
 				return (
 					<TextInput
@@ -78,10 +172,10 @@ export const EditFieldDialog = ({
 
 			case "date":
 				return (
-					<View style={styles.input}>
+					<View style={{ marginTop: 30, marginBottom: 30 }}>
 						<DatePickerInput
 							locale="en"
-							label={fieldLabel}
+							// label={fieldLabel}
 							value={value ? new Date(value) : undefined}
 							onChange={(date) => {
 								setValue(date ? date.toISOString() : null);
@@ -206,5 +300,17 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		marginBottom: 10,
+	},
+	priceContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginBottom: 10,
+		gap: 10,
+	},
+	priceInput: {
+		flex: 2,
+	},
+	currencyDropdown: {
+		flex: 1,
 	},
 });

@@ -1,0 +1,75 @@
+---
+description: ORGANIZE hooks into FEATURE_GROUPS to IMPROVE_DISCOVERABILITY
+globs: hooks/**/*.{ts,tsx}
+---
+
+# Hooks Organization Standard
+
+## Context
+- Hooks are currently scattered across individual files
+- Each hook uses React Query for data fetching
+- Need to improve discoverability and maintainability of hooks
+
+## Requirements
+- Group hooks by feature domain in dedicated directories
+- Follow consistent naming patterns for hooks
+- Maintain clear separation of concerns
+- Export hooks through feature-specific index files
+
+## Directory Structure
+```
+hooks/
+├── gemstones/           # Gemstone-related hooks
+│   ├── index.ts         # Re-exports all gemstone hooks
+│   ├── useGemstone.ts
+│   ├── useGemstones.ts
+│   └── mutations/       # Mutation hooks for gemstones
+│       ├── useCreateGemstone.ts
+│       ├── useUpdateGemstone.ts
+│       └── useDeleteGemstone.ts
+├── organizations/       # Organization-related hooks
+│   ├── index.ts
+│   ├── useOrganization.ts
+│   └── mutations/
+├── images/             # Image-related hooks
+│   ├── index.ts
+│   └── useImage.ts
+└── ui/                 # UI-related hooks
+    ├── index.ts
+    └── useColumnPreference.ts
+```
+
+## Hook Naming Conventions
+- Query hooks: `use{Entity}[Qualifier]`
+  - Examples: `useGemstone`, `useGemstonesByDate`
+- Mutation hooks: `use{Action}{Entity}`
+  - Examples: `useCreateGemstone`, `useUpdateOrganization`
+- UI/Utility hooks: `use{Feature}`
+  - Examples: `useColumnPreference`, `useImageUpload`
+
+## Examples
+
+<example>
+// Good: Properly organized gemstone hooks
+// hooks/gemstones/index.ts
+export * from './useGemstone';
+export * from './useGemstones';
+export * from './useGemstonesByDate';
+export * from './mutations/useCreateGemstone';
+export * from './mutations/useUpdateGemstone';
+</example>
+
+<example type="invalid">
+// Bad: Mixed concerns and inconsistent naming
+// hooks/useGemstone.ts
+export const useGemstoneData = () => { ... }
+export const updateGemstone = () => { ... }
+export const useGemstoneImageHandler = () => { ... }
+</example>
+
+## Critical Guidelines
+- Each hook should have a single responsibility
+- Keep mutation hooks separate from query hooks
+- Use feature-specific index files for clean imports
+- Document hook parameters and return types
+- Maintain consistent error handling across hooks 

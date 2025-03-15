@@ -356,7 +356,7 @@ export default function AddNewGemstone() {
 				<TextInput
 					label="Bill number"
 					mode="outlined"
-					value={formData.bill_number}
+					defaultValue={formData.bill_number}
 					onChangeText={(value) => updateField("bill_number", value)}
 					style={[
 						styles.input,
@@ -368,7 +368,7 @@ export default function AddNewGemstone() {
 				<TextInput
 					label="Weight (carats)"
 					mode="outlined"
-					value={formData.weight}
+					defaultValue={formData.weight}
 					onChangeText={(value) => handleNumericInput(value, "weight")}
 					keyboardType="decimal-pad"
 					style={[styles.input, error?.field === "weight" && styles.inputError]}
@@ -379,7 +379,7 @@ export default function AddNewGemstone() {
 					<TextInput
 						label="Quantity (pieces)"
 						mode="outlined"
-						value={formData.quantity}
+						defaultValue={formData.quantity}
 						onChangeText={(value) => {
 							// Only allow positive integers
 							const numericValue = value.replace(/[^0-9]/g, "");
@@ -495,7 +495,7 @@ export default function AddNewGemstone() {
 					<TextInput
 						label="Buy price"
 						mode="outlined"
-						value={formData.buy_price.toString()}
+						defaultValue={formData.buy_price.toString()}
 						onChangeText={(value) => updateField("buy_price", value)}
 						keyboardType="decimal-pad"
 						style={[
@@ -526,7 +526,7 @@ export default function AddNewGemstone() {
 					<TextInput
 						label="Sell price"
 						mode="outlined"
-						value={formData.sell_price.toString()}
+						defaultValue={formData.sell_price.toString()}
 						onChangeText={(value) => updateField("sell_price", value)}
 						keyboardType="decimal-pad"
 						style={[
@@ -556,7 +556,7 @@ export default function AddNewGemstone() {
 				<TextInput
 					label="Buyer"
 					mode="outlined"
-					value={formData.buyer}
+					defaultValue={formData.buyer}
 					onChangeText={(value) => updateField("buyer", value)}
 					style={[styles.input, error?.field === "buyer" && styles.inputError]}
 					error={error?.field === "buyer"}
@@ -565,7 +565,7 @@ export default function AddNewGemstone() {
 				<TextInput
 					label="Buyer Address"
 					mode="outlined"
-					value={formData.buyer_address}
+					defaultValue={formData.buyer_address}
 					onChangeText={(value) => updateField("buyer_address", value)}
 					style={[
 						styles.input,
@@ -666,7 +666,7 @@ export default function AddNewGemstone() {
 				<TextInput
 					label="Comments"
 					mode="outlined"
-					value={formData.comment}
+					defaultValue={formData.comment}
 					onChangeText={(value) => updateField("comment", value)}
 					multiline
 					numberOfLines={3}

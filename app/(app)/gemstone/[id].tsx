@@ -134,7 +134,9 @@ export default function GemstoneDetail() {
 			| "shape"
 			| "color"
 			| "owner"
-			| "gem_type";
+			| "gem_type"
+			| "buy_price"
+			| "sell_price";
 		value: any;
 	}>({ name: "", label: "", type: "text", value: null });
 
@@ -310,7 +312,9 @@ export default function GemstoneDetail() {
 			| "shape"
 			| "color"
 			| "owner"
-			| "gem_type",
+			| "gem_type"
+			| "buy_price"
+			| "sell_price",
 		fieldValue: any,
 	) => {
 		setCurrentField({
@@ -326,9 +330,24 @@ export default function GemstoneDetail() {
 	const handleSaveField = async (value: any) => {
 		try {
 			// Create update object with just the field being edited
-			const updateData: Partial<Tables<"stones">> = {
-				[currentField.name]: value,
-			};
+			const updateData: Partial<Tables<"stones">> = {};
+
+			// Handle special case for buy_price which includes currency
+			if (currentField.name === "buy_price" && typeof value === "object") {
+				updateData.buy_price = value.price;
+				updateData.buy_currency = value.currency;
+			}
+			// Handle special case for sell_price which includes currency
+			else if (
+				currentField.name === "sell_price" &&
+				typeof value === "object"
+			) {
+				updateData.sell_price = value.price;
+				updateData.sell_currency = value.currency;
+			} else {
+				// Use type assertion to avoid TypeScript error
+				(updateData as any)[currentField.name] = value;
+			}
 
 			await updateGemstone.mutateAsync({
 				id: gemstone.id,
@@ -962,7 +981,7 @@ export default function GemstoneDetail() {
 													handleEditField(
 														"buy_price",
 														"Buy Price",
-														"number",
+														"buy_price",
 														gemstone.buy_price,
 													)
 												}
@@ -985,7 +1004,7 @@ export default function GemstoneDetail() {
 													handleEditField(
 														"sell_price",
 														"Sell Price",
-														"number",
+														"sell_price",
 														gemstone.sell_price,
 													)
 												}
@@ -1198,6 +1217,13 @@ export default function GemstoneDetail() {
 					fieldType={currentField.type}
 					currentValue={currentField.value}
 					onSave={handleSaveField}
+					currentCurrency={
+						currentField.name === "buy_price"
+							? (gemstone?.buy_currency as Currency)
+							: currentField.name === "sell_price"
+								? (gemstone?.sell_currency as Currency)
+								: undefined
+					}
 				/>
 
 				{/* Sell Dialog */}
