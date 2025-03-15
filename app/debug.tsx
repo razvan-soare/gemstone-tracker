@@ -2,6 +2,8 @@ import { View, Text, ScrollView, SafeAreaView } from "react-native";
 import UpdateDebugger from "@/components/UpdateDebugger";
 import { Stack, useRouter } from "expo-router";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/config/supabase";
+import { useState } from "react";
 
 /**
  * Debug screen for development and troubleshooting
@@ -13,6 +15,14 @@ import { Button } from "@/components/ui/button";
  */
 export default function DebugScreen() {
 	const router = useRouter();
+	const [minVersion, setMinVersion] = useState<string | null>(null);
+	const getMinVersion = async () => {
+		const { data, error } = await supabase.from("app_settings").select("*");
+		if (error) {
+			throw error;
+		}
+		setMinVersion(data[0].min_version);
+	};
 
 	return (
 		<SafeAreaView className="flex-1 bg-white">
@@ -31,6 +41,8 @@ export default function DebugScreen() {
 					<Text>Supabase URL: {process.env.EXPO_PUBLIC_SUPABASE_URL}</Text>
 					<Text>Supabase Key: {process.env.EXPO_PUBLIC_SUPABASE_KEY}</Text>
 
+					<Button onPress={getMinVersion}>Get Min Version</Button>
+					<Text>{minVersion}</Text>
 					<Button
 						size="default"
 						variant="outline"
