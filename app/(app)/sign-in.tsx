@@ -1,18 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { ActivityIndicator, View, Pressable } from "react-native";
-import * as z from "zod";
 import Constants from "expo-constants";
-import { useState } from "react";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import * as z from "zod";
 
 import { SafeAreaView } from "@/components/safe-area-view";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
-import { Alert } from "@/components/ui/alert";
 
 const formSchema = z.object({
 	email: z.string().email("Please enter a valid email address."),
@@ -27,7 +27,6 @@ export default function SignIn() {
 	const [devTapCount, setDevTapCount] = useState(0);
 	const router = useRouter();
 	const [loginError, setLoginError] = useState<string | null>(null);
-	const environment = process.env.EXPO_PUBLIC_ENV || "development";
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -126,9 +125,7 @@ export default function SignIn() {
 				</Button>
 				<Pressable onPress={handleBuildNumberPress}>
 					<Text className="text-sm text-gray-500 text-center">
-						Build: {Constants.expoConfig?.ios?.buildNumber || "Unknown"}
-						{environment !== "production" && ` (${environment})`}
-						{process.env.EXPO_PUBLIC_SUPABASE_URL}
+						{Constants.expoConfig?.ios?.buildNumber || "Unknown"}
 					</Text>
 				</Pressable>
 			</View>

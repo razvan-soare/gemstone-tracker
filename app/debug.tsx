@@ -27,6 +27,10 @@ export default function DebugScreen() {
 						<UpdateDebugger />
 					</View>
 
+					<Text>Environment: {process.env.EXPO_PUBLIC_ENV}</Text>
+					<Text>Supabase URL: {process.env.EXPO_PUBLIC_SUPABASE_URL}</Text>
+					<Text>Supabase Key: {process.env.EXPO_PUBLIC_SUPABASE_KEY}</Text>
+
 					<Button
 						size="default"
 						variant="outline"
