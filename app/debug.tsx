@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, SafeAreaView } from "react-native";
 import UpdateDebugger from "@/components/UpdateDebugger";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { Button } from "@/components/ui/button";
 
 /**
  * Debug screen for development and troubleshooting
@@ -11,6 +12,8 @@ import { Stack } from "expo-router";
  * 3. Using router.push("/debug") from expo-router
  */
 export default function DebugScreen() {
+	const router = useRouter();
+
 	return (
 		<SafeAreaView className="flex-1 bg-white">
 			<ScrollView className="flex-1 bg-white">
@@ -23,6 +26,15 @@ export default function DebugScreen() {
 						<Text className="text-lg font-semibold mb-2">Expo Updates</Text>
 						<UpdateDebugger />
 					</View>
+
+					<Button
+						size="default"
+						variant="outline"
+						onPress={() => router.back()}
+						className="mt-4"
+					>
+						<Text>Back</Text>
+					</Button>
 				</View>
 			</ScrollView>
 		</SafeAreaView>

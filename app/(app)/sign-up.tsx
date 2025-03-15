@@ -65,13 +65,13 @@ export default function SignUp() {
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start">Sign Up</H1>
+				<H1 className="self-start">Register</H1>
 
 				{verificationSent ? (
 					<Alert
 						title="Verification Email Sent"
 						intent="success"
-						description="Please check your email and follow the verification link to activate your account before signing in."
+						description="Please check your email and follow the verification link to activate your account before logging in."
 					/>
 				) : (
 					<Form {...form}>
@@ -130,7 +130,7 @@ export default function SignUp() {
 					onPress={() => setVerificationSent(false)}
 					className="web:m-4"
 				>
-					<Text>Back to Sign Up</Text>
+					<Text>Back to Register</Text>
 				</Button>
 			) : (
 				<Button
@@ -143,7 +143,7 @@ export default function SignUp() {
 					{form.formState.isSubmitting ? (
 						<ActivityIndicator size="small" />
 					) : (
-						<Text>Sign Up</Text>
+						<Text>Register</Text>
 					)}
 				</Button>
 			)}

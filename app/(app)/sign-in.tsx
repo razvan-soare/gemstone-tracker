@@ -1,7 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, Pressable } from "react-native";
 import * as z from "zod";
+import Constants from "expo-constants";
+import { useState } from "react";
+import { useRouter } from "expo-router";
 
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,8 @@ const formSchema = z.object({
 
 export default function SignIn() {
 	const { signInWithPassword } = useSupabase();
+	const [devTapCount, setDevTapCount] = useState(0);
+	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -39,10 +44,26 @@ export default function SignIn() {
 		}
 	}
 
+	const handleBuildNumberPress = () => {
+		const newCount = devTapCount + 1;
+		setDevTapCount(newCount);
+
+		// Navigate to debug screen after 7 taps
+		if (newCount >= 7) {
+			router.push("/debug");
+			setDevTapCount(0);
+		}
+
+		// Reset count after 3 seconds
+		setTimeout(() => {
+			setDevTapCount(0);
+		}, 3000);
+	};
+
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start ">Sign In</H1>
+				<H1 className="self-start ">Login</H1>
 				<Form {...form}>
 					<View className="gap-4">
 						<FormField
@@ -77,19 +98,25 @@ export default function SignIn() {
 					</View>
 				</Form>
 			</View>
-			<Button
-				size="default"
-				variant="default"
-				onPress={form.handleSubmit(onSubmit)}
-				disabled={form.formState.isSubmitting}
-				className="web:m-4"
-			>
-				{form.formState.isSubmitting ? (
-					<ActivityIndicator size="small" />
-				) : (
-					<Text>Sign In</Text>
-				)}
-			</Button>
+			<View className="web:m-4 gap-2">
+				<Button
+					size="default"
+					variant="default"
+					onPress={form.handleSubmit(onSubmit)}
+					disabled={form.formState.isSubmitting}
+				>
+					{form.formState.isSubmitting ? (
+						<ActivityIndicator size="small" />
+					) : (
+						<Text>Login</Text>
+					)}
+				</Button>
+				<Pressable onPress={handleBuildNumberPress}>
+					<Text className="text-sm text-gray-500 text-center">
+						Build: {Constants.expoConfig?.ios?.buildNumber || "Unknown"}
+					</Text>
+				</Pressable>
+			</View>
 		</SafeAreaView>
 	);
 }

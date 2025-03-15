@@ -29,7 +29,7 @@ export default function WelcomeScreen() {
 						router.push("/sign-up");
 					}}
 				>
-					<Text>Sign Up</Text>
+					<Text>Register</Text>
 				</Button>
 				<Button
 					size="default"
@@ -38,7 +38,7 @@ export default function WelcomeScreen() {
 						router.push("/sign-in");
 					}}
 				>
-					<Text>Sign In</Text>
+					<Text>Login</Text>
 				</Button>
 			</View>
 		</SafeAreaView>
