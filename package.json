@@ -93,7 +93,7 @@
 		"eslint-config-universe": "^14.0.0",
 		"prettier": "^3.3.3",
 		"supabase": "^2.15.8",
-		"typescript": "~5.3.3"
+		"typescript": "~5.8.0"
 	},
 	"private": true
 }
