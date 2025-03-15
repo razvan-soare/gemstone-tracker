@@ -31,6 +31,7 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { useDialog } from "@/hooks/useDialog";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import { OwnersDialog } from "@/components/OwnersDialog";
 
 export default function Settings() {
 	const {
@@ -50,6 +51,7 @@ export default function Settings() {
 	const [orgNameError, setOrgNameError] = useState("");
 	const [showDevOptions, setShowDevOptions] = useState(false);
 	const [devTapCount, setDevTapCount] = useState(0);
+	const [ownersDialogVisible, setOwnersDialogVisible] = useState(false);
 	const router = useRouter();
 	const {
 		open: orgNameDialogOpen,
@@ -117,8 +119,6 @@ export default function Settings() {
 	};
 
 	const handleAcceptInvite = async (invitation: Tables<"invitations">) => {
-		if (!activeOrganization?.id) return;
-
 		try {
 			await acceptInvitation.mutateAsync({ invitation });
 			refetchAllInvitations();
@@ -130,9 +130,7 @@ export default function Settings() {
 		if (!activeOrganization?.id) return;
 
 		try {
-			await declineInvitation.mutateAsync({
-				invitationId: invitation.id,
-			});
+			await declineInvitation.mutateAsync({ invitationId: invitation.id });
 			refetchAllInvitations();
 		} catch (error) {
 			console.error("Error accepting invitation:", error);
@@ -217,14 +215,24 @@ export default function Settings() {
 								/>
 							</View>
 							{isOrgOwner && activeOrganization && (
-								<Button
-									className="w-full mt-2"
-									size="default"
-									variant="outline"
-									onPress={openOrgNameModal}
-								>
-									<Text>Edit Organization Name</Text>
-								</Button>
+								<>
+									<Button
+										className="w-full mt-2"
+										size="default"
+										variant="outline"
+										onPress={openOrgNameModal}
+									>
+										<Text>Edit Organization Name</Text>
+									</Button>
+									<Button
+										className="w-full mt-2"
+										size="default"
+										variant="outline"
+										onPress={() => setOwnersDialogVisible(true)}
+									>
+										<Text>Manage Owners</Text>
+									</Button>
+								</>
 							)}
 						</View>
 					)}
@@ -503,6 +511,12 @@ export default function Settings() {
 					</View>
 				</Modal>
 			</Portal>
+
+			{/* Owners Dialog */}
+			<OwnersDialog
+				visible={ownersDialogVisible}
+				onDismiss={() => setOwnersDialogVisible(false)}
+			/>
 		</SafeAreaView>
 	);
 }

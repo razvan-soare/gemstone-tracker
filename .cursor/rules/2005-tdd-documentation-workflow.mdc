@@ -1,0 +1,51 @@
+---
+description: CREATE_TDD_DOCUMENT when IMPLEMENTING_COMPLEX_FEATURE to ENSURE_STRUCTURED_IMPLEMENTATION
+globs: **/*.{js,jsx,ts,tsx,py,rb,go,rs}
+---
+
+# TDD Documentation Workflow
+
+<version>1.0.0</version>
+
+## Context
+- When implementing complex features or significant changes
+- When a task requires multiple steps or components
+- When implementation needs to be broken down into atomic units
+
+## Requirements
+- Create a TDD document in `docs/plans` before starting implementation
+- Document should include:
+  - Problem statement and requirements
+  - Proposed solution architecture
+  - Breakdown of tasks into atomic units
+  - Acceptance criteria for each task
+  - Dependencies between tasks
+  - Testing strategy
+- Review the TDD document after each implementation step
+- Update the document with progress, challenges, and any changes to the plan
+- Mark completed tasks and document what remains to be done
+- Ensure each implementation step aligns with the documented plan
+
+## Examples
+
+<example>
+# Feature: User Authentication System
+## Problem Statement
+Need to implement secure user authentication with email verification.
+
+## Tasks
+- [ ] 1. Create user registration endpoint
+- [ ] 2. Implement password hashing
+- [ ] 3. Create email verification flow
+- [ ] 4. Implement login endpoint
+- [ ] 5. Add password reset functionality
+
+## Implementation Plan
+Starting with task 1: Create database schema for users table...
+</example>
+
+<example type="invalid">
+Let's implement user authentication. First I'll create a login form, then add some validation...
+
+This lacks proper planning, doesn't break down the implementation into atomic tasks, and doesn't provide a clear path for implementation.
+</example> 
