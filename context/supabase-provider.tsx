@@ -7,11 +7,25 @@ import { supabase } from "@/config/supabase";
 import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";
 import { useOrganizationMemberships } from "@/hooks/useOrganizationMemberships";
 import { Tables } from "@/lib/database.types";
+import "../lib/supabase-types"; // Import type extensions
 import { useQueryClient } from "@tanstack/react-query";
 SplashScreen.preventAutoHideAsync();
 
 // Storage key for the active organization
 const ACTIVE_ORGANIZATION_KEY = "gemstone_tracker_active_organization";
+
+interface ProfileType {
+	id: string;
+	name: string;
+	created_at: string | null;
+	updated_at: string | null;
+	is_onboarded: boolean;
+}
+
+interface CompleteOnboardingParams {
+	user_name: string;
+	organization_name: string;
+}
 
 type SupabaseContextProps = {
 	user: User | null;
@@ -31,6 +45,13 @@ type SupabaseContextProps = {
 		email: string,
 	) => Promise<Tables<"organizations"> | null>;
 	updateActiveOrganization: (organization: Tables<"organizations">) => void;
+	userProfile: ProfileType | null;
+	isOnboarded: boolean;
+	completeUserOnboarding: (props: {
+		userName: string;
+		organizationName: string;
+		organizationId: string;
+	}) => Promise<void>;
 };
 
 type SupabaseProviderProps = {
@@ -50,6 +71,9 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	onSelectOrganization: async () => {},
 	createOrganizationForUser: async () => null,
 	updateActiveOrganization: () => {},
+	userProfile: null,
+	isOnboarded: false,
+	completeUserOnboarding: async () => {},
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -60,6 +84,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [session, setSession] = useState<Session | null>(null);
 	const [initialized, setInitialized] = useState<boolean>(false);
+	const [userProfile, setUserProfile] = useState<ProfileType | null>(null);
+	const [isOnboarded, setIsOnboarded] = useState<boolean>(false);
 	const queryClient = useQueryClient();
 	const { data: organizationMemberships } = useOrganizationMemberships(session);
 	const [activeOrganization, setActiveOrganization] =
@@ -72,6 +98,41 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			.map((membership) => membership.organization)
 			.filter((org) => org !== null);
 	}, [organizationMemberships]);
+
+	// Fetch user profile when user changes
+	useEffect(() => {
+		const fetchUserProfile = async () => {
+			if (!user) {
+				setUserProfile(null);
+				setIsOnboarded(false);
+				return;
+			}
+
+			try {
+				const { data, error } = await supabase
+					.from("profiles")
+					.select("*")
+					.eq("id", user.id)
+					.single();
+
+				if (error) {
+					console.error("Error fetching user profile:", error);
+					setUserProfile(null);
+					setIsOnboarded(false);
+					return;
+				}
+
+				setUserProfile(data as ProfileType);
+				setIsOnboarded(data?.is_onboarded || false);
+			} catch (error) {
+				console.error("Error in fetchUserProfile:", error);
+				setUserProfile(null);
+				setIsOnboarded(false);
+			}
+		};
+
+		fetchUserProfile();
+	}, [user]);
 
 	// Load the active organization from AsyncStorage on initialization
 	useEffect(() => {
@@ -172,6 +233,219 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}
 
 		return data;
+	};
+
+	// Function to complete the onboarding process
+	const completeUserOnboarding = async (props: {
+		userName: string;
+		organizationName: string;
+		organizationId: string;
+	}) => {
+		if (!user) throw new Error("User not authenticated");
+		let organizationId = props.organizationId;
+		try {
+			// 1. Update user profile with name and mark as onboarded
+			const { error: profileError } = await supabase.from("profiles").upsert({
+				id: user.id,
+				name: props.userName,
+				is_onboarded: true,
+				updated_at: new Date().toISOString(),
+			});
+
+			if (profileError) {
+				console.error("Error updating profile:", profileError);
+				throw profileError;
+			}
+
+			if (organizationId) {
+				// Update the existing organization name
+				const { data: updatedOrg, error: updateOrgError } = await supabase
+					.from("organizations")
+					.update({
+						name: props.organizationName,
+						updated_at: new Date().toISOString(),
+					})
+					.eq("id", organizationId)
+					.select()
+					.single();
+
+				if (updateOrgError) {
+					console.error("Error updating organization:", updateOrgError);
+					throw updateOrgError;
+				}
+
+				if (!updatedOrg) {
+					throw new Error("Failed to update organization");
+				}
+
+				// Check if there's an owner record and create/update it
+				const { data: existingOwners, error: ownerCheckError } = await supabase
+					.from("organization_owners")
+					.select()
+					.eq("organization_id", organizationId);
+
+				if (ownerCheckError) {
+					console.error("Error checking organization owners:", ownerCheckError);
+					throw ownerCheckError;
+				}
+
+				if (!existingOwners || existingOwners.length === 0) {
+					// Create owner record if it doesn't exist
+					const { error: createOwnerError } = await supabase
+						.from("organization_owners")
+						.insert({
+							organization_id: organizationId,
+							name: props.userName,
+						});
+
+					if (createOwnerError) {
+						console.error(
+							"Error creating organization owner:",
+							createOwnerError,
+						);
+						throw createOwnerError;
+					}
+				} else {
+					// Update existing owner name
+					const { error: updateOwnerError } = await supabase
+						.from("organization_owners")
+						.update({
+							name: props.userName,
+							updated_at: new Date().toISOString(),
+						})
+						.eq("organization_id", organizationId);
+
+					if (updateOwnerError) {
+						console.error(
+							"Error updating organization owner:",
+							updateOwnerError,
+						);
+						throw updateOwnerError;
+					}
+				}
+			} else {
+				// User doesn't have an organization, create a new one
+				const { data: newOrg, error: orgError } = await supabase
+					.from("organizations")
+					.insert({
+						name: props.organizationName,
+						user_id: user.id,
+					})
+					.select()
+					.single();
+
+				if (orgError) {
+					console.error("Error creating organization:", orgError);
+					throw orgError;
+				}
+
+				if (!newOrg) {
+					throw new Error("Failed to create organization");
+				}
+
+				organizationId = newOrg.id;
+
+				// Add user as owner of the organization
+				const { error: memberError } = await supabase
+					.from("organization_members")
+					.insert({
+						organization_id: organizationId,
+						user_id: user.id,
+						role: "owner",
+					});
+
+				if (memberError) {
+					console.error("Error adding user to organization:", memberError);
+					throw memberError;
+				}
+
+				// Create organization owner with the user's name
+				const { error: ownerError } = await supabase
+					.from("organization_owners")
+					.insert({
+						organization_id: organizationId,
+						name: props.userName,
+					});
+
+				if (ownerError) {
+					console.error("Error creating organization owner:", ownerError);
+					throw ownerError;
+				}
+
+				// Add default gemstone types for the new organization
+				const defaultGemstoneTypes = [
+					"Ruby",
+					"Sapphire",
+					"Emerald",
+					"Diamond",
+					"Amethyst",
+					"Aquamarine",
+					"Topaz",
+					"Opal",
+					"Garnet",
+					"Peridot",
+					"Tanzanite",
+					"Tourmaline",
+					"Citrine",
+					"Morganite",
+					"Alexandrite",
+					"Turquoise",
+					"Jade",
+					"Lapis Lazuli",
+					"Moonstone",
+					"Onyx",
+					"Pearl",
+					"Spinel",
+					"Zircon",
+					"Other",
+				];
+
+				// Create batch insert data
+				const gemstoneTypesData = defaultGemstoneTypes.map((name) => ({
+					organization_id: organizationId,
+					name,
+				}));
+
+				// Insert default gemstone types
+				const { error: gemstoneTypesError } = await supabase
+					.from("organization_gemstone_types")
+					.insert(gemstoneTypesData);
+
+				if (gemstoneTypesError) {
+					console.error(
+						"Error adding default gemstone types:",
+						gemstoneTypesError,
+					);
+					// Continue even if there's an error with gemstone types
+				}
+			}
+
+			// Update local state with the results
+			setIsOnboarded(true);
+			setUserProfile({
+				id: user.id,
+				name: props.userName,
+				is_onboarded: true,
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString(),
+			});
+
+			// Update async storage for active organization
+			try {
+				await AsyncStorage.setItem(ACTIVE_ORGANIZATION_KEY, organizationId);
+			} catch (error) {
+				console.error("Error saving active organization:", error);
+			}
+
+			// Invalidate relevant queries
+			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
+			queryClient.invalidateQueries({
+				queryKey: ["organization-gemstone-types"],
+			});
+		} catch (error) {
+			console.error("Error in completeUserOnboarding:", error);
+			throw error;
+		}
 	};
 
 	// Function to create an organization for a user
@@ -307,16 +581,25 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		if (!initialized) return;
 
 		const inProtectedGroup = segments[1] === "(protected)";
-
+		const isOnboardingScreen = segments.some(
+			(segment) => segment && segment.includes("onboarding"),
+		);
 		const isVerifyPage = segments.some(
 			(segment) => segment && segment.includes("verify"),
 		);
-		if (!isVerifyPage) {
-			if (session && !inProtectedGroup) {
-				router.replace("/(app)/(protected)");
-			} else if (!session && inProtectedGroup) {
-				router.replace("/(app)/welcome");
+
+		if (session) {
+			// If user is authenticated but not onboarded and not on onboarding screen
+			if (!isOnboarded && !isOnboardingScreen) {
+				router.replace("/(app)/onboarding");
 			}
+			// If user is authenticated and onboarded but not in protected group
+			else if (isOnboarded && !inProtectedGroup && !isVerifyPage) {
+				router.replace("/(app)/(protected)");
+			}
+		} else if (!session && inProtectedGroup) {
+			// If not authenticated but trying to access protected routes
+			router.replace("/(app)/welcome");
 		}
 
 		/* HACK: Something must be rendered when determining the initial auth state... 
@@ -327,7 +610,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		setTimeout(() => {
 			SplashScreen.hideAsync();
 		}, 500);
-	}, [initialized, session]);
+	}, [initialized, session, isOnboarded]);
 
 	const updateActiveOrganization = (organization: Tables<"organizations">) => {
 		setActiveOrganization(organization);
@@ -357,6 +640,9 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				onSelectOrganization,
 				createOrganizationForUser,
 				updateActiveOrganization,
+				userProfile,
+				isOnboarded,
+				completeUserOnboarding,
 			}}
 		>
 			{children}

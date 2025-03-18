@@ -296,6 +296,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_onboarded: boolean
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          is_onboarded?: boolean
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_onboarded?: boolean
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stones: {
         Row: {
           bill_number: string | null
@@ -416,7 +440,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_onboarding: {
+        Args: {
+          user_name: string
+          organization_name: string
+        }
+        Returns: string
+      }
+      create_organization_and_add_member: {
+        Args: {
+          organization_name: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
