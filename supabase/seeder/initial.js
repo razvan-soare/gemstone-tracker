@@ -19,6 +19,12 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Also create a service role client for admin operations
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAdmin = serviceRoleKey
+	? createClient(supabaseUrl, serviceRoleKey)
+	: supabase; // Fallback to regular client if no service role key
+
 // Test user credentials
 const TEST_USER = {
 	email: "test@test.com",
@@ -207,9 +213,26 @@ async function seed() {
 			}
 		}
 
-		await supabase.from("app_settings").insert({
-			min_version: "1.0.0",
-		});
+		// Step 2.1: Update or insert app settings
+		console.log("Adding app settings with min_version 1.0.0...");
+
+		try {
+			// Using direct upsert with on_conflict
+			const { data: appSettings, error: appSettingsError } = await supabaseAdmin
+				.from("app_settings")
+				.insert({
+					min_version: "1.0.0",
+				})
+				.select();
+
+			if (appSettingsError) {
+				console.warn(`Error with app settings: ${appSettingsError.message}`);
+			} else {
+				console.log("App settings added/updated successfully:", appSettings);
+			}
+		} catch (e) {
+			console.error("Exception handling app settings:", e.message);
+		}
 
 		// Step 3: Check if the organization already has stones
 		const { data: existingStones, error: stonesError } = await supabase
