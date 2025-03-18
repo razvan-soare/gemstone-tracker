@@ -116,7 +116,6 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 					.single();
 
 				if (error) {
-					console.error("Error fetching user profile:", error);
 					setUserProfile(null);
 					setIsOnboarded(false);
 					return;
@@ -278,50 +277,17 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 					throw new Error("Failed to update organization");
 				}
 
-				// Check if there's an owner record and create/update it
-				const { data: existingOwners, error: ownerCheckError } = await supabase
+				// Create owner record if it doesn't exist
+				const { error: createOwnerError } = await supabase
 					.from("organization_owners")
-					.select()
-					.eq("organization_id", organizationId);
+					.insert({
+						organization_id: organizationId,
+						name: props.userName,
+					});
 
-				if (ownerCheckError) {
-					console.error("Error checking organization owners:", ownerCheckError);
-					throw ownerCheckError;
-				}
-
-				if (!existingOwners || existingOwners.length === 0) {
-					// Create owner record if it doesn't exist
-					const { error: createOwnerError } = await supabase
-						.from("organization_owners")
-						.insert({
-							organization_id: organizationId,
-							name: props.userName,
-						});
-
-					if (createOwnerError) {
-						console.error(
-							"Error creating organization owner:",
-							createOwnerError,
-						);
-						throw createOwnerError;
-					}
-				} else {
-					// Update existing owner name
-					const { error: updateOwnerError } = await supabase
-						.from("organization_owners")
-						.update({
-							name: props.userName,
-							updated_at: new Date().toISOString(),
-						})
-						.eq("organization_id", organizationId);
-
-					if (updateOwnerError) {
-						console.error(
-							"Error updating organization owner:",
-							updateOwnerError,
-						);
-						throw updateOwnerError;
-					}
+				if (createOwnerError) {
+					console.error("Error creating organization owner:", createOwnerError);
+					throw createOwnerError;
 				}
 			} else {
 				// User doesn't have an organization, create a new one
