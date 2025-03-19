@@ -95,7 +95,6 @@ export const ColorsDialog = ({ visible, onDismiss }: ColorsDialogProps) => {
 					<View style={styles.inputContainer}>
 						<TextInput
 							label="New Color"
-							value={newColorName}
 							onChangeText={setNewColorName}
 							style={styles.input}
 							error={!!error}

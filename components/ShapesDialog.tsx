@@ -95,7 +95,6 @@ export const ShapesDialog = ({ visible, onDismiss }: ShapesDialogProps) => {
 					<View style={styles.inputContainer}>
 						<TextInput
 							label="New Shape"
-							value={newShapeName}
 							onChangeText={setNewShapeName}
 							style={styles.input}
 							error={!!error}

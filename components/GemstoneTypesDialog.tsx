@@ -102,7 +102,6 @@ export const GemstoneTypesDialog = ({
 					<View style={styles.inputContainer}>
 						<TextInput
 							label="New Gemstone Type"
-							value={newGemstoneTypeName}
 							onChangeText={setNewGemstoneTypeName}
 							style={styles.input}
 							error={!!error}
