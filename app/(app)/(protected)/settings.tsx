@@ -35,6 +35,7 @@ import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import { useColumnPreference } from "@/hooks/useColumnPreference";
 
 export default function Settings() {
 	const {
@@ -47,6 +48,7 @@ export default function Settings() {
 		session,
 	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
+	const { columnCount, updateColumnCount } = useColumnPreference();
 	const [inviteEmail, setInviteEmail] = useState("");
 	const [inviteModalVisible, setInviteModalVisible] = useState(false);
 	const [inviteError, setInviteError] = useState("");
@@ -239,34 +241,92 @@ export default function Settings() {
 									>
 										<Text>Manage Owners</Text>
 									</Button>
-									<Button
-										className="w-full mt-2"
-										size="default"
-										variant="outline"
-										onPress={() => setGemstoneTypesDialogVisible(true)}
-									>
-										<Text>Manage Gemstone Types</Text>
-									</Button>
-									<Button
-										className="w-full mt-2"
-										size="default"
-										variant="outline"
-										onPress={() => setShapesDialogVisible(true)}
-									>
-										<Text>Manage Shapes</Text>
-									</Button>
-									<Button
-										className="w-full mt-2"
-										size="default"
-										variant="outline"
-										onPress={() => setColorsDialogVisible(true)}
-									>
-										<Text>Manage Colors</Text>
-									</Button>
+
+									<View className="mt-4">
+										<H3>Gemstone Attributes</H3>
+										<Muted>
+											Configure gemstone types, shapes, and colors for your
+											organization
+										</Muted>
+
+										<View className="flex-row flex-wrap gap-2 mt-2">
+											<Button
+												size="default"
+												variant="outline"
+												onPress={() => setGemstoneTypesDialogVisible(true)}
+												className="flex-1 min-w-[110px] justify-center"
+											>
+												<Text>Gemstone Types</Text>
+											</Button>
+											<Button
+												size="default"
+												variant="outline"
+												onPress={() => setShapesDialogVisible(true)}
+												className="flex-1 min-w-[110px] justify-center"
+											>
+												<Text>Shapes</Text>
+											</Button>
+											<Button
+												size="default"
+												variant="outline"
+												onPress={() => setColorsDialogVisible(true)}
+												className="flex-1 min-w-[110px] justify-center"
+											>
+												<Text>Colors</Text>
+											</Button>
+										</View>
+									</View>
 								</>
 							)}
 						</View>
 					)}
+
+					<View className="gap-y-2">
+						<H3>App Preferences</H3>
+						<Muted>Customize the app's appearance and layout</Muted>
+
+						<View className="flex-row flex-wrap gap-2 mt-2">
+							<View className="flex-1 min-w-[120px]">
+								<Dropdown
+									label="Theme"
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: 60 }}
+									value={colorScheme}
+									onSelect={(value) => {
+										if (!value) return;
+										if (value !== colorScheme) {
+											toggleColorScheme();
+										}
+									}}
+									options={[
+										{ label: "Light Mode", value: "light" },
+										{ label: "Dark Mode", value: "dark" },
+									]}
+								/>
+							</View>
+
+							<View className="flex-1 min-w-[120px]">
+								<Dropdown
+									label="Columns"
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: 60 }}
+									value={columnCount ? columnCount.toString() : "2"}
+									onSelect={(value) => {
+										if (!value) return;
+										if (updateColumnCount) {
+											updateColumnCount(parseInt(value));
+										}
+									}}
+									options={[1, 2, 3, 4, 5].map((count) => ({
+										label: `${count} Column${count > 1 ? "s" : ""}`,
+										value: count.toString(),
+									}))}
+								/>
+							</View>
+						</View>
+					</View>
 
 					{activeOrganization && (
 						<View className="gap-y-2">
@@ -344,19 +404,6 @@ export default function Settings() {
 							)}
 						</View>
 					)}
-
-					<View className="gap-y-2">
-						<H3>Appearance</H3>
-						<Muted>Change the app's appearance</Muted>
-						<Button
-							className="w-full"
-							size="default"
-							variant="outline"
-							onPress={toggleColorScheme}
-						>
-							<Text>{colorScheme === "dark" ? "Light Mode" : "Dark Mode"}</Text>
-						</Button>
-					</View>
 
 					<View className="gap-y-2">
 						<H3>Account</H3>

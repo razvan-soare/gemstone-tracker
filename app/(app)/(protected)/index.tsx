@@ -11,7 +11,6 @@ import {
 import FilterButton from "@/components/FilterButton";
 import GemstoneList from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
-import ColumnSettingsButton from "@/components/ColumnSettingsButton";
 import { colors } from "@/constants/colors";
 import { useGemstones } from "@/hooks/useGemstones";
 import { useColumnPreference } from "@/hooks/useColumnPreference";
@@ -67,10 +66,6 @@ export default function Home() {
 					/>
 				</View>
 				<View style={styles.rightButtons}>
-					<ColumnSettingsButton
-						columnCount={columnCount}
-						onColumnCountChange={updateColumnCount}
-					/>
 					<FilterButton filters={filters} onFiltersChange={setFilters} />
 				</View>
 			</View>
