@@ -40,13 +40,55 @@ const TEST_ORGANIZATION = {
 // Default owners for new organizations
 const DEFAULT_OWNERS = ["Nuo", "Han", "Hulu"];
 
+// Default shapes for new organizations
+const DEFAULT_SHAPES = [
+	"Marquise",
+	"Round",
+	"Trillion",
+	"Oval",
+	"Pear",
+	"Square",
+	"Octagon",
+	"Emerald",
+	"Baguette",
+	"Cushion",
+	"Heart",
+	"Cobochon",
+	"Princess",
+	"Radiant",
+	"Asscher",
+];
+
+// Default colors for new organizations
+const DEFAULT_COLORS = [
+	"Royal Blue",
+	"Corn Flower",
+	"Pinkish Purple",
+	"Neon Pink",
+	"Hot Pink",
+	"Blue",
+	"Red",
+	"Pink",
+	"Yellow",
+	"Green",
+	"Orange",
+	"Pink & Orange",
+	"Brown",
+	"Black",
+	"White",
+	"Colorless",
+	"Neon Blue",
+	"Purple",
+	"Multi-colored",
+];
+
 // Test stone
 const TEST_STONE = {
 	name: "Test Diamond",
 	weight: 2.5,
 	color: "Clear",
 	shape: "Round",
-	gem_type: "Diamond",
+	gem_treatment: "natural",
 	buy_price: 1000.0,
 	buy_currency: "USD",
 	sold: false,
@@ -163,6 +205,38 @@ async function seed() {
 			}
 
 			console.log(`Added default owners to the organization`);
+
+			// Add default shapes for the new organization
+			const shapesData = DEFAULT_SHAPES.map((name) => ({
+				organization_id: organizationId,
+				name,
+			}));
+
+			const { error: shapesError } = await supabase
+				.from("organization_shapes")
+				.insert(shapesData);
+
+			if (shapesError) {
+				console.warn("Error adding default shapes:", shapesError.message);
+			} else {
+				console.log(`Added default shapes to the organization`);
+			}
+
+			// Add default colors for the new organization
+			const colorsData = DEFAULT_COLORS.map((name) => ({
+				organization_id: organizationId,
+				name,
+			}));
+
+			const { error: colorsError } = await supabase
+				.from("organization_colors")
+				.insert(colorsData);
+
+			if (colorsError) {
+				console.warn("Error adding default colors:", colorsError.message);
+			} else {
+				console.log(`Added default colors to the organization`);
+			}
 
 			// Add default gemstone types for the new organization
 			const DEFAULT_GEMSTONE_TYPES = [

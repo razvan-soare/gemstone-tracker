@@ -1,18 +1,19 @@
 import {
 	Currency,
 	CurrencySymbols,
-	GemstoneColor,
 	GemstoneOwner,
-	GemstoneShape,
-	GemstoneType,
-	GemTypeEnum,
-	GemTypeLabels,
+	GemTreatmentEnum,
+	GemTreatmentLabels,
 } from "@/app/types/gemstone";
 import { ComboBox } from "@/components/ui/combobox";
 import { H3, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
+import { useOrganizationColors } from "@/hooks/useOrganizationColors";
+import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
+import { useOrganizationShapes } from "@/hooks/useOrganizationShapes";
 import { uploadFiles } from "@/lib/tus";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,8 +41,6 @@ import {
 } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
-import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
 
 // Register the English locale
 registerTranslation("en", enGB);
@@ -67,6 +66,8 @@ export default function AddNewGemstone() {
 
 	const { owners, addOwner } = useOrganizationOwners();
 	const { gemstoneTypes, addGemstoneType } = useOrganizationGemstoneTypes();
+	const { shapes, addShape } = useOrganizationShapes();
+	const { colors: orgColors, addColor } = useOrganizationColors();
 
 	const [formData, setFormData] = useState({
 		name: "",
@@ -76,7 +77,7 @@ export default function AddNewGemstone() {
 		cut: "",
 		weight: "",
 		quantity: "1",
-		gem_type: GemTypeEnum.NATURAL,
+		gem_treatment: GemTreatmentEnum.NATURAL,
 		comment: "",
 		date: new Date().toISOString().split("T")[0],
 		dimensions: { length: "", width: "", height: "" },
@@ -91,7 +92,7 @@ export default function AddNewGemstone() {
 		owner: "Nuo",
 	});
 
-	const updateField = (field: string, value?: string | GemTypeEnum) => {
+	const updateField = (field: string, value?: string | GemTreatmentEnum) => {
 		setFormData((prev) => ({
 			...prev,
 			[field]: value,
@@ -195,12 +196,18 @@ export default function AddNewGemstone() {
 				sold_at: null,
 				buy_currency: formData.buy_currency,
 				sell_currency: formData.sell_currency,
-				gem_type: formData.gem_type,
+				gem_treatment: formData.gem_treatment,
 				sold: false,
 				owner: formData.owner,
 				// Find the gemstone type ID based on the name
 				gem_type_id:
 					gemstoneTypes.find((type) => type.name === formData.name)?.id || null,
+				// Find shape_id based on the selected shape name
+				shape_id:
+					shapes.find((shape) => shape.name === formData.shape)?.id || null,
+				// Find color_id based on the selected color name
+				color_id:
+					orgColors.find((color) => color.name === formData.color)?.id || null,
 			});
 
 			// If there are selected images, upload them in the background
@@ -323,11 +330,14 @@ export default function AddNewGemstone() {
 						label="Shape"
 						allowCustom
 						value={formData.shape || ""}
-						options={Object.values(GemstoneShape).map((shape) => ({
-							id: shape,
-							title: shape,
+						options={shapes.map((shape) => ({
+							id: shape.name,
+							title: shape.name,
 						}))}
-						onChange={(value) => updateField("shape", value as GemstoneShape)}
+						onChange={(value) => updateField("shape", value as string)}
+						onCreateNewOption={async (newValue) => {
+							await addShape.mutateAsync(newValue);
+						}}
 					/>
 				</View>
 
@@ -336,11 +346,14 @@ export default function AddNewGemstone() {
 						label="Color"
 						allowCustom
 						value={formData.color || ""}
-						options={Object.values(GemstoneColor).map((color) => ({
-							id: color,
-							title: color,
+						options={orgColors.map((color) => ({
+							id: color.name,
+							title: color.name,
 						}))}
-						onChange={(value) => updateField("color", value as GemstoneColor)}
+						onChange={(value) => updateField("color", value as string)}
+						onCreateNewOption={async (newValue) => {
+							await addColor.mutateAsync(newValue);
+						}}
 					/>
 				</View>
 
@@ -409,64 +422,64 @@ export default function AddNewGemstone() {
 						<TouchableOpacity
 							style={[
 								styles.radioCard,
-								formData.gem_type === GemTypeEnum.NATURAL &&
+								formData.gem_treatment === GemTreatmentEnum.NATURAL &&
 									styles.radioCardSelected,
 							]}
 							onPress={() =>
 								setFormData((prev) => ({
 									...prev,
-									gem_type: GemTypeEnum.NATURAL,
+									gem_treatment: GemTreatmentEnum.NATURAL,
 								}))
 							}
 							activeOpacity={0.7}
 						>
 							<View style={styles.radioIconContainer}>
 								<View style={styles.radioOuterCircle}>
-									{formData.gem_type === GemTypeEnum.NATURAL && (
+									{formData.gem_treatment === GemTreatmentEnum.NATURAL && (
 										<View style={styles.radioInnerCircle} />
 									)}
 								</View>
 							</View>
 							<P
 								style={
-									formData.gem_type === GemTypeEnum.NATURAL
+									formData.gem_treatment === GemTreatmentEnum.NATURAL
 										? styles.radioTextSelected
 										: styles.radioText
 								}
 							>
-								{GemTypeLabels[GemTypeEnum.NATURAL]}
+								{GemTreatmentLabels[GemTreatmentEnum.NATURAL]}
 							</P>
 						</TouchableOpacity>
 
 						<TouchableOpacity
 							style={[
 								styles.radioCard,
-								formData.gem_type === GemTypeEnum.HEATED &&
+								formData.gem_treatment === GemTreatmentEnum.HEATED &&
 									styles.radioCardSelected,
 							]}
 							onPress={() =>
 								setFormData((prev) => ({
 									...prev,
-									gem_type: GemTypeEnum.HEATED,
+									gem_treatment: GemTreatmentEnum.HEATED,
 								}))
 							}
 							activeOpacity={0.7}
 						>
 							<View style={styles.radioIconContainer}>
 								<View style={styles.radioOuterCircle}>
-									{formData.gem_type === GemTypeEnum.HEATED && (
+									{formData.gem_treatment === GemTreatmentEnum.HEATED && (
 										<View style={styles.radioInnerCircle} />
 									)}
 								</View>
 							</View>
 							<P
 								style={
-									formData.gem_type === GemTypeEnum.HEATED
+									formData.gem_treatment === GemTreatmentEnum.HEATED
 										? styles.radioTextSelected
 										: styles.radioText
 								}
 							>
-								{GemTypeLabels[GemTypeEnum.HEATED]}
+								{GemTreatmentLabels[GemTreatmentEnum.HEATED]}
 							</P>
 						</TouchableOpacity>
 					</View>

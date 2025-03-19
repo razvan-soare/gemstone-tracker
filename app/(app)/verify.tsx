@@ -1,3 +1,4 @@
+import { P } from "@/components/ui/typography";
 import { router, useLocalSearchParams } from "expo-router";
 import { CheckCircle, XCircle } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
@@ -5,7 +6,7 @@ import { ActivityIndicator, View } from "react-native";
 
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
-import { H2, P } from "@/components/ui/typography";
+import { H2 } from "@/components/ui/typography";
 import { supabase } from "@/config/supabase";
 
 export default function VerifyAccount() {
@@ -131,6 +132,76 @@ export default function VerifyAccount() {
 						gemstoneTypesError,
 					);
 					// Continue even if there's an error with gemstone types
+				}
+
+				// Add default shapes
+				const defaultShapes = [
+					"Marquise",
+					"Round",
+					"Trillion",
+					"Oval",
+					"Pear",
+					"Square",
+					"Octagon",
+					"Emerald",
+					"Baguette",
+					"Cushion",
+					"Heart",
+					"Cobochon",
+					"Princess",
+					"Radiant",
+					"Asscher",
+				];
+
+				const shapesData = defaultShapes.map((name) => ({
+					organization_id: organization.id,
+					name,
+				}));
+
+				const { error: shapesError } = await supabase
+					.from("organization_shapes")
+					.insert(shapesData);
+
+				if (shapesError) {
+					console.error("Error adding default shapes:", shapesError);
+					// Continue even if there's an error with shapes
+				}
+
+				// Add default colors
+				const defaultColors = [
+					"Royal Blue",
+					"Corn Flower",
+					"Pinkish Purple",
+					"Neon Pink",
+					"Hot Pink",
+					"Blue",
+					"Red",
+					"Pink",
+					"Yellow",
+					"Green",
+					"Orange",
+					"Pink & Orange",
+					"Brown",
+					"Black",
+					"White",
+					"Colorless",
+					"Neon Blue",
+					"Purple",
+					"Multi-colored",
+				];
+
+				const colorsData = defaultColors.map((name) => ({
+					organization_id: organization.id,
+					name,
+				}));
+
+				const { error: colorsError } = await supabase
+					.from("organization_colors")
+					.insert(colorsData);
+
+				if (colorsError) {
+					console.error("Error adding default colors:", colorsError);
+					// Continue even if there's an error with colors
 				}
 
 				setOrgCreated(true);

@@ -176,6 +176,38 @@ export type Database = {
           },
         ]
       }
+      organization_colors: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_colors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_gemstone_types: {
         Row: {
           created_at: string | null
@@ -272,6 +304,38 @@ export type Database = {
           },
         ]
       }
+      organization_shapes: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_shapes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string | null
@@ -329,12 +393,13 @@ export type Database = {
           buyer_address: string | null
           certificate_id: string | null
           color: string | null
+          color_id: string | null
           comment: string | null
           created_at: string | null
           cut: string | null
           date: string | null
           dimensions: Json | null
-          gem_type: string | null
+          gem_treatment: string | null
           gem_type_id: string | null
           id: string
           name: string
@@ -346,6 +411,7 @@ export type Database = {
           sell_currency: string | null
           sell_price: number | null
           shape: string | null
+          shape_id: string | null
           sold: boolean | null
           sold_at: string | null
           updated_at: string | null
@@ -359,12 +425,13 @@ export type Database = {
           buyer_address?: string | null
           certificate_id?: string | null
           color?: string | null
+          color_id?: string | null
           comment?: string | null
           created_at?: string | null
           cut?: string | null
           date?: string | null
           dimensions?: Json | null
-          gem_type?: string | null
+          gem_treatment?: string | null
           gem_type_id?: string | null
           id?: string
           name: string
@@ -376,6 +443,7 @@ export type Database = {
           sell_currency?: string | null
           sell_price?: number | null
           shape?: string | null
+          shape_id?: string | null
           sold?: boolean | null
           sold_at?: string | null
           updated_at?: string | null
@@ -389,12 +457,13 @@ export type Database = {
           buyer_address?: string | null
           certificate_id?: string | null
           color?: string | null
+          color_id?: string | null
           comment?: string | null
           created_at?: string | null
           cut?: string | null
           date?: string | null
           dimensions?: Json | null
-          gem_type?: string | null
+          gem_treatment?: string | null
           gem_type_id?: string | null
           id?: string
           name?: string
@@ -406,6 +475,7 @@ export type Database = {
           sell_currency?: string | null
           sell_price?: number | null
           shape?: string | null
+          shape_id?: string | null
           sold?: boolean | null
           sold_at?: string | null
           updated_at?: string | null
@@ -420,6 +490,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "stones_color_id_fkey"
+            columns: ["color_id"]
+            isOneToOne: false
+            referencedRelation: "organization_colors"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "stones_gem_type_id_fkey"
             columns: ["gem_type_id"]
             isOneToOne: false
@@ -431,6 +508,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stones_shape_id_fkey"
+            columns: ["shape_id"]
+            isOneToOne: false
+            referencedRelation: "organization_shapes"
             referencedColumns: ["id"]
           },
         ]

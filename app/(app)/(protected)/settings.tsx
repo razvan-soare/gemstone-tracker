@@ -1,19 +1,24 @@
 import { useState } from "react";
 import {
+	Pressable,
 	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	View,
-	Pressable,
 } from "react-native";
 import { List, Modal, Portal, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 
+import { ColorsDialog } from "@/components/ColorsDialog";
+import { GemstoneTypesDialog } from "@/components/GemstoneTypesDialog";
+import { OwnersDialog } from "@/components/OwnersDialog";
+import { ShapesDialog } from "@/components/ShapesDialog";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { H2, H3, Muted } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
+import { useDialog } from "@/hooks/useDialog";
 import {
 	useAcceptInvitation,
 	useCheckPendingInvitations,
@@ -28,11 +33,8 @@ import {
 } from "@/hooks/useOrganizationMemberships";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { useDialog } from "@/hooks/useDialog";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { OwnersDialog } from "@/components/OwnersDialog";
-import { GemstoneTypesDialog } from "@/components/GemstoneTypesDialog";
 
 export default function Settings() {
 	const {
@@ -55,6 +57,8 @@ export default function Settings() {
 	const [ownersDialogVisible, setOwnersDialogVisible] = useState(false);
 	const [gemstoneTypesDialogVisible, setGemstoneTypesDialogVisible] =
 		useState(false);
+	const [shapesDialogVisible, setShapesDialogVisible] = useState(false);
+	const [colorsDialogVisible, setColorsDialogVisible] = useState(false);
 	const router = useRouter();
 	const {
 		open: orgNameDialogOpen,
@@ -242,6 +246,22 @@ export default function Settings() {
 										onPress={() => setGemstoneTypesDialogVisible(true)}
 									>
 										<Text>Manage Gemstone Types</Text>
+									</Button>
+									<Button
+										className="w-full mt-2"
+										size="default"
+										variant="outline"
+										onPress={() => setShapesDialogVisible(true)}
+									>
+										<Text>Manage Shapes</Text>
+									</Button>
+									<Button
+										className="w-full mt-2"
+										size="default"
+										variant="outline"
+										onPress={() => setColorsDialogVisible(true)}
+									>
+										<Text>Manage Colors</Text>
 									</Button>
 								</>
 							)}
@@ -533,6 +553,18 @@ export default function Settings() {
 			<GemstoneTypesDialog
 				visible={gemstoneTypesDialogVisible}
 				onDismiss={() => setGemstoneTypesDialogVisible(false)}
+			/>
+
+			{/* Shapes Dialog */}
+			<ShapesDialog
+				visible={shapesDialogVisible}
+				onDismiss={() => setShapesDialogVisible(false)}
+			/>
+
+			{/* Colors Dialog */}
+			<ColorsDialog
+				visible={colorsDialogVisible}
+				onDismiss={() => setColorsDialogVisible(false)}
 			/>
 		</SafeAreaView>
 	);

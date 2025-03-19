@@ -5,8 +5,8 @@ import { P } from "@/components/ui/typography";
 import {
 	GemstoneColor,
 	GemstoneShape,
-	GemTypeEnum,
-	GemTypeLabels,
+	GemTreatmentEnum,
+	GemTreatmentLabels,
 } from "@/app/types/gemstone";
 import { Badge } from "react-native-paper";
 
@@ -14,7 +14,7 @@ interface GemstoneHeaderProps {
 	name: string;
 	shape: GemstoneShape;
 	color: GemstoneColor;
-	gemType: GemTypeEnum;
+	gemType: GemTreatmentEnum;
 }
 
 export const GemstoneHeader: React.FC<GemstoneHeaderProps> = ({
@@ -39,11 +39,11 @@ export const GemstoneHeader: React.FC<GemstoneHeaderProps> = ({
 							styles.badge,
 							{
 								backgroundColor:
-									gemType === GemTypeEnum.HEATED ? "#f70000" : "#81C784",
+									gemType === GemTreatmentEnum.HEATED ? "#f70000" : "#81C784",
 							},
 						]}
 					>
-						{GemTypeLabels[gemType]}
+						{GemTreatmentLabels[gemType]}
 					</Badge>
 				)}
 				{color && (

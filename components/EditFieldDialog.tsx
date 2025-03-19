@@ -1,15 +1,13 @@
 import {
 	Currency,
 	CurrencySymbols,
-	GemstoneColor,
-	GemstoneOwner,
-	GemstoneShape,
-	GemTypeEnum,
-	GemTypeLabels,
+	GemTreatmentEnum,
 } from "@/app/types/gemstone";
 import { ComboBox } from "@/components/ui/combobox";
-import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
+import { useOrganizationColors } from "@/hooks/useOrganizationColors";
 import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
+import { useOrganizationShapes } from "@/hooks/useOrganizationShapes";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, Portal, TextInput } from "react-native-paper";
@@ -25,286 +23,311 @@ type FieldType =
 	| "shape"
 	| "color"
 	| "owner"
-	| "gem_type"
+	| "gem_treatment"
 	| "buy_price"
 	| "sell_price"
+	| "quantity"
 	| "name";
 
-type EditFieldDialogProps = {
+// Define props for the edit field dialog
+interface EditFieldDialogProps {
 	visible: boolean;
 	onDismiss: () => void;
-	fieldName: string;
-	fieldLabel: string;
-	fieldType: FieldType;
-	currentValue: any;
 	onSave: (value: any) => void;
-	currentCurrency?: Currency;
-};
+	field: {
+		name: string;
+		label: string;
+		type: FieldType;
+		value: any;
+	};
+}
 
 export const EditFieldDialog = ({
 	visible,
 	onDismiss,
-	fieldName,
-	fieldLabel,
-	fieldType,
-	currentValue,
 	onSave,
-	currentCurrency,
+	field,
 }: EditFieldDialogProps) => {
-	const [value, setValue] = useState<any>(currentValue);
-	const [currency, setCurrency] = useState<Currency>(
-		currentCurrency || Currency.RMB,
-	);
+	// Get organization-specific values
 	const { owners, addOwner } = useOrganizationOwners();
 	const { gemstoneTypes, addGemstoneType } = useOrganizationGemstoneTypes();
+	const { shapes, addShape } = useOrganizationShapes();
+	const { colors: orgColors, addColor } = useOrganizationColors();
 
-	// Update value when currentValue changes
+	// Set up state for the input value
+	const [value, setValue] = useState<any>(field.value);
+	const [dateValue, setDateValue] = useState<Date | undefined>(
+		field.value ? new Date(field.value) : undefined,
+	);
+	const [currencyCode, setCurrencyCode] = useState<string>(
+		field.type === "buy_price"
+			? field.value?.currency || "USD"
+			: field.type === "sell_price"
+				? field.value?.currency || "USD"
+				: "USD",
+	);
+	const [priceValue, setPriceValue] = useState<string>(
+		field.type === "buy_price" || field.type === "sell_price"
+			? field.value?.toString() || ""
+			: "",
+	);
+
+	// Update value state when field changes
 	useEffect(() => {
-		setValue(currentValue);
-		if (currentCurrency) {
-			setCurrency(currentCurrency);
+		setValue(field.value);
+		if (field.type === "date" && field.value) {
+			setDateValue(new Date(field.value));
 		}
-	}, [currentValue, currentCurrency]);
+		if (
+			(field.type === "buy_price" || field.type === "sell_price") &&
+			field.value
+		) {
+			setPriceValue(field.value.toString());
+		}
+	}, [field]);
 
-	const handleSave = () => {
-		if (fieldType === "buy_price" || fieldType === "sell_price") {
-			// For price fields, we need to save both the price and currency
-			onSave({
-				price: parseFloat(value),
-				currency: currency,
-			});
+	// Handler to ensure numbers are valid before saving
+	const handleSaveNumberField = () => {
+		let numValue = parseFloat(value);
+		if (isNaN(numValue)) {
+			numValue = 0;
+		}
+		onSave(numValue);
+		onDismiss();
+	};
+
+	// Handler to save date fields
+	const handleSaveDateField = () => {
+		if (!dateValue) {
+			onDismiss();
+			return;
+		}
+		onSave(dateValue.toISOString().split("T")[0]);
+		onDismiss();
+	};
+
+	// Handler to save currency fields (with price and currency)
+	const handleSaveCurrencyField = () => {
+		const numValue = parseFloat(priceValue);
+		if (isNaN(numValue)) {
+			onSave(null);
 		} else {
-			onSave(value);
+			onSave({
+				price: numValue,
+				currency: currencyCode,
+			});
 		}
 		onDismiss();
 	};
 
-	const renderInputComponent = () => {
-		switch (fieldType) {
-			case "buy_price":
-				return (
-					<View>
-						<View style={styles.priceContainer}>
-							<TextInput
-								label={fieldLabel}
-								mode="outlined"
-								value={String(value || "")}
-								onChangeText={(text) => {
-									// Only allow numbers and decimal point
-									const numericValue = text.replace(/[^0-9.]/g, "");
-									// Prevent multiple decimal points
-									if (numericValue.split(".").length > 2) return;
-									setValue(numericValue);
-								}}
-								keyboardType="decimal-pad"
-								style={styles.priceInput}
-								left={<TextInput.Affix text={CurrencySymbols[currency]} />}
-							/>
-							<View style={styles.currencyDropdown}>
-								<Dropdown
-									label="Currency"
-									mode="outlined"
-									hideMenuHeader
-									menuContentStyle={{ top: 60 }}
-									value={currency}
-									options={Object.values(Currency).map((curr) => ({
-										label: curr,
-										value: curr,
-									}))}
-									onSelect={(value) => setCurrency(value as Currency)}
-								/>
-							</View>
-						</View>
-					</View>
-				);
+	const currencyOptions = Object.entries(Currency).map(([key, value]) => ({
+		label: `${value} (${CurrencySymbols[value as Currency] || ""})`,
+		value,
+	}));
 
-			case "sell_price":
+	const renderFieldInput = () => {
+		switch (field.type) {
+			case "text":
+			case "quantity":
 				return (
-					<View>
-						<View style={styles.priceContainer}>
-							<TextInput
-								label={fieldLabel}
-								mode="outlined"
-								value={String(value || "")}
-								onChangeText={(text) => {
-									// Only allow numbers and decimal point
-									const numericValue = text.replace(/[^0-9.]/g, "");
-									// Prevent multiple decimal points
-									if (numericValue.split(".").length > 2) return;
-									setValue(numericValue);
-								}}
-								keyboardType="decimal-pad"
-								style={styles.priceInput}
-								left={<TextInput.Affix text={CurrencySymbols[currency]} />}
-							/>
-							<View style={styles.currencyDropdown}>
-								<Dropdown
-									label="Currency"
-									mode="outlined"
-									hideMenuHeader
-									menuContentStyle={{ top: 60 }}
-									value={currency}
-									options={Object.values(Currency).map((curr) => ({
-										label: curr,
-										value: curr,
-									}))}
-									onSelect={(value) => setCurrency(value as Currency)}
-								/>
-							</View>
-						</View>
-					</View>
+					<TextInput
+						label={field.label}
+						value={value || ""}
+						onChangeText={setValue}
+						mode="outlined"
+						style={styles.input}
+					/>
 				);
-
 			case "number":
 				return (
 					<TextInput
-						label={fieldLabel}
-						mode="outlined"
-						value={String(value || "")}
-						onChangeText={(text) => {
-							// Only allow numbers and decimal point
-							const numericValue = text.replace(/[^0-9.]/g, "");
+						label={field.label}
+						value={value?.toString() || ""}
+						onChangeText={(val) => {
+							// Only allow numbers and decimal points
+							const cleaned = val.replace(/[^0-9.]/g, "");
 							// Prevent multiple decimal points
-							if (numericValue.split(".").length > 2) return;
-							setValue(numericValue);
+							const parts = cleaned.split(".");
+							if (parts.length > 2) {
+								setValue(parts[0] + "." + parts.slice(1).join(""));
+							} else {
+								setValue(cleaned);
+							}
 						}}
-						keyboardType="decimal-pad"
+						keyboardType="numeric"
+						mode="outlined"
 						style={styles.input}
 					/>
 				);
-
 			case "date":
 				return (
-					<View style={{ marginTop: 30, marginBottom: 30 }}>
-						<DatePickerInput
-							locale="en"
-							value={value ? new Date(value) : undefined}
-							onChange={(date) => {
-								setValue(date ? date.toISOString() : null);
-							}}
-							inputMode="start"
-							mode="outlined"
-							presentationStyle="pageSheet"
-							withDateFormatInLabel={false}
-						/>
-					</View>
+					<DatePickerInput
+						locale="en"
+						label={field.label}
+						value={dateValue}
+						onChange={(date) => setDateValue(date)}
+						inputMode="start"
+						mode="outlined"
+						style={styles.input}
+					/>
 				);
-
 			case "currency":
+			case "buy_price":
+			case "sell_price":
 				return (
-					<View style={styles.input}>
-						<ComboBox
-							// label={fieldLabel}
-							value={value || ""}
+					<View>
+						<TextInput
+							label={`${field.label} Amount`}
+							value={priceValue || ""}
+							onChangeText={(val) => {
+								// Only allow numbers and decimal points
+								const cleaned = val.replace(/[^0-9.]/g, "");
+								// Prevent multiple decimal points
+								const parts = cleaned.split(".");
+								if (parts.length > 2) {
+									setPriceValue(parts[0] + "." + parts.slice(1).join(""));
+								} else {
+									setPriceValue(cleaned);
+								}
+							}}
+							keyboardType="numeric"
+							mode="outlined"
+							style={[styles.input, { marginBottom: 10 }]}
+						/>
+
+						<Dropdown
+							label="Currency"
+							mode="outlined"
+							hideMenuHeader
+							menuContentStyle={{ top: 60 }}
+							value={currencyCode}
+							onSelect={(value) => setCurrencyCode(value || "USD")}
 							options={Object.values(Currency).map((currency) => ({
-								id: currency,
-								title: currency,
+								label: currency,
+								value: currency,
 							}))}
-							onChange={(selectedValue) => setValue(selectedValue)}
 						/>
 					</View>
 				);
-
 			case "shape":
 				return (
-					<View style={styles.input}>
-						<ComboBox
-							// label={fieldLabel}
-							value={value || ""}
-							options={Object.values(GemstoneShape).map((shape) => ({
-								id: shape,
-								title: shape,
-							}))}
-							onChange={(selectedValue) => setValue(selectedValue)}
-						/>
-					</View>
+					<ComboBox
+						label={field.label}
+						allowCustom
+						value={value}
+						options={shapes.map((shape) => ({
+							id: shape.name,
+							title: shape.name,
+						}))}
+						onChange={setValue}
+						onCreateNewOption={async (newValue) => {
+							await addShape.mutateAsync(newValue);
+						}}
+					/>
 				);
-
 			case "color":
 				return (
-					<View style={styles.input}>
-						<ComboBox
-							// label={fieldLabel}
-							value={value || ""}
-							options={Object.values(GemstoneColor).map((color) => ({
-								id: color,
-								title: color,
-							}))}
-							onChange={(selectedValue) => setValue(selectedValue)}
-						/>
-					</View>
+					<ComboBox
+						label={field.label}
+						allowCustom
+						value={value}
+						options={orgColors.map((color) => ({
+							id: color.name,
+							title: color.name,
+						}))}
+						onChange={setValue}
+						onCreateNewOption={async (newValue) => {
+							await addColor.mutateAsync(newValue);
+						}}
+					/>
 				);
-
 			case "owner":
 				return (
-					<View style={styles.input}>
-						<ComboBox
-							// label={fieldLabel}
-							value={value || ""}
-							options={owners.map((owner) => ({
-								id: owner.name,
-								title: owner.name,
-							}))}
-							allowCustom={true}
-							onChange={(selectedValue) => setValue(selectedValue)}
-							onCreateNewOption={async (newValue) => {
-								await addOwner.mutateAsync(newValue);
-							}}
-						/>
-					</View>
+					<ComboBox
+						label={field.label}
+						allowCustom
+						value={value}
+						options={owners.map((owner) => ({
+							id: owner.name,
+							title: owner.name,
+						}))}
+						onChange={setValue}
+						onCreateNewOption={async (newValue) => {
+							await addOwner.mutateAsync(newValue);
+						}}
+					/>
 				);
-
-			case "gem_type":
+			case "gem_treatment":
 				return (
-					<View style={styles.input}>
-						<ComboBox
-							// label={fieldLabel}
-							value={value || ""}
-							options={Object.values(GemTypeEnum).map((type) => ({
-								id: type,
-								title: GemTypeLabels[type],
-							}))}
-							onChange={(selectedValue) => setValue(selectedValue)}
-						/>
-					</View>
+					<ComboBox
+						label={field.label}
+						allowCustom
+						value={value}
+						options={Object.values(GemTreatmentEnum).map((treatment) => ({
+							id: treatment,
+							title: treatment,
+						}))}
+						onChange={setValue}
+						onCreateNewOption={async (newValue) => {
+							await addGemstoneType.mutateAsync(newValue);
+						}}
+					/>
 				);
-
 			case "name":
 				return (
-					<View style={styles.input}>
-						<ComboBox
-							value={value || ""}
-							options={gemstoneTypes.map((type) => ({
-								id: type.name,
-								title: type.name,
-							}))}
-							allowCustom={true}
-							onChange={(selectedValue) => setValue(selectedValue)}
-							onCreateNewOption={async (newValue) => {
-								await addGemstoneType.mutateAsync(newValue);
-							}}
-						/>
-					</View>
+					<ComboBox
+						label={field.label}
+						allowCustom
+						value={value}
+						options={gemstoneTypes.map((type) => ({
+							id: type.name,
+							title: type.name,
+						}))}
+						onChange={setValue}
+						onCreateNewOption={async (newValue) => {
+							await addGemstoneType.mutateAsync(newValue);
+						}}
+					/>
 				);
-
 			default:
 				return (
 					<TextInput
-						label={fieldLabel}
+						label={field.label}
+						value={value?.toString() || ""}
+						onChangeText={setValue}
 						mode="outlined"
-						value={String(value || "")}
-						onChangeText={(text) => setValue(text)}
 						style={styles.input}
 					/>
 				);
+		}
+	};
+
+	const handleSave = () => {
+		switch (field.type) {
+			case "number":
+				handleSaveNumberField();
+				break;
+			case "date":
+				handleSaveDateField();
+				break;
+			case "currency":
+			case "buy_price":
+			case "sell_price":
+				handleSaveCurrencyField();
+				break;
+			default:
+				onSave(value);
+				onDismiss();
 		}
 	};
 
 	return (
 		<Portal>
-			<Dialog visible={visible} onDismiss={onDismiss} style={styles.dialog}>
-				<Dialog.Title>Edit {fieldLabel}</Dialog.Title>
-				<Dialog.Content>{renderInputComponent()}</Dialog.Content>
+			<Dialog visible={visible} onDismiss={onDismiss}>
+				<Dialog.Title>{`Edit ${field.label}`}</Dialog.Title>
+				<Dialog.Content>
+					<View style={styles.container}>{renderFieldInput()}</View>
+				</Dialog.Content>
 				<Dialog.Actions>
 					<Button onPress={onDismiss}>Cancel</Button>
 					<Button onPress={handleSave}>Save</Button>
@@ -315,22 +338,10 @@ export const EditFieldDialog = ({
 };
 
 const styles = StyleSheet.create({
-	dialog: {
-		padding: 10,
+	container: {
+		minWidth: 250,
 	},
 	input: {
-		marginBottom: 10,
-	},
-	priceContainer: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		marginBottom: 10,
-		gap: 10,
-	},
-	priceInput: {
-		flex: 2,
-	},
-	currencyDropdown: {
-		flex: 1,
+		marginBottom: 5,
 	},
 });

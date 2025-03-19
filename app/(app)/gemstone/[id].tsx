@@ -2,31 +2,33 @@ import {
 	Currency,
 	CurrencySymbols,
 	GemstoneColor,
-	GemstoneOwner,
 	GemstoneShape,
 	GemstoneType,
-	GemTypeEnum,
-	GemTypeLabels,
+	GemTreatmentEnum,
+	GemTreatmentLabels,
 } from "@/app/types/gemstone";
 import { P } from "@/components/ui/typography";
+import { useDeleteGemstone } from "@/hooks/useDeleteGemstone";
 import { useGemstone } from "@/hooks/useGemstone";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
-import { useDeleteGemstone } from "@/hooks/useDeleteGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
+import { EditFieldDialog } from "@/components/EditFieldDialog";
 import { GemstoneHeader } from "@/components/GemstoneHeader";
 import { ComboBox } from "@/components/ui/combobox";
-import { EditFieldDialog } from "@/components/EditFieldDialog";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useOrganizationColors } from "@/hooks/useOrganizationColors";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
+import { useOrganizationShapes } from "@/hooks/useOrganizationShapes";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
 	Dimensions,
 	ScrollView,
@@ -47,7 +49,6 @@ import {
 import { DatePickerInput } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Helper function to format dates consistently
 const formatDate = (dateString: string) => {
@@ -73,21 +74,21 @@ const getCurrencySymbol = (currencyCode: string | null): string => {
 	return "$"; // Default fallback
 };
 
-// Helper function to convert string to GemTypeEnum
-const getGemTypeEnum = (gemType: string | null): GemTypeEnum => {
-	if (!gemType) return GemTypeEnum.NATURAL;
+// Helper function to convert string to GemTreatmentEnum
+const getGemTreatmentEnum = (gemType: string | null): GemTreatmentEnum => {
+	if (!gemType) return GemTreatmentEnum.NATURAL;
 
-	// Check if it's already a valid GemTypeEnum value
-	if (Object.values(GemTypeEnum).includes(gemType as any)) {
-		return gemType as GemTypeEnum;
+	// Check if it's already a valid GemTreatmentEnum value
+	if (Object.values(GemTreatmentEnum).includes(gemType as any)) {
+		return gemType as GemTreatmentEnum;
 	}
 
 	// Convert legacy string values to enum
-	if (gemType.toLowerCase() === "natural") return GemTypeEnum.NATURAL;
-	if (gemType.toLowerCase() === "heated") return GemTypeEnum.HEATED;
+	if (gemType.toLowerCase() === "natural") return GemTreatmentEnum.NATURAL;
+	if (gemType.toLowerCase() === "heated") return GemTreatmentEnum.HEATED;
 
 	// Default fallback
-	return GemTypeEnum.NATURAL;
+	return GemTreatmentEnum.NATURAL;
 };
 
 export default function GemstoneDetail() {
@@ -134,10 +135,10 @@ export default function GemstoneDetail() {
 			| "shape"
 			| "color"
 			| "owner"
-			| "gem_type"
 			| "buy_price"
 			| "sell_price"
-			| "name";
+			| "name"
+			| "gem_treatment";
 		value: any;
 	}>({ name: "", label: "", type: "text", value: null });
 
@@ -146,6 +147,8 @@ export default function GemstoneDetail() {
 	);
 
 	const { owners, addOwner } = useOrganizationOwners();
+	const { shapes, addShape } = useOrganizationShapes();
+	const { colors: organizationColors, addColor } = useOrganizationColors();
 
 	const handleTakePhoto = async () => {
 		await takePhoto({
@@ -313,10 +316,10 @@ export default function GemstoneDetail() {
 			| "shape"
 			| "color"
 			| "owner"
-			| "gem_type"
 			| "buy_price"
 			| "sell_price"
-			| "name",
+			| "name"
+			| "gem_treatment",
 		fieldValue: any,
 	) => {
 		setCurrentField({
@@ -425,7 +428,9 @@ export default function GemstoneDetail() {
 												cut: gemstone.cut,
 												weight: gemstone.weight,
 												quantity: gemstone.quantity || "1",
-												gem_type: getGemTypeEnum(gemstone.gem_type),
+												gem_treatment: getGemTreatmentEnum(
+													gemstone.gem_treatment,
+												),
 												comment: gemstone.comment,
 												bill_number: gemstone.bill_number,
 												buy_price: gemstone.buy_price,
@@ -494,64 +499,66 @@ export default function GemstoneDetail() {
 											<TouchableOpacity
 												style={[
 													styles.radioCard,
-													formData.gem_type === GemTypeEnum.NATURAL &&
+													formData.gem_treatment === GemTreatmentEnum.NATURAL &&
 														styles.radioCardSelected,
 												]}
 												onPress={() =>
 													setFormData((prev) => ({
 														...prev,
-														gem_type: GemTypeEnum.NATURAL,
+														gem_treatment: GemTreatmentEnum.NATURAL,
 													}))
 												}
 												activeOpacity={0.7}
 											>
 												<View style={styles.radioIconContainer}>
 													<View style={styles.radioOuterCircle}>
-														{formData.gem_type === GemTypeEnum.NATURAL && (
+														{formData.gem_treatment ===
+															GemTreatmentEnum.NATURAL && (
 															<View style={styles.radioInnerCircle} />
 														)}
 													</View>
 												</View>
 												<P
 													style={
-														formData.gem_type === GemTypeEnum.NATURAL
+														formData.gem_treatment === GemTreatmentEnum.NATURAL
 															? styles.radioTextSelected
 															: styles.radioText
 													}
 												>
-													{GemTypeLabels[GemTypeEnum.NATURAL]}
+													{GemTreatmentLabels[GemTreatmentEnum.NATURAL]}
 												</P>
 											</TouchableOpacity>
 
 											<TouchableOpacity
 												style={[
 													styles.radioCard,
-													formData.gem_type === GemTypeEnum.HEATED &&
+													formData.gem_treatment === GemTreatmentEnum.HEATED &&
 														styles.radioCardSelected,
 												]}
 												onPress={() =>
 													setFormData((prev) => ({
 														...prev,
-														gem_type: GemTypeEnum.HEATED,
+														gem_treatment: GemTreatmentEnum.HEATED,
 													}))
 												}
 												activeOpacity={0.7}
 											>
 												<View style={styles.radioIconContainer}>
 													<View style={styles.radioOuterCircle}>
-														{formData.gem_type === GemTypeEnum.HEATED && (
+														{formData.gem_treatment ===
+															GemTreatmentEnum.HEATED && (
 															<View style={styles.radioInnerCircle} />
 														)}
 													</View>
 												</View>
 												<P
 													style={
-														formData.gem_type === GemTypeEnum.HEATED
+														formData.gem_treatment === GemTreatmentEnum.HEATED
 															? styles.radioTextSelected
 															: styles.radioText
 													}
 												>
-													{GemTypeLabels[GemTypeEnum.HEATED]}
+													{GemTreatmentLabels[GemTreatmentEnum.HEATED]}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -569,34 +576,42 @@ export default function GemstoneDetail() {
 									<View style={styles.input}>
 										<ComboBox
 											label="Shape"
+											allowCustom={true}
 											value={formData.shape || ""}
-											options={Object.values(GemstoneShape).map((shape) => ({
-												id: shape,
-												title: shape,
+											options={shapes.map((shape) => ({
+												id: shape.name,
+												title: shape.name,
 											}))}
 											onChange={(value) =>
 												setFormData((prev) => ({
 													...prev,
-													shape: value as GemstoneShape,
+													shape: value as string,
 												}))
 											}
+											onCreateNewOption={async (value) => {
+												await addShape.mutateAsync(value);
+											}}
 										/>
 									</View>
 
 									<View style={styles.input}>
 										<ComboBox
 											label="Color"
+											allowCustom={true}
 											value={formData.color || ""}
-											options={Object.values(GemstoneColor).map((color) => ({
-												id: color,
-												title: color,
+											options={organizationColors.map((color) => ({
+												id: color.name,
+												title: color.name,
 											}))}
 											onChange={(value) =>
 												setFormData((prev) => ({
 													...prev,
-													color: value as GemstoneColor,
+													color: value as string,
 												}))
 											}
+											onCreateNewOption={async (value) => {
+												await addColor.mutateAsync(value);
+											}}
 										/>
 									</View>
 
@@ -877,7 +892,7 @@ export default function GemstoneDetail() {
 										name={gemstone.name}
 										shape={gemstone.shape as GemstoneShape}
 										color={gemstone.color as GemstoneColor}
-										gemType={getGemTypeEnum(gemstone.gem_type)}
+										gemType={getGemTreatmentEnum(gemstone.gem_treatment)}
 									/>
 
 									<View style={styles.tableHeader}>
@@ -1133,23 +1148,25 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Gem Type</P>
+											<P style={styles.tableCellLabel}>Gem Treatment</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
-														"gem_type",
-														"Gem Type",
-														"gem_type",
-														gemstone.gem_type,
+														"gem_treatment",
+														"Gem Treatment",
+														"gem_treatment",
+														gemstone.gem_treatment,
 													)
 												}
 											>
 												<P style={styles.tableCellValue}>
-													{gemstone.gem_type
-														? GemTypeLabels[getGemTypeEnum(gemstone.gem_type)]
-														: GemTypeLabels[GemTypeEnum.NATURAL]}
+													{gemstone.gem_treatment
+														? GemTreatmentLabels[
+																getGemTreatmentEnum(gemstone.gem_treatment)
+															]
+														: GemTreatmentLabels[GemTreatmentEnum.NATURAL]}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -1234,18 +1251,8 @@ export default function GemstoneDetail() {
 				<EditFieldDialog
 					visible={editFieldDialogVisible}
 					onDismiss={() => setEditFieldDialogVisible(false)}
-					fieldName={currentField.name}
-					fieldLabel={currentField.label}
-					fieldType={currentField.type}
-					currentValue={currentField.value}
+					field={currentField}
 					onSave={handleSaveField}
-					currentCurrency={
-						currentField.name === "buy_price"
-							? (gemstone?.buy_currency as Currency)
-							: currentField.name === "sell_price"
-								? (gemstone?.sell_currency as Currency)
-								: undefined
-					}
 				/>
 
 				{/* Sell Dialog */}

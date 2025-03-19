@@ -32,7 +32,7 @@ const buildSearchQuery = (term: string) => {
 	return (
 		`name.ilike.%${term}%,` +
 		`bill_number.ilike.%${term}%,` +
-		`gem_type.ilike.%${term}%,` +
+		`gem_treatment.ilike.%${term}%,` +
 		`shape.ilike.%${term}%,` +
 		`color.ilike.%${term}%,` +
 		`cut.ilike.%${term}%`

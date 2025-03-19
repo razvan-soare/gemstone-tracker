@@ -79,14 +79,14 @@ export const CurrencySymbols: Record<Currency, string> = {
 	[Currency.RMB]: "¥",
 };
 
-export enum GemTypeEnum {
+export enum GemTreatmentEnum {
 	NATURAL = "natural",
 	HEATED = "heated",
 }
 
-export const GemTypeLabels: Record<GemTypeEnum, string> = {
-	[GemTypeEnum.NATURAL]: "Natural",
-	[GemTypeEnum.HEATED]: "Heated",
+export const GemTreatmentLabels: Record<GemTreatmentEnum, string> = {
+	[GemTreatmentEnum.NATURAL]: "Natural",
+	[GemTreatmentEnum.HEATED]: "Heated",
 };
 
 export enum GemstoneSize {
