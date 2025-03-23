@@ -114,8 +114,28 @@ export default function AppLayout() {
 						<Stack.Screen
 							name="add-new-gemstone"
 							options={{
+								headerBackTitle: "Back",
 								headerShown: true,
 								headerTitle: "Add new gemstone",
+								headerStyle: {
+									backgroundColor:
+										colorScheme === "dark"
+											? colors.dark.background
+											: colors.light.background,
+								},
+								headerTintColor:
+									colorScheme === "dark"
+										? colors.dark.foreground
+										: colors.light.foreground,
+								gestureEnabled: true,
+							}}
+						/>
+						<Stack.Screen
+							name="organizations"
+							options={{
+								headerBackTitle: "Back",
+								headerShown: true,
+								headerTitle: "Organizations",
 								headerStyle: {
 									backgroundColor:
 										colorScheme === "dark"
