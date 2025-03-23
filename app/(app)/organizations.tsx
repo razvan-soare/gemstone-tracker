@@ -8,9 +8,15 @@ import {
 	useUpdateOrganization,
 } from "@/hooks/useOrganizationMemberships";
 import { useState } from "react";
-import { View, StyleSheet, ToastAndroid, Platform } from "react-native";
+import {
+	View,
+	StyleSheet,
+	ToastAndroid,
+	Platform,
+	Pressable,
+} from "react-native";
 import { List, Modal, Portal, TextInput, Snackbar } from "react-native-paper";
-
+import { Pencil } from "lucide-react-native";
 import { Dropdown } from "react-native-paper-dropdown";
 import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
 import { ColorsDialog } from "@/components/ColorsDialog";
@@ -35,6 +41,7 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function Organizations() {
 	const [orgName, setOrgName] = useState("");
 	const [orgNameError, setOrgNameError] = useState("");
+	const [editingOrgId, setEditingOrgId] = useState<string | null>(null);
 	const [ownersDialogVisible, setOwnersDialogVisible] = useState(false);
 	const [inviteModalVisible, setInviteModalVisible] = useState(false);
 	const [gemstoneTypesDialogVisible, setGemstoneTypesDialogVisible] =
@@ -49,6 +56,10 @@ export default function Organizations() {
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
 	const [isSuccess, setIsSuccess] = useState(false);
+	const [removeOrgModalVisible, setRemoveOrgModalVisible] = useState(false);
+	const [organizationToRemove, setOrganizationToRemove] = useState<
+		string | null
+	>(null);
 	const queryClient = useQueryClient();
 	const updateOrganization = useUpdateOrganization();
 	const createOrganization = useCreateOrganization();
@@ -153,7 +164,7 @@ export default function Organizations() {
 
 	// Handle updating organization name
 	const handleUpdateOrgName = async () => {
-		if (!orgName || !activeOrganization?.id) {
+		if (!orgName || !editingOrgId) {
 			setOrgNameError("Please enter a valid organization name");
 			return;
 		}
@@ -161,19 +172,27 @@ export default function Organizations() {
 		try {
 			setOrgNameError("");
 			const updatedOrg = await updateOrganization.mutateAsync({
-				organizationId: activeOrganization.id,
+				organizationId: editingOrgId,
 				name: orgName,
 			});
 
-			// Update the active organization with the updated name
-			if (updatedOrg) {
-				// Update the active organization directly
+			// If updating the active organization, update it directly
+			if (updatedOrg && activeOrganization?.id === editingOrgId) {
 				updateActiveOrganization(updatedOrg);
 			}
 
+			// Refresh data
+			queryClient.invalidateQueries({ queryKey: ["organizations"] });
+			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
+
+			// Show success message
+			showMessage(`Organization name updated to "${orgName}"`, true);
+
 			closeOrgNameDialog();
+			setEditingOrgId(null);
 		} catch (error: any) {
 			setOrgNameError(error.message || "Failed to update organization name");
+			showMessage(error.message || "Failed to update organization name", false);
 		}
 	};
 
@@ -220,6 +239,80 @@ export default function Organizations() {
 		// Also show a toast on Android for better visibility
 		if (Platform.OS === "android") {
 			ToastAndroid.show(message, ToastAndroid.SHORT);
+		}
+	};
+
+	// Handle initiating organization removal
+	const handleRemoveOrganization = (organizationId: string) => {
+		// Find the organization to show its name in the confirmation
+		const organizationToDelete = userOrganizations.find(
+			(org) => org.id === organizationId,
+		);
+		if (!organizationToDelete) return;
+
+		// Don't allow removing the active organization if it's the only one
+		if (userOrganizations.length === 1) {
+			showMessage("You cannot remove your only organization", false);
+			return;
+		}
+
+		setOrganizationToRemove(organizationId);
+		setRemoveOrgModalVisible(true);
+	};
+
+	// Handle confirming organization removal
+	const confirmRemoveOrganization = async () => {
+		if (!organizationToRemove) return;
+
+		try {
+			// Find the organization name for feedback message
+			const orgToDelete = userOrganizations.find(
+				(org) => org.id === organizationToRemove,
+			);
+			const orgName = orgToDelete?.name || "Organization";
+
+			// If the active organization is being removed, switch to another organization
+			if (activeOrganization?.id === organizationToRemove) {
+				const nextOrg = userOrganizations.find(
+					(org) => org.id !== organizationToRemove,
+				);
+				if (nextOrg) {
+					await onSelectOrganization(nextOrg.id);
+				}
+			}
+
+			// Delete the organization
+			const { error } = await supabase
+				.from("organizations")
+				.delete()
+				.eq("id", organizationToRemove);
+
+			if (error) throw error;
+
+			// Refresh all related data
+			// Clear organization related data
+			queryClient.invalidateQueries();
+
+			// Explicitly invalidate relevant query keys
+			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
+			queryClient.invalidateQueries({ queryKey: ["organizations"] });
+			queryClient.invalidateQueries({
+				queryKey: ["organization-gemstone-types"],
+			});
+			queryClient.invalidateQueries({ queryKey: ["organization-colors"] });
+			queryClient.invalidateQueries({ queryKey: ["organization-shapes"] });
+			queryClient.invalidateQueries({ queryKey: ["gemstone"] });
+			queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+			queryClient.invalidateQueries({ queryKey: ["invitations"] });
+
+			// Show success message
+			showMessage(`${orgName} has been removed`, true);
+		} catch (error: any) {
+			console.error("Error removing organization:", error);
+			showMessage(error.message || "Failed to remove organization", false);
+		} finally {
+			setRemoveOrgModalVisible(false);
+			setOrganizationToRemove(null);
 		}
 	};
 
@@ -308,6 +401,46 @@ export default function Organizations() {
 				>
 					{snackbarMessage}
 				</Snackbar>
+
+				{/* Remove Organization Confirmation Modal */}
+				<Portal>
+					<Modal
+						visible={removeOrgModalVisible}
+						onDismiss={() => {
+							setRemoveOrgModalVisible(false);
+							setOrganizationToRemove(null);
+						}}
+						contentContainerStyle={[
+							styles.modalContainer,
+							{
+								backgroundColor:
+									colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							},
+						]}
+					>
+						<H3>Remove Organization</H3>
+						<Muted className="my-4">
+							Are you sure you want to remove this organization? This action
+							cannot be undone and all data associated with this organization
+							will be lost.
+						</Muted>
+
+						<View style={styles.modalButtons}>
+							<Button
+								variant="ghost"
+								onPress={() => {
+									setRemoveOrgModalVisible(false);
+									setOrganizationToRemove(null);
+								}}
+							>
+								<Text>Cancel</Text>
+							</Button>
+							<Button variant="destructive" onPress={confirmRemoveOrganization}>
+								<Text className="text-white">Remove</Text>
+							</Button>
+						</View>
+					</Modal>
+				</Portal>
 			</View>
 		);
 	}
@@ -317,30 +450,66 @@ export default function Organizations() {
 			<View className="flex gap-2">
 				<H3>Organization</H3>
 				<View>
-					<Dropdown
-						label="Select Organization"
-						mode="outlined"
-						hideMenuHeader
-						menuContentStyle={{ top: 60 }}
-						value={activeOrganization?.id}
-						onSelect={(orgId) => {
-							if (!orgId) return;
-							onSelectOrganization(orgId);
-						}}
-						options={userOrganizations.map((org) => ({
-							label: org.name,
-							value: org.id,
-						}))}
-					/>
+					{userOrganizations.map((org) => (
+						<View
+							key={org.id}
+							className={`p-3 mb-2 rounded-md border border-gray-200 flex-row justify-between items-center ${
+								activeOrganization?.id === org.id ? "bg-blue-50" : ""
+							}`}
+						>
+							<Pressable
+								className="flex-1"
+								style={({ pressed }) => [
+									pressed && styles.activeOrgNamePressed,
+									{ borderRadius: 4 },
+								]}
+								onPress={() => {
+									setOrgName(org.name);
+									setEditingOrgId(org.id);
+									openOrgNameDialog();
+								}}
+							>
+								<View className="flex-row items-center p-1 gap-2">
+									<Pencil size={14} color="#666" />
+									<Text className="font-medium flex-1">{org.name}</Text>
+								</View>
+							</Pressable>
+
+							<View className="flex-row gap-2">
+								{activeOrganization?.id !== org.id ? (
+									<Button
+										size="sm"
+										variant="outline"
+										onPress={() => onSelectOrganization(org.id)}
+									>
+										<Text>Select</Text>
+									</Button>
+								) : (
+									<View className="bg-blue-100 px-3 py-0.5 rounded flex items-center justify-center">
+										<Text className="text-blue-600 text-xs font-medium">
+											Active
+										</Text>
+									</View>
+								)}
+								<Button
+									size="sm"
+									variant="destructive"
+									onPress={() => handleRemoveOrganization(org.id)}
+								>
+									<Text className="text-white">Remove</Text>
+								</Button>
+							</View>
+						</View>
+					))}
 				</View>
 
 				<Button
 					className="w-full mt-2"
 					size="default"
-					variant="outline"
-					onPress={openOrgNameModal}
+					variant="default"
+					onPress={() => setNewOrgModalVisible(true)}
 				>
-					<Text>Edit Organization Name</Text>
+					<Text>Create New Organization</Text>
 				</Button>
 				<Button
 					className="w-full mt-2"
@@ -349,14 +518,6 @@ export default function Organizations() {
 					onPress={() => setOwnersDialogVisible(true)}
 				>
 					<Text>Manage Owners</Text>
-				</Button>
-				<Button
-					className="w-full mt-2"
-					size="default"
-					variant="default"
-					onPress={() => setNewOrgModalVisible(true)}
-				>
-					<Text>Create New Organization</Text>
 				</Button>
 			</View>
 			<View className="flex gap-2">
@@ -533,19 +694,22 @@ export default function Organizations() {
 						closeOrgNameDialog();
 						setOrgName("");
 						setOrgNameError("");
+						setEditingOrgId(null);
 					}}
 					contentContainerStyle={[
 						{
 							padding: 20,
 							margin: 20,
 							borderRadius: 8,
+							display: "flex",
+							flexDirection: "column",
+							gap: 10,
 							backgroundColor:
 								colorScheme === "dark" ? colors.dark.card : colors.light.card,
 						},
 					]}
 				>
 					<H3>Edit Organization Name</H3>
-					<Muted>Enter a new name for your organization</Muted>
 
 					<TextInput
 						label="Organization Name"
@@ -553,6 +717,7 @@ export default function Organizations() {
 						onChangeText={setOrgName}
 						mode="outlined"
 						className="mt-4 mb-2"
+						autoCapitalize="words"
 					/>
 
 					{orgNameError ? (
@@ -566,6 +731,7 @@ export default function Organizations() {
 								closeOrgNameDialog();
 								setOrgName("");
 								setOrgNameError("");
+								setEditingOrgId(null);
 							}}
 						>
 							<Text>Cancel</Text>
@@ -679,6 +845,46 @@ export default function Organizations() {
 			>
 				{snackbarMessage}
 			</Snackbar>
+
+			{/* Remove Organization Confirmation Modal */}
+			<Portal>
+				<Modal
+					visible={removeOrgModalVisible}
+					onDismiss={() => {
+						setRemoveOrgModalVisible(false);
+						setOrganizationToRemove(null);
+					}}
+					contentContainerStyle={[
+						styles.modalContainer,
+						{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						},
+					]}
+				>
+					<H3>Remove Organization</H3>
+					<Muted className="my-4">
+						Are you sure you want to remove this organization? This action
+						cannot be undone and all data associated with this organization will
+						be lost.
+					</Muted>
+
+					<View style={styles.modalButtons}>
+						<Button
+							variant="ghost"
+							onPress={() => {
+								setRemoveOrgModalVisible(false);
+								setOrganizationToRemove(null);
+							}}
+						>
+							<Text>Cancel</Text>
+						</Button>
+						<Button variant="destructive" onPress={confirmRemoveOrganization}>
+							<Text className="text-white">Remove</Text>
+						</Button>
+					</View>
+				</Modal>
+			</Portal>
 		</View>
 	);
 }
@@ -694,7 +900,14 @@ const styles = StyleSheet.create({
 		padding: 16,
 		paddingBottom: 32,
 	},
-
+	activeOrgName: {
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+	},
+	activeOrgNamePressed: {
+		backgroundColor: "rgba(59, 130, 246, 0.1)",
+	},
 	membersCard: {
 		marginTop: 8,
 	},
