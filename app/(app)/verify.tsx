@@ -3,17 +3,20 @@ import { router, useLocalSearchParams } from "expo-router";
 import { CheckCircle, XCircle } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { H2 } from "@/components/ui/typography";
 import { supabase } from "@/config/supabase";
+import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
 
 export default function VerifyAccount() {
 	const local = useLocalSearchParams();
 	const [isCreatingOrg, setIsCreatingOrg] = useState(false);
 	const [orgCreated, setOrgCreated] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const queryClient = useQueryClient();
 
 	const { access_token, refresh_token } = useMemo(() => {
 		const params = new URLSearchParams(local["#"] as string);
@@ -64,145 +67,17 @@ export default function VerifyAccount() {
 					return;
 				}
 
-				// Create a new organization
-				const { data: organization, error: orgError } = await supabase
-					.from("organizations")
-					.insert({
+				// Create a new organization with default values
+				const organization = await createOrganizationWithDefaults(
+					supabase,
+					{
 						name: `${user.email?.split("@")[0]}'s Organization`,
 						user_id: user.id,
-					})
-					.select()
-					.single();
+					},
+					queryClient,
+				);
 
-				if (orgError) throw orgError;
-
-				// Add user as owner of the organization
-				const { error: memberError } = await supabase
-					.from("organization_members")
-					.insert({
-						organization_id: organization.id,
-						user_id: user.id,
-						role: "owner",
-					});
-
-				if (memberError) throw memberError;
-
-				// Add default gemstone types for the new organization
-				const defaultGemstoneTypes = [
-					"Ruby",
-					"Sapphire",
-					"Emerald",
-					"Diamond",
-					"Amethyst",
-					"Aquamarine",
-					"Topaz",
-					"Opal",
-					"Garnet",
-					"Peridot",
-					"Tanzanite",
-					"Tourmaline",
-					"Citrine",
-					"Morganite",
-					"Alexandrite",
-					"Turquoise",
-					"Jade",
-					"Lapis Lazuli",
-					"Moonstone",
-					"Onyx",
-					"Pearl",
-					"Spinel",
-					"Zircon",
-					"Other",
-				];
-
-				// Create batch insert data
-				const gemstoneTypesData = defaultGemstoneTypes.map((name) => ({
-					organization_id: organization.id,
-					name,
-				}));
-
-				// Insert default gemstone types
-				const { error: gemstoneTypesError } = await supabase
-					.from("organization_gemstone_types")
-					.insert(gemstoneTypesData);
-
-				if (gemstoneTypesError) {
-					console.error(
-						"Error adding default gemstone types:",
-						gemstoneTypesError,
-					);
-					// Continue even if there's an error with gemstone types
-				}
-
-				// Add default shapes
-				const defaultShapes = [
-					"Marquise",
-					"Round",
-					"Trillion",
-					"Oval",
-					"Pear",
-					"Square",
-					"Octagon",
-					"Emerald",
-					"Baguette",
-					"Cushion",
-					"Heart",
-					"Cobochon",
-					"Princess",
-					"Radiant",
-					"Asscher",
-				];
-
-				const shapesData = defaultShapes.map((name) => ({
-					organization_id: organization.id,
-					name,
-				}));
-
-				const { error: shapesError } = await supabase
-					.from("organization_shapes")
-					.insert(shapesData);
-
-				if (shapesError) {
-					console.error("Error adding default shapes:", shapesError);
-					// Continue even if there's an error with shapes
-				}
-
-				// Add default colors
-				const defaultColors = [
-					"Royal Blue",
-					"Corn Flower",
-					"Pinkish Purple",
-					"Neon Pink",
-					"Hot Pink",
-					"Blue",
-					"Red",
-					"Pink",
-					"Yellow",
-					"Green",
-					"Orange",
-					"Pink & Orange",
-					"Brown",
-					"Black",
-					"White",
-					"Colorless",
-					"Neon Blue",
-					"Purple",
-					"Multi-colored",
-				];
-
-				const colorsData = defaultColors.map((name) => ({
-					organization_id: organization.id,
-					name,
-				}));
-
-				const { error: colorsError } = await supabase
-					.from("organization_colors")
-					.insert(colorsData);
-
-				if (colorsError) {
-					console.error("Error adding default colors:", colorsError);
-					// Continue even if there's an error with colors
-				}
+				if (!organization) throw new Error("Failed to create organization");
 
 				setOrgCreated(true);
 			} catch (err: any) {
@@ -214,7 +89,7 @@ export default function VerifyAccount() {
 		};
 
 		createOrganization();
-	}, [isVerified, access_token]);
+	}, [isVerified, access_token, queryClient]);
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>

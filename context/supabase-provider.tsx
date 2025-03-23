@@ -1,19 +1,14 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Session, User } from "@supabase/supabase-js";
-import { SplashScreen, useRouter, useSegments } from "expo-router";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/config/supabase";
 import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";
 import { useOrganizationMemberships } from "@/hooks/useOrganizationMemberships";
 import type { Tables } from "@/lib/database.types";
-import "../lib/supabase-types"; // Import type extensions
+import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	GemstoneColor,
-	GemstoneShape,
-	GemstoneType,
-} from "@/app/types/gemstone";
+import { SplashScreen, useRouter, useSegments } from "expo-router";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import "../lib/supabase-types"; // Import type extensions
 SplashScreen.preventAutoHideAsync();
 
 // Storage key for the active organization
@@ -296,39 +291,20 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				}
 			} else {
 				// User doesn't have an organization, create a new one
-				const { data: newOrg, error: orgError } = await supabase
-					.from("organizations")
-					.insert({
+				const organization = await createOrganizationWithDefaults(
+					supabase,
+					{
 						name: props.organizationName,
 						user_id: user.id,
-					})
-					.select()
-					.single();
+					},
+					queryClient,
+				);
 
-				if (orgError) {
-					console.error("Error creating organization:", orgError);
-					throw orgError;
-				}
-
-				if (!newOrg) {
+				if (!organization) {
 					throw new Error("Failed to create organization");
 				}
 
-				organizationId = newOrg.id;
-
-				// Add user as owner of the organization
-				const { error: memberError } = await supabase
-					.from("organization_members")
-					.insert({
-						organization_id: organizationId,
-						user_id: user.id,
-						role: "owner",
-					});
-
-				if (memberError) {
-					console.error("Error adding user to organization:", memberError);
-					throw memberError;
-				}
+				organizationId = organization.id;
 
 				// Create organization owner with the user's name
 				const { error: ownerError } = await supabase
@@ -341,53 +317,6 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				if (ownerError) {
 					console.error("Error creating organization owner:", ownerError);
 					throw ownerError;
-				}
-
-				// Add default gemstone types for the new organization
-				const defaultGemstoneTypes = [
-					"Ruby",
-					"Sapphire",
-					"Emerald",
-					"Diamond",
-					"Amethyst",
-					"Aquamarine",
-					"Topaz",
-					"Opal",
-					"Garnet",
-					"Peridot",
-					"Tanzanite",
-					"Tourmaline",
-					"Citrine",
-					"Morganite",
-					"Alexandrite",
-					"Turquoise",
-					"Jade",
-					"Lapis Lazuli",
-					"Moonstone",
-					"Onyx",
-					"Pearl",
-					"Spinel",
-					"Zircon",
-					"Other",
-				];
-
-				// Create batch insert data
-				const gemstoneTypesData = defaultGemstoneTypes.map((name) => ({
-					organization_id: organizationId,
-					name,
-				}));
-
-				// Insert default gemstone types
-				const { error: gemstoneTypesError } = await supabase
-					.from("organization_gemstone_types")
-					.insert(gemstoneTypesData);
-
-				if (gemstoneTypesError) {
-					console.error(
-						"Error adding default gemstone types:",
-						gemstoneTypesError,
-					);
-					// Continue even if there's an error with gemstone types
 				}
 			}
 
@@ -447,95 +376,14 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				? `${email.split("@")[0]}'s Organization`
 				: "My Organization";
 
-			const { data: organization, error: orgError } = await supabase
-				.from("organizations")
-				.insert({
+			const organization = await createOrganizationWithDefaults(
+				supabase,
+				{
 					name: orgName,
 					user_id: userId,
-				})
-				.select()
-				.single();
-
-			if (orgError) {
-				console.error("Error creating organization:", orgError);
-				return null;
-			}
-
-			// Add user as owner of the organization
-			const { error: memberError } = await supabase
-				.from("organization_members")
-				.insert({
-					organization_id: organization.id,
-					user_id: userId,
-					role: "owner",
-				});
-
-			if (memberError) {
-				console.error("Error adding user to organization:", memberError);
-				return null;
-			}
-
-			// Add default shapes
-			const defaultShapes = Object.values(GemstoneShape);
-
-			const shapesData = defaultShapes.map((name) => ({
-				organization_id: organization.id,
-				name,
-			}));
-
-			const { error: shapesError } = await supabase
-				.from("organization_shapes")
-				.insert(shapesData);
-
-			if (shapesError) {
-				console.error("Error adding default shapes:", shapesError);
-				// Continue even if there's an error with shapes
-			}
-
-			// Add default colors
-			const defaultColors = Object.values(GemstoneColor);
-
-			const colorsData = defaultColors.map((name) => ({
-				organization_id: organization.id,
-				name,
-			}));
-
-			const { error: colorsError } = await supabase
-				.from("organization_colors")
-				.insert(colorsData);
-
-			if (colorsError) {
-				console.error("Error adding default colors:", colorsError);
-				// Continue even if there's an error with colors
-			}
-
-			// Add default gemstone types for the new organization
-			const defaultGemstoneTypes = Object.values(GemstoneType);
-
-			// Create batch insert data
-			const gemstoneTypesData = defaultGemstoneTypes.map((name) => ({
-				organization_id: organization.id,
-				name,
-			}));
-
-			// Insert default gemstone types
-			const { error: gemstoneTypesError } = await supabase
-				.from("organization_gemstone_types")
-				.insert(gemstoneTypesData);
-
-			if (gemstoneTypesError) {
-				console.error(
-					"Error adding default gemstone types:",
-					gemstoneTypesError,
-				);
-				// Continue even if there's an error with gemstone types
-			}
-
-			// Invalidate queries to refresh data
-			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
-			queryClient.invalidateQueries({
-				queryKey: ["organization-gemstone-types"],
-			});
+				},
+				queryClient,
+			);
 
 			return organization;
 		} catch (error) {

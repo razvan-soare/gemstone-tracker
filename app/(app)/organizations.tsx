@@ -8,11 +8,11 @@ import {
 	useUpdateOrganization,
 } from "@/hooks/useOrganizationMemberships";
 import { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { List, Modal, Portal, TextInput } from "react-native-paper";
+import { View, StyleSheet, ToastAndroid, Platform } from "react-native";
+import { List, Modal, Portal, TextInput, Snackbar } from "react-native-paper";
 
 import { Dropdown } from "react-native-paper-dropdown";
-
+import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
 import { ColorsDialog } from "@/components/ColorsDialog";
 import { GemstoneTypesDialog } from "@/components/GemstoneTypesDialog";
 import { OwnersDialog } from "@/components/OwnersDialog";
@@ -28,6 +28,9 @@ import {
 } from "@/hooks/useInvitations";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useCreateOrganization } from "@/hooks/useCreateOrganization";
+import { supabase } from "@/config/supabase";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Organizations() {
 	const [orgName, setOrgName] = useState("");
@@ -40,7 +43,15 @@ export default function Organizations() {
 	const [inviteError, setInviteError] = useState("");
 	const [shapesDialogVisible, setShapesDialogVisible] = useState(false);
 	const [colorsDialogVisible, setColorsDialogVisible] = useState(false);
+	const [newOrgModalVisible, setNewOrgModalVisible] = useState(false);
+	const [newOrgName, setNewOrgName] = useState("");
+	const [newOrgError, setNewOrgError] = useState("");
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
+	const [snackbarMessage, setSnackbarMessage] = useState("");
+	const [isSuccess, setIsSuccess] = useState(false);
+	const queryClient = useQueryClient();
 	const updateOrganization = useUpdateOrganization();
+	const createOrganization = useCreateOrganization();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
 	const {
 		activeOrganization,
@@ -166,10 +177,137 @@ export default function Organizations() {
 		}
 	};
 
+	// Handle creating a new organization
+	const handleCreateOrganization = async () => {
+		if (!newOrgName || !user?.id) {
+			setNewOrgError("Please enter a valid organization name");
+			return;
+		}
+
+		try {
+			setNewOrgError("");
+
+			const newOrg = await createOrganizationWithDefaults(
+				supabase,
+				{
+					name: newOrgName,
+					user_id: user.id,
+				},
+				queryClient,
+			);
+
+			if (newOrg) {
+				await onSelectOrganization(newOrg.id);
+				setNewOrgModalVisible(false);
+				setNewOrgName("");
+				showMessage(`Organization "${newOrg.name}" created successfully`);
+			} else {
+				throw new Error("Failed to create organization");
+			}
+		} catch (error: any) {
+			console.error("Error creating organization:", error);
+			setNewOrgError(error.message || "Failed to create organization");
+			showMessage(error.message || "Failed to create organization", false);
+		}
+	};
+
+	// Show a success or error message
+	const showMessage = (message: string, success: boolean = true) => {
+		setSnackbarMessage(message);
+		setIsSuccess(success);
+		setSnackbarVisible(true);
+
+		// Also show a toast on Android for better visibility
+		if (Platform.OS === "android") {
+			ToastAndroid.show(message, ToastAndroid.SHORT);
+		}
+	};
+
 	if (userOrganizations.length === 0) {
 		return (
-			<View>
-				<Text>No organizations found</Text>
+			<View className="p-4 bg-white h-full flex gap-y-8">
+				<H3>No Organizations</H3>
+				<Muted>You don't have any organizations yet.</Muted>
+				<Button
+					className="w-full mt-4"
+					size="default"
+					variant="default"
+					onPress={() => setNewOrgModalVisible(true)}
+				>
+					<Text>Create New Organization</Text>
+				</Button>
+
+				{/* New Organization Modal */}
+				<Portal>
+					<Modal
+						visible={newOrgModalVisible}
+						onDismiss={() => {
+							setNewOrgModalVisible(false);
+							setNewOrgName("");
+							setNewOrgError("");
+						}}
+						contentContainerStyle={[
+							styles.modalContainer,
+							{
+								backgroundColor:
+									colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							},
+						]}
+					>
+						<H3>Create New Organization</H3>
+						<Muted>Enter a name for your new organization</Muted>
+
+						<TextInput
+							label="Organization Name"
+							onChangeText={setNewOrgName}
+							mode="outlined"
+							style={styles.input}
+							autoCapitalize="words"
+						/>
+
+						{newOrgError ? (
+							<Text style={styles.errorText}>{newOrgError}</Text>
+						) : null}
+
+						<View style={styles.modalButtons}>
+							<Button
+								variant="ghost"
+								onPress={() => {
+									setNewOrgModalVisible(false);
+									setNewOrgName("");
+									setNewOrgError("");
+								}}
+							>
+								<Text>Cancel</Text>
+							</Button>
+							<Button
+								variant="default"
+								onPress={handleCreateOrganization}
+								disabled={createOrganization.isPending}
+							>
+								<Text>
+									{createOrganization.isPending ? "Creating..." : "Create"}
+								</Text>
+							</Button>
+						</View>
+					</Modal>
+				</Portal>
+
+				{/* Success/Error Snackbar */}
+				<Snackbar
+					visible={snackbarVisible}
+					onDismiss={() => setSnackbarVisible(false)}
+					duration={3000}
+					style={{
+						backgroundColor: isSuccess ? "#43a047" : "#d32f2f",
+					}}
+					action={{
+						label: "Dismiss",
+						onPress: () => setSnackbarVisible(false),
+					}}
+				>
+					{snackbarMessage}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -211,6 +349,14 @@ export default function Organizations() {
 					onPress={() => setOwnersDialogVisible(true)}
 				>
 					<Text>Manage Owners</Text>
+				</Button>
+				<Button
+					className="w-full mt-2"
+					size="default"
+					variant="default"
+					onPress={() => setNewOrgModalVisible(true)}
+				>
+					<Text>Create New Organization</Text>
 				</Button>
 			</View>
 			<View className="flex gap-2">
@@ -460,6 +606,79 @@ export default function Organizations() {
 				visible={colorsDialogVisible}
 				onDismiss={() => setColorsDialogVisible(false)}
 			/>
+
+			{/* New Organization Modal */}
+			<Portal>
+				<Modal
+					visible={newOrgModalVisible}
+					onDismiss={() => {
+						setNewOrgModalVisible(false);
+						setNewOrgName("");
+						setNewOrgError("");
+					}}
+					contentContainerStyle={[
+						styles.modalContainer,
+						{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						},
+					]}
+				>
+					<H3>Create New Organization</H3>
+					<Muted>Enter a name for your new organization</Muted>
+
+					<TextInput
+						label="Organization Name"
+						value={newOrgName}
+						onChangeText={setNewOrgName}
+						mode="outlined"
+						style={styles.input}
+						autoCapitalize="words"
+					/>
+
+					{newOrgError ? (
+						<Text style={styles.errorText}>{newOrgError}</Text>
+					) : null}
+
+					<View style={styles.modalButtons}>
+						<Button
+							variant="ghost"
+							onPress={() => {
+								setNewOrgModalVisible(false);
+								setNewOrgName("");
+								setNewOrgError("");
+							}}
+						>
+							<Text>Cancel</Text>
+						</Button>
+						<Button
+							variant="default"
+							onPress={handleCreateOrganization}
+							disabled={createOrganization.isPending}
+						>
+							<Text>
+								{createOrganization.isPending ? "Creating..." : "Create"}
+							</Text>
+						</Button>
+					</View>
+				</Modal>
+			</Portal>
+
+			{/* Success/Error Snackbar */}
+			<Snackbar
+				visible={snackbarVisible}
+				onDismiss={() => setSnackbarVisible(false)}
+				duration={3000}
+				style={{
+					backgroundColor: isSuccess ? "#43a047" : "#d32f2f",
+				}}
+				action={{
+					label: "Dismiss",
+					onPress: () => setSnackbarVisible(false),
+				}}
+			>
+				{snackbarMessage}
+			</Snackbar>
 		</View>
 	);
 }
