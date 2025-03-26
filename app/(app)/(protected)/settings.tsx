@@ -20,8 +20,13 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 
 export default function Settings() {
-	const { signOut, activeOrganization, userOrganizations, user, session } =
-		useSupabase();
+	const {
+		signOut,
+		activeOrganization,
+		onSelectOrganization,
+		userOrganizations,
+		session,
+	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
 	const { columnCount, updateColumnCount } = useColumnPreference();
 
@@ -58,6 +63,24 @@ export default function Settings() {
 					{userOrganizations.length > 0 && (
 						<View className="gap-y-2">
 							<H3>Organization</H3>
+							<View>
+								<Dropdown
+									label="Select Organization"
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: 60 }}
+									value={activeOrganization?.id}
+									onSelect={(orgId) => {
+										if (!orgId) return;
+										onSelectOrganization(orgId);
+									}}
+									options={userOrganizations.map((org) => ({
+										label: org.name,
+										value: org.id,
+									}))}
+								/>
+							</View>
+
 							<Button
 								className="w-full mt-2"
 								size="default"

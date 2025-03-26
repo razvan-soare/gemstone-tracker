@@ -5,18 +5,18 @@ import { FAB } from "react-native-paper";
 
 import {
 	GemstoneColor,
-	GemstoneShape,
 	GemstoneOwner,
+	GemstoneShape,
 } from "@/app/types/gemstone";
 import FilterButton from "@/components/FilterButton";
 import GemstoneList from "@/components/GemstoneList";
 import SearchBar from "@/components/SearchBar";
+import { H4 } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
-import { useGemstones } from "@/hooks/useGemstones";
-import { useColumnPreference } from "@/hooks/useColumnPreference";
-import { useColorScheme } from "@/lib/useColorScheme";
 import { useSupabase } from "@/context/supabase-provider";
-import { H2 } from "@/components/ui/typography";
+import { useColumnPreference } from "@/hooks/useColumnPreference";
+import { useGemstones } from "@/hooks/useGemstones";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function Home() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -54,9 +54,9 @@ export default function Home() {
 				barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
 			/>
 
-			{/* <View className="w-full items-center justify-center py-4">
-				<H2>{activeOrganization?.name}'s gemstones</H2>
-			</View> */}
+			<View className="w-full items-center justify-center px-2">
+				<H4>{activeOrganization?.name}</H4>
+			</View>
 
 			<View style={styles.headerButtons}>
 				<View style={styles.searchContainer}>
