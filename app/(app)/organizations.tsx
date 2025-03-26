@@ -16,7 +16,7 @@ import {
 	Pressable,
 } from "react-native";
 import { List, Modal, Portal, TextInput, Snackbar } from "react-native-paper";
-import { Pencil } from "lucide-react-native";
+import { Pencil, Trash2 } from "lucide-react-native";
 import { Dropdown } from "react-native-paper-dropdown";
 import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
 import { ColorsDialog } from "@/components/ColorsDialog";
@@ -37,6 +37,7 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { useCreateOrganization } from "@/hooks/useCreateOrganization";
 import { supabase } from "@/config/supabase";
 import { useQueryClient } from "@tanstack/react-query";
+import { DeleteOrganizationDialog } from "@/components/DeleteOrganizationDialog";
 
 export default function Organizations() {
 	const [orgName, setOrgName] = useState("");
@@ -56,7 +57,7 @@ export default function Organizations() {
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
 	const [isSuccess, setIsSuccess] = useState(false);
-	const [removeOrgModalVisible, setRemoveOrgModalVisible] = useState(false);
+	const [deleteOrgDialogVisible, setDeleteOrgDialogVisible] = useState(false);
 	const [organizationToRemove, setOrganizationToRemove] = useState<
 		string | null
 	>(null);
@@ -257,63 +258,7 @@ export default function Organizations() {
 		}
 
 		setOrganizationToRemove(organizationId);
-		setRemoveOrgModalVisible(true);
-	};
-
-	// Handle confirming organization removal
-	const confirmRemoveOrganization = async () => {
-		if (!organizationToRemove) return;
-
-		try {
-			// Find the organization name for feedback message
-			const orgToDelete = userOrganizations.find(
-				(org) => org.id === organizationToRemove,
-			);
-			const orgName = orgToDelete?.name || "Organization";
-
-			// If the active organization is being removed, switch to another organization
-			if (activeOrganization?.id === organizationToRemove) {
-				const nextOrg = userOrganizations.find(
-					(org) => org.id !== organizationToRemove,
-				);
-				if (nextOrg) {
-					await onSelectOrganization(nextOrg.id);
-				}
-			}
-
-			// Delete the organization
-			const { error } = await supabase
-				.from("organizations")
-				.delete()
-				.eq("id", organizationToRemove);
-
-			if (error) throw error;
-
-			// Refresh all related data
-			// Clear organization related data
-			queryClient.invalidateQueries();
-
-			// Explicitly invalidate relevant query keys
-			queryClient.invalidateQueries({ queryKey: ["organization_members"] });
-			queryClient.invalidateQueries({ queryKey: ["organizations"] });
-			queryClient.invalidateQueries({
-				queryKey: ["organization-gemstone-types"],
-			});
-			queryClient.invalidateQueries({ queryKey: ["organization-colors"] });
-			queryClient.invalidateQueries({ queryKey: ["organization-shapes"] });
-			queryClient.invalidateQueries({ queryKey: ["gemstone"] });
-			queryClient.invalidateQueries({ queryKey: ["gemstones"] });
-			queryClient.invalidateQueries({ queryKey: ["invitations"] });
-
-			// Show success message
-			showMessage(`${orgName} has been removed`, true);
-		} catch (error: any) {
-			console.error("Error removing organization:", error);
-			showMessage(error.message || "Failed to remove organization", false);
-		} finally {
-			setRemoveOrgModalVisible(false);
-			setOrganizationToRemove(null);
-		}
+		setDeleteOrgDialogVisible(true);
 	};
 
 	if (userOrganizations.length === 0) {
@@ -401,59 +346,19 @@ export default function Organizations() {
 				>
 					{snackbarMessage}
 				</Snackbar>
-
-				{/* Remove Organization Confirmation Modal */}
-				<Portal>
-					<Modal
-						visible={removeOrgModalVisible}
-						onDismiss={() => {
-							setRemoveOrgModalVisible(false);
-							setOrganizationToRemove(null);
-						}}
-						contentContainerStyle={[
-							styles.modalContainer,
-							{
-								backgroundColor:
-									colorScheme === "dark" ? colors.dark.card : colors.light.card,
-							},
-						]}
-					>
-						<H3>Remove Organization</H3>
-						<Muted className="my-4">
-							Are you sure you want to remove this organization? This action
-							cannot be undone and all data associated with this organization
-							will be lost.
-						</Muted>
-
-						<View style={styles.modalButtons}>
-							<Button
-								variant="ghost"
-								onPress={() => {
-									setRemoveOrgModalVisible(false);
-									setOrganizationToRemove(null);
-								}}
-							>
-								<Text>Cancel</Text>
-							</Button>
-							<Button variant="destructive" onPress={confirmRemoveOrganization}>
-								<Text className="text-white">Remove</Text>
-							</Button>
-						</View>
-					</Modal>
-				</Portal>
 			</View>
 		);
 	}
 
 	return (
 		<View className="p-4 bg-white h-full flex gap-y-8">
-			<View className="flex gap-2">
+			<View className="flex gap-4">
 				<H3>Organization</H3>
-				<View>
+				<View className="flex gap-2">
 					{userOrganizations.map((org) => (
 						<View
 							key={org.id}
-							className={`p-3 mb-2 rounded-md border border-gray-200 flex-row justify-between items-center ${
+							className={`p-3 rounded-md border border-gray-200 flex-row justify-between items-center ${
 								activeOrganization?.id === org.id ? "bg-blue-50" : ""
 							}`}
 						>
@@ -475,7 +380,7 @@ export default function Organizations() {
 								</View>
 							</Pressable>
 
-							<View className="flex-row gap-2">
+							<View className="flex-row gap-4">
 								{activeOrganization?.id !== org.id ? (
 									<Button
 										size="sm"
@@ -486,39 +391,40 @@ export default function Organizations() {
 									</Button>
 								) : (
 									<View className="bg-blue-100 px-3 py-0.5 rounded flex items-center justify-center">
-										<Text className="text-blue-600 text-xs font-medium">
-											Active
-										</Text>
+										<Text className="text-blue-600  font-medium">Active</Text>
 									</View>
 								)}
 								<Button
 									size="sm"
 									variant="destructive"
+									disabled={activeOrganization?.id === org.id}
 									onPress={() => handleRemoveOrganization(org.id)}
 								>
-									<Text className="text-white">Remove</Text>
+									<Trash2 size={16} color="white" />
 								</Button>
 							</View>
 						</View>
 					))}
 				</View>
 
-				<Button
-					className="w-full mt-2"
-					size="default"
-					variant="default"
-					onPress={() => setNewOrgModalVisible(true)}
-				>
-					<Text>Create New Organization</Text>
-				</Button>
-				<Button
-					className="w-full mt-2"
-					size="default"
-					variant="outline"
-					onPress={() => setOwnersDialogVisible(true)}
-				>
-					<Text>Manage Owners</Text>
-				</Button>
+				<View className="flex flex-row gap-2">
+					<Button
+						className="flex-1"
+						size="default"
+						variant="default"
+						onPress={() => setNewOrgModalVisible(true)}
+					>
+						<Text>New Organization</Text>
+					</Button>
+					<Button
+						className="flex-1"
+						size="default"
+						variant="outline"
+						onPress={() => setOwnersDialogVisible(true)}
+					>
+						<Text>Manage Owners</Text>
+					</Button>
+				</View>
 			</View>
 			<View className="flex gap-2">
 				<H3>Team Members</H3>
@@ -795,7 +701,7 @@ export default function Organizations() {
 
 					<TextInput
 						label="Organization Name"
-						value={newOrgName}
+						defaultValue={newOrgName}
 						onChangeText={setNewOrgName}
 						mode="outlined"
 						style={styles.input}
@@ -830,6 +736,16 @@ export default function Organizations() {
 				</Modal>
 			</Portal>
 
+			{/* Enhanced Delete Organization Dialog */}
+			<DeleteOrganizationDialog
+				visible={deleteOrgDialogVisible}
+				onDismiss={() => {
+					setDeleteOrgDialogVisible(false);
+					setOrganizationToRemove(null);
+				}}
+				organizationId={organizationToRemove ?? ""}
+			/>
+
 			{/* Success/Error Snackbar */}
 			<Snackbar
 				visible={snackbarVisible}
@@ -845,46 +761,6 @@ export default function Organizations() {
 			>
 				{snackbarMessage}
 			</Snackbar>
-
-			{/* Remove Organization Confirmation Modal */}
-			<Portal>
-				<Modal
-					visible={removeOrgModalVisible}
-					onDismiss={() => {
-						setRemoveOrgModalVisible(false);
-						setOrganizationToRemove(null);
-					}}
-					contentContainerStyle={[
-						styles.modalContainer,
-						{
-							backgroundColor:
-								colorScheme === "dark" ? colors.dark.card : colors.light.card,
-						},
-					]}
-				>
-					<H3>Remove Organization</H3>
-					<Muted className="my-4">
-						Are you sure you want to remove this organization? This action
-						cannot be undone and all data associated with this organization will
-						be lost.
-					</Muted>
-
-					<View style={styles.modalButtons}>
-						<Button
-							variant="ghost"
-							onPress={() => {
-								setRemoveOrgModalVisible(false);
-								setOrganizationToRemove(null);
-							}}
-						>
-							<Text>Cancel</Text>
-						</Button>
-						<Button variant="destructive" onPress={confirmRemoveOrganization}>
-							<Text className="text-white">Remove</Text>
-						</Button>
-					</View>
-				</Modal>
-			</Portal>
 		</View>
 	);
 }
