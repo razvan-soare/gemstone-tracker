@@ -1,71 +1,77 @@
 {
-	"expo": {
-		"name": "Gemstone tracker",
-		"slug": "gem-tracker",
-		"scheme": "gemstone-tracker",
-		"version": "1.0.5",
-		"orientation": "portrait",
-		"icon": "./assets/icon.png",
-		"userInterfaceStyle": "automatic",
-		"assetBundlePatterns": ["**/*"],
-		"newArchEnabled": true,
-		"ios": {
-			"supportsTablet": true,
-			"config": {
-				"usesNonExemptEncryption": false
-			},
-			"splash": {
-				"image": "./assets/splash.png",
-				"resizeMode": "cover",
-				"backgroundColor": "#ffffff",
-				"dark": {
-					"backgroundColor": "#000000",
-					"resizeMode": "cover",
-					"image": "./assets/splash.png"
-				}
-			},
-			"bundleIdentifier": "com.razvansoare.gemtracker",
-			"buildNumber": "1.0.5"
-		},
-		"web": {
-			"bundler": "metro",
-			"output": "single",
-			"favicon": "./assets/favicon.png"
-		},
-		"android": {
-			"adaptiveIcon": {
-				"backgroundImage": "./assets/adaptive-icon/background.png",
-				"foregroundImage": "./assets/adaptive-icon/foreground.png"
-			},
-			"splash": {
-				"image": "./assets/splash.png",
-				"resizeMode": "cover",
-				"backgroundColor": "#ffffff",
-				"dark": {
-					"backgroundColor": "#000000",
-					"resizeMode": "cover",
-					"image": "./assets/splash.png"
-				}
-			},
-			"versionCode": 49010005
-		},
-		"experiments": {
-			"typedRoutes": true
-		},
-		"plugins": ["expo-router", "expo-secure-store", "expo-updates"],
-		"updates": {
-			"enabled": true,
-			"fallbackToCacheTimeout": 0,
-			"url": "https://u.expo.dev/37d4e43f-67a6-4de6-90a3-81495f8c7666"
-		},
-		"runtimeVersion": {
-			"policy": "appVersion"
-		},
-		"extra": {
-			"eas": {
-				"projectId": "37d4e43f-67a6-4de6-90a3-81495f8c7666"
-			}
-		},
-		"owner": "razvansoare"
-	}
+  "expo": {
+    "name": "Gemstone tracker",
+    "slug": "gem-tracker",
+    "scheme": "gemstone-tracker",
+    "version": "1.0.6",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#ffffff",
+        "dark": {
+          "backgroundColor": "#000000",
+          "resizeMode": "cover",
+          "image": "./assets/splash.png"
+        }
+      },
+      "bundleIdentifier": "com.razvansoare.gemtracker",
+      "buildNumber": "1.0.6"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundImage": "./assets/adaptive-icon/background.png",
+        "foregroundImage": "./assets/adaptive-icon/foreground.png"
+      },
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#ffffff",
+        "dark": {
+          "backgroundColor": "#000000",
+          "resizeMode": "cover",
+          "image": "./assets/splash.png"
+        }
+      },
+      "versionCode": 49010006
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-updates"
+    ],
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/37d4e43f-67a6-4de6-90a3-81495f8c7666"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "37d4e43f-67a6-4de6-90a3-81495f8c7666"
+      }
+    },
+    "owner": "razvansoare"
+  }
 }

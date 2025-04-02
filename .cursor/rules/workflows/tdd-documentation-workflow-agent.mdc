@@ -8,13 +8,16 @@ alwaysApply: false
 
 ## Critical Rules
 
-- Create a TDD document in `docs/plans` before starting implementation
+- Create a TDD document in `.ai/tdd/` before starting implementation
+- Ensure the `.ai` folder is added to `.gitignore` to prevent committing TDD documents
+- Create a new file for each TDD request with a descriptive name and date (e.g., `multilanguage-support-20230403.md`)
 - Document must include problem statement, requirements, solution architecture
 - Break down tasks into atomic units with acceptance criteria
 - Document dependencies between tasks and testing strategy
 - Review and update the TDD document after each implementation step
 - Mark completed tasks and document remaining work
 - Ensure each implementation step aligns with the documented plan
+- Reference the TDD document when implementing related features
 
 ## Examples
 
