@@ -123,7 +123,7 @@ const GemstoneListView = ({
 
 export default function BuyList() {
 	const { colorScheme } = useColorScheme();
-	const [activeTab, setActiveTab] = useState<GemstoneFilter>("purchased");
+	const [activeTab, setActiveTab] = useState<GemstoneFilter>("all");
 
 	const backgroundColor =
 		colorScheme === "dark" ? colors.dark.background : colors.light.background;
@@ -146,8 +146,12 @@ export default function BuyList() {
 					onValueChange={(value) => setActiveTab(value as GemstoneFilter)}
 					buttons={[
 						{
-							value: "purchased",
-							label: "Purchased",
+							value: "all",
+							label: "All",
+						},
+						{
+							value: "stock",
+							label: "Stock",
 						},
 						{
 							value: "sold",
@@ -163,7 +167,7 @@ export default function BuyList() {
 				itemBackgroundColor={itemBackgroundColor}
 			/>
 			{/* Export Button */}
-			<ExportButton style={styles.exportFab} />
+			<ExportButton style={styles.exportFab} filter={activeTab} />
 		</SafeAreaView>
 	);
 }

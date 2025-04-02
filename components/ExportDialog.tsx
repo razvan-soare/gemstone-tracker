@@ -25,9 +25,15 @@ type ExportDialogProps = {
 	visible: boolean;
 	onDismiss: () => void;
 	onConfirm: (filters: ExportFilters) => void;
+	initialSoldStatus?: "all" | "sold" | "unsold";
 };
 
-const ExportDialog = ({ visible, onDismiss, onConfirm }: ExportDialogProps) => {
+const ExportDialog = ({
+	visible,
+	onDismiss,
+	onConfirm,
+	initialSoldStatus = "all",
+}: ExportDialogProps) => {
 	// Initialize with default values
 	const getDefaultStartDate = useCallback(() => {
 		const date = new Date();
@@ -38,7 +44,7 @@ const ExportDialog = ({ visible, onDismiss, onConfirm }: ExportDialogProps) => {
 	const [startDate, setStartDate] = useState(getDefaultStartDate);
 	const [endDate, setEndDate] = useState(new Date());
 	const [soldStatus, setSoldStatus] = useState<"all" | "sold" | "unsold">(
-		"all",
+		initialSoldStatus,
 	);
 	const [owner, setOwner] = useState<GemstoneOwner | "all">("all");
 	const { owners } = useOrganizationOwners();

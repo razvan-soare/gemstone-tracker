@@ -6,12 +6,14 @@ import { exportToNumbers } from "@/lib/exportToNumbers";
 import ExportDialog, { ExportFilters } from "./ExportDialog";
 import { startOfDay, endOfDay, isWithinInterval } from "date-fns";
 import { Tables } from "@/lib/database.types";
+import { GemstoneFilter } from "@/hooks/useGemstonesByDate";
 
 type ExportButtonProps = {
 	style?: object;
+	filter?: GemstoneFilter;
 };
 
-const ExportButton = ({ style }: ExportButtonProps) => {
+const ExportButton = ({ style, filter = "all" }: ExportButtonProps) => {
 	const [isExporting, setIsExporting] = useState(false);
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -88,8 +90,13 @@ const ExportButton = ({ style }: ExportButtonProps) => {
 			if (!isInDateRange) return false;
 
 			// Filter by sold status
-			if (filters.soldStatus === "sold" && !gemstone.sold_at) return false;
-			if (filters.soldStatus === "unsold" && gemstone.sold_at) return false;
+			if (filter !== "all") {
+				if (filter === "sold" && !gemstone.sold_at) return false;
+				if (filter === "stock" && gemstone.sold_at) return false;
+			} else {
+				if (filters.soldStatus === "sold" && !gemstone.sold_at) return false;
+				if (filters.soldStatus === "unsold" && gemstone.sold_at) return false;
+			}
 
 			// Filter by owner
 			if (filters.owner !== "all" && gemstone.owner !== filters.owner)
@@ -113,6 +120,9 @@ const ExportButton = ({ style }: ExportButtonProps) => {
 				visible={dialogVisible}
 				onDismiss={handleDialogDismiss}
 				onConfirm={handleExport}
+				initialSoldStatus={
+					filter !== "all" ? (filter === "sold" ? "sold" : "unsold") : "all"
+				}
 			/>
 
 			<Snackbar
