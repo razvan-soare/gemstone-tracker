@@ -1,29 +1,19 @@
 ---
-description: CREATE_TDD_DOCUMENT when IMPLEMENTING_COMPLEX_FEATURE to ENSURE_STRUCTURED_IMPLEMENTATION
-globs: **/*.{js,jsx,ts,tsx,py,rb,go,rs}
+description: This rule governs the Test-Driven Development documentation process. It should be applied whenever: (1) Implementing complex features or significant changes, (2) Tasks requiring multiple steps or components, (3) Implementation needs to be broken down into atomic units, (4) Planning new features with dependencies. The rule ensures structured implementation approach through proper documentation. It's particularly important for maintaining implementation quality and meeting requirements.
+globs: 
+alwaysApply: false
 ---
 
 # TDD Documentation Workflow
 
-<version>1.0.0</version>
+## Critical Rules
 
-## Context
-- When implementing complex features or significant changes
-- When a task requires multiple steps or components
-- When implementation needs to be broken down into atomic units
-
-## Requirements
 - Create a TDD document in `docs/plans` before starting implementation
-- Document should include:
-  - Problem statement and requirements
-  - Proposed solution architecture
-  - Breakdown of tasks into atomic units
-  - Acceptance criteria for each task
-  - Dependencies between tasks
-  - Testing strategy
-- Review the TDD document after each implementation step
-- Update the document with progress, challenges, and any changes to the plan
-- Mark completed tasks and document what remains to be done
+- Document must include problem statement, requirements, solution architecture
+- Break down tasks into atomic units with acceptance criteria
+- Document dependencies between tasks and testing strategy
+- Review and update the TDD document after each implementation step
+- Mark completed tasks and document remaining work
 - Ensure each implementation step aligns with the documented plan
 
 ## Examples

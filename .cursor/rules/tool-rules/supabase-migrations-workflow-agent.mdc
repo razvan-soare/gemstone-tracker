@@ -1,0 +1,54 @@
+---
+description: This rule governs Supabase database migration workflows. It should be applied whenever: (1) Making changes to database schema, (2) Adding, modifying, or removing tables/columns/constraints, (3) Updating database functions, triggers, or policies, (4) Seeding data that depends on schema structure. The rule ensures consistent database schema management through proper migration practices. It's particularly important for maintaining data integrity and consistency across environments.
+globs: 
+alwaysApply: false
+---
+
+# Supabase Migration Workflow
+
+## Critical Rules
+
+- MUST create a new migration for ANY database schema change
+- MUST run `supabase migration new migration_description` before making changes
+- MUST run `supabase migration up` after creating the migration to apply changes
+- MUST update the initial seeder script if schema changes affect seeded data
+- MUST test migrations locally before committing
+- MUST use descriptive migration names that clearly indicate the purpose
+- MUST NOT modify existing migrations that have been applied
+- MUST create new "fix" migrations instead of modifying existing ones
+- MUST document the purpose of each migration with comments
+
+## Examples
+
+<example>
+// Good: Creating and applying a new migration
+```bash
+# 1. Create a new migration file
+supabase migration new add_status_column_to_stones
+
+# 2. Edit the migration file with the schema changes
+# In the generated SQL file:
+ALTER TABLE public.stones ADD COLUMN status TEXT DEFAULT 'available';
+
+# 3. Apply the migration
+supabase migration up
+
+# 4. Update seeder if needed
+# In initial.js, update TEST_STONE:
+const TEST_STONE = {
+  // existing properties
+  status: 'available',
+  // other properties
+};
+```
+</example>
+
+<example type="invalid">
+// Bad: Modifying database without migration
+```bash
+# Directly modifying the database without creating a migration
+psql -d postgres -c "ALTER TABLE public.stones ADD COLUMN status TEXT;"
+
+# Or making changes through the Supabase UI without creating a migration
+```
+</example> 
