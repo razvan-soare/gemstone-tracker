@@ -223,7 +223,7 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 	images,
 	tempImagePreviews = [],
 	width = Dimensions.get("window").width - 30,
-	height = 250,
+	height = 400,
 	onAddImage,
 }) => {
 	const { colorScheme } = useColorScheme();
@@ -307,13 +307,15 @@ export const GemstoneCarousel: React.FC<GemstoneCarouselProps> = ({
 								image={item.data}
 								placeholder={getDefaultStoneImage()}
 								style={styles.image}
+								contentFit="contain"
 							/>
 						) : (
 							<View style={{ position: "relative" }}>
 								<Image
 									source={{ uri: item.data.uri }}
 									style={[styles.image, { opacity: 0.7 }]}
-									contentFit="cover"
+									contentFit="contain"
+									placeholder={getDefaultStoneImage()}
 								/>
 								<View style={styles.loadingOverlay}>
 									<ActivityIndicator
