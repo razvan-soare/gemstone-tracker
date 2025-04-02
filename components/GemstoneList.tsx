@@ -56,12 +56,13 @@ const GemstoneList = ({
 	return (
 		<FlatList
 			data={gemstones}
-			renderItem={({ item }) => (
+			renderItem={({ item, index }) => (
 				<View
 					style={{
 						width: columnWidth,
-						marginRight: (columnCount > 1 && spacing) || 0,
+						marginRight: index % columnCount !== columnCount - 1 ? spacing : 0,
 						marginBottom: spacing,
+						flex: 1,
 					}}
 				>
 					<GemstoneCard gemstone={item} />
@@ -71,6 +72,7 @@ const GemstoneList = ({
 			contentContainerStyle={styles.listContainer}
 			numColumns={columnCount}
 			key={`column-${columnCount}`} // Force re-render when column count changes
+			columnWrapperStyle={styles.columnWrapper}
 			onEndReached={() => {
 				if (hasNextPage && !isFetchingNextPage) {
 					onLoadMore();
@@ -105,6 +107,11 @@ const styles = StyleSheet.create({
 	footer: {
 		padding: 16,
 		alignItems: "center",
+	},
+	columnWrapper: {
+		flex: 1,
+		justifyContent: "space-between",
+		alignItems: "stretch",
 	},
 });
 
