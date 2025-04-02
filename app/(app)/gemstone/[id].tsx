@@ -469,7 +469,6 @@ export default function GemstoneDetail() {
 							<GemstoneCarousel
 								images={gemstone.images || []}
 								tempImagePreviews={tempImagePreviews}
-								height={200}
 								width={screenWidth}
 								onAddImage={onOpenAddPicture}
 							/>
