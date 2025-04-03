@@ -89,7 +89,7 @@ export default function AddNewGemstone() {
 		dimensions: { length: "", width: "", height: "" },
 		buy_price: 0,
 		sell_price: 0,
-		buy_currency: Currency.RMB,
+		buy_currency: Currency.LKR,
 		sell_currency: Currency.RMB,
 		purchase_date: new Date().toISOString().split("T")[0],
 		sold_at: null as string | null,
@@ -586,9 +586,6 @@ export default function AddNewGemstone() {
 							styles.priceInput,
 							error?.field === "buy_price" && styles.inputError,
 						]}
-						left={
-							<TextInput.Affix text={CurrencySymbols[formData.buy_currency]} />
-						}
 					/>
 					<View style={styles.currencyDropdown}>
 						<Dropdown
@@ -617,9 +614,6 @@ export default function AddNewGemstone() {
 							styles.priceInput,
 							error?.field === "sell_price" && styles.inputError,
 						]}
-						left={
-							<TextInput.Affix text={CurrencySymbols[formData.sell_currency]} />
-						}
 					/>
 					<View style={styles.currencyDropdown}>
 						<Dropdown

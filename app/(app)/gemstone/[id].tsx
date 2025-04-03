@@ -685,28 +685,13 @@ export default function GemstoneDetail() {
 											}
 											keyboardType="decimal-pad"
 											style={styles.priceInput}
-											left={
-												<TextInput.Affix
-													text={
-														formData.buy_currency &&
-														typeof formData.buy_currency === "string" &&
-														Object.values(Currency).includes(
-															formData.buy_currency as any,
-														)
-															? CurrencySymbols[
-																	formData.buy_currency as Currency
-																]
-															: "$"
-													}
-												/>
-											}
 										/>
 										<View style={styles.currencyDropdown}>
 											<Dropdown
 												label="Currency"
 												mode="outlined"
 												hideMenuHeader
-												menuContentStyle={{ top: 60 }}
+												menuContentStyle={{ top: -40 }}
 												value={formData.buy_currency || Currency.RMB}
 												options={Object.values(Currency).map((currency) => ({
 													label: currency,
@@ -734,29 +719,13 @@ export default function GemstoneDetail() {
 											}
 											keyboardType="decimal-pad"
 											style={styles.priceInput}
-											left={
-												<TextInput.Affix
-													text={
-														formData.sell_currency &&
-														typeof formData.sell_currency === "string" &&
-														Object.values(Currency).includes(
-															formData.sell_currency as any,
-														)
-															? CurrencySymbols[
-																	formData.sell_currency as Currency
-																]
-															: "$"
-													}
-												/>
-											}
-											placeholder="Set price without marking as sold"
 										/>
 										<View style={styles.currencyDropdown}>
 											<Dropdown
 												label="Currency"
 												mode="outlined"
 												hideMenuHeader
-												menuContentStyle={{ top: 60 }}
+												menuContentStyle={{ top: -40 }}
 												value={formData.sell_currency || Currency.RMB}
 												options={Object.values(Currency).map((currency) => ({
 													label: currency,
@@ -1023,8 +992,8 @@ export default function GemstoneDetail() {
 												}
 											>
 												<P style={styles.tableCellValue}>
+													{gemstone.buy_price || 0}{" "}
 													{getCurrencySymbol(gemstone.buy_currency)}
-													{gemstone.buy_price || 0}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -1046,8 +1015,8 @@ export default function GemstoneDetail() {
 												}
 											>
 												<P style={styles.tableCellValue}>
+													{gemstone.sell_price || 0}{" "}
 													{getCurrencySymbol(gemstone.sell_currency)}
-													{gemstone.sell_price || 0}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -1252,6 +1221,7 @@ export default function GemstoneDetail() {
 					onDismiss={() => setEditFieldDialogVisible(false)}
 					field={currentField}
 					onSave={handleSaveField}
+					key={currentField.label}
 				/>
 
 				{/* Sell Dialog */}
@@ -1271,9 +1241,6 @@ export default function GemstoneDetail() {
 									keyboardType="decimal-pad"
 									mode="outlined"
 									style={styles.priceInput}
-									left={
-										<TextInput.Affix text={CurrencySymbols[sellCurrency]} />
-									}
 								/>
 								<View style={styles.currencyDropdown}>
 									<Dropdown

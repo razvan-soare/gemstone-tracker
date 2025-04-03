@@ -87,12 +87,12 @@ const GemstoneItem = ({
 						)}
 						<View style={styles.priceContainer}>
 							<P className="text-green-500 font-semibold">
+								{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}{" "}
 								{buyCurrencySymbol}
-								{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}
 							</P>
 							<P className="text-red-500 font-semibold">
+								{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}{" "}
 								{sellCurrencySymbol}
-								{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}
 							</P>
 						</View>
 						<View>

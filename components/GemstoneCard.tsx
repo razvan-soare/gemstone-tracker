@@ -86,13 +86,13 @@ const GemstoneCard = ({
 
 						<View className="justify-between">
 							<P className="text-green-500 font-semibold">
-								Buy: {getCurrencySymbol(gemstone.buy_currency)}
-								{gemstone.buy_price?.toFixed(2) || "0.00"}
+								Buy: {gemstone.buy_price?.toFixed(2) || "0.00"}{" "}
+								{getCurrencySymbol(gemstone.buy_currency)}
 							</P>
 
 							<P className="text-red-500 font-semibold">
-								Sell: {getCurrencySymbol(gemstone.sell_currency)}
-								{gemstone.sell_price?.toFixed(2) || "0.00"}
+								Sell: {gemstone.sell_price?.toFixed(2) || "0.00"}{" "}
+								{getCurrencySymbol(gemstone.sell_currency)}
 							</P>
 						</View>
 					</Card.Content>

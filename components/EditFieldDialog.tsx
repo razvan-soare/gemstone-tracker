@@ -61,10 +61,10 @@ export const EditFieldDialog = ({
 	);
 	const [currencyCode, setCurrencyCode] = useState<string>(
 		field.type === "buy_price"
-			? field.value?.currency || "USD"
+			? field.value?.currency || Currency.LKR
 			: field.type === "sell_price"
-				? field.value?.currency || "USD"
-				: "USD",
+				? field.value?.currency || Currency.RMB
+				: Currency.RMB,
 	);
 	const [priceValue, setPriceValue] = useState<string>(
 		field.type === "buy_price" || field.type === "sell_price"
@@ -120,11 +120,6 @@ export const EditFieldDialog = ({
 		onDismiss();
 	};
 
-	const currencyOptions = Object.entries(Currency).map(([key, value]) => ({
-		label: `${value} (${CurrencySymbols[value as Currency] || ""})`,
-		value,
-	}));
-
 	const renderFieldInput = () => {
 		switch (field.type) {
 			case "text":
@@ -175,10 +170,12 @@ export const EditFieldDialog = ({
 			case "buy_price":
 			case "sell_price":
 				return (
-					<View>
+					<View style={styles.priceContainer} key={field.label}>
 						<TextInput
 							label={`${field.label} Amount`}
-							value={priceValue || ""}
+							mode="outlined"
+							defaultValue={priceValue || ""}
+							autoFocus
 							onChangeText={(val) => {
 								// Only allow numbers and decimal points
 								const cleaned = val.replace(/[^0-9.]/g, "");
@@ -190,23 +187,23 @@ export const EditFieldDialog = ({
 									setPriceValue(cleaned);
 								}
 							}}
-							keyboardType="numeric"
-							mode="outlined"
-							style={[styles.input, { marginBottom: 10 }]}
+							keyboardType="decimal-pad"
+							style={[styles.priceInput]}
 						/>
-
-						<Dropdown
-							label="Currency"
-							mode="outlined"
-							hideMenuHeader
-							menuContentStyle={{ top: 60 }}
-							value={currencyCode}
-							onSelect={(value) => setCurrencyCode(value || "USD")}
-							options={Object.values(Currency).map((currency) => ({
-								label: currency,
-								value: currency,
-							}))}
-						/>
+						<View style={styles.currencyDropdown}>
+							<Dropdown
+								label="Currency"
+								mode="outlined"
+								hideMenuHeader
+								menuContentStyle={{ top: -40 }}
+								value={currencyCode}
+								onSelect={(value) => setCurrencyCode(value || Currency.RMB)}
+								options={Object.values(Currency).map((currency) => ({
+									label: currency,
+									value: currency,
+								}))}
+							/>
+						</View>
 					</View>
 				);
 			case "shape":
@@ -343,5 +340,17 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		marginBottom: 5,
+	},
+	priceContainer: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		marginBottom: 16,
+		gap: 16,
+	},
+	priceInput: {
+		flex: 2,
+	},
+	currencyDropdown: {
+		flex: 1,
 	},
 });
