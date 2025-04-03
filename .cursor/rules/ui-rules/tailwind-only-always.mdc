@@ -1,0 +1,96 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Tailwind Classes Only
+
+## Critical Rules
+
+- ALWAYS use Tailwind CSS classes (className prop) for styling components instead of StyleSheet
+- NEVER create or use StyleSheet.create() for styling components
+- Convert all inline styles to equivalent Tailwind classes
+- Use style prop only when absolutely necessary for dynamic values that cannot be expressed in Tailwind
+- Maintain proper flex container hierarchies with Tailwind's flex classes
+- Ensure proper height handling with h-full and flex-1 classes for containers
+- When components don't support className (like some third-party components), use minimal inline styles only for those specific components
+- When migrating existing StyleSheet code, convert ALL styles to Tailwind equivalents
+- Position elements at the bottom of containers using mt-auto instead of position absolute
+- Use proper Tailwind spacing and sizing classes instead of fixed pixel values
+- When encountering StyleSheet code, always suggest refactoring to Tailwind classes
+- Always prioritize code consistency by using Tailwind across the entire codebase
+
+## Examples
+
+<example>
+  // Good - Using Tailwind classes only
+  <View className="flex-1 h-full p-4">
+    <Card className="flex-1 flex flex-col border-2 border-gray-200 rounded-lg">
+      <View className="relative">
+        <Image className="w-full h-40 rounded-t-lg" />
+        <Badge className="absolute top-2 right-2 bg-red-500 px-2 py-1">
+          <Text className="text-white text-xs">SOLD</Text>
+        </Badge>
+      </View>
+      
+      <View className="flex-1 p-4 flex flex-col justify-between">
+        <View className="flex-1">
+          <Text className="text-lg font-bold">Product Name</Text>
+          <View className="flex-row flex-wrap gap-1 mt-2">
+            <Badge className="rounded-md px-2 py-1 bg-blue-100">
+              <Text className="text-xs">Tag 1</Text>
+            </Badge>
+          </View>
+        </View>
+        
+        <View className="mt-auto pt-2">
+          <Text className="text-green-500">Price: $100</Text>
+        </View>
+      </View>
+    </Card>
+  </View>
+</example>
+
+<example type="invalid">
+  // Bad - Using StyleSheet and mixed styles
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+    },
+    card: {
+      flex: 1,
+      borderWidth: 2,
+      borderColor: '#e5e7eb',
+      borderRadius: 8,
+    },
+    imageContainer: {
+      position: 'relative',
+    },
+    image: {
+      width: '100%',
+      height: 160,
+      borderTopLeftRadius: 8,
+      borderTopRightRadius: 8,
+    },
+  });
+
+  <View style={styles.container}>
+    <Card style={styles.card}>
+      <View style={styles.imageContainer}>
+        <Image style={styles.image} />
+        <Badge style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          backgroundColor: '#ef4444',
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+        }}>
+          <Text style={{color: 'white', fontSize: 12}}>SOLD</Text>
+        </Badge>
+      </View>
+    </Card>
+  </View>
+</example> 

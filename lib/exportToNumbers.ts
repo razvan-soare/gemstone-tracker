@@ -1,9 +1,9 @@
-import { Tables } from "./database.types";
+import { ExportFilters } from "@/components/ExportDialog";
+import { format } from "date-fns";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
-import { format } from "date-fns";
-import { ExportFilters } from "@/components/ExportDialog";
+import { Tables } from "./database.types";
 
 // Function to export gemstone data to a CSV file (Numbers-compatible)
 export const exportToNumbers = async (
@@ -97,17 +97,22 @@ export const exportToNumbers = async (
 
 		// Add filter information to filename if available
 		if (filters) {
-			// Add date range
-			fileName += `_${format(filters.startDate, "yyyyMMdd")}-${format(filters.endDate, "yyyyMMdd")}`;
+			// Check if this is a selected stones export
+			if (gemstones.length > 0 && gemstones.length < 10) {
+				fileName += `_selected_${gemstones.length}_stones`;
+			} else {
+				// Add date range
+				fileName += `_${format(filters.startDate, "yyyyMMdd")}-${format(filters.endDate, "yyyyMMdd")}`;
 
-			// Add sold status
-			if (filters.soldStatus !== "all") {
-				fileName += `_${filters.soldStatus}`;
-			}
+				// Add sold status
+				if (filters.soldStatus !== "all") {
+					fileName += `_${filters.soldStatus}`;
+				}
 
-			// Add owner
-			if (filters.owner !== "all") {
-				fileName += `_${filters.owner}`;
+				// Add owner
+				if (filters.owner !== "all") {
+					fileName += `_${filters.owner}`;
+				}
 			}
 		}
 

@@ -3,15 +3,16 @@ import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
 	Button,
 	Dialog,
+	Divider,
+	IconButton,
 	Menu,
 	Portal,
 	Text,
-	IconButton,
 } from "react-native-paper";
 
 export type ExportFilters = {
@@ -26,6 +27,7 @@ type ExportDialogProps = {
 	onDismiss: () => void;
 	onConfirm: (filters: ExportFilters) => void;
 	initialSoldStatus?: "all" | "sold" | "unsold";
+	selectedCount?: number;
 };
 
 const ExportDialog = ({
@@ -33,6 +35,7 @@ const ExportDialog = ({
 	onDismiss,
 	onConfirm,
 	initialSoldStatus = "all",
+	selectedCount = 0,
 }: ExportDialogProps) => {
 	// Initialize with default values
 	const getDefaultStartDate = useCallback(() => {
@@ -87,6 +90,34 @@ const ExportDialog = ({
 		}
 		return owner;
 	};
+
+	if (selectedCount > 0) {
+		return (
+			<Portal>
+				<Dialog visible={visible} onDismiss={onDismiss}>
+					<Dialog.Title>Export Options</Dialog.Title>
+
+					<View className="p-4">
+						<View style={styles.selectedCountContainer}>
+							<Text style={styles.selectionAlert}>
+								You have selected {selectedCount} gemstone
+								{selectedCount === 1 ? "" : "s"}
+							</Text>
+							<Text>Only the selected gemstones will be exported.</Text>
+						</View>
+						<Divider style={styles.divider} />
+					</View>
+
+					<Dialog.Actions>
+						<Button onPress={onDismiss}>Cancel</Button>
+						<Button onPress={handleConfirm}>
+							Export {selectedCount} Selected
+						</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
+		);
+	}
 
 	return (
 		<Portal>
@@ -260,7 +291,6 @@ const styles = StyleSheet.create({
 		width: "100%",
 		marginVertical: 4,
 	},
-	// Keep the radioGroup and radioItem styles for backward compatibility
 	radioGroup: {
 		marginLeft: 8,
 	},
@@ -269,6 +299,19 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		paddingVertical: 8,
 		paddingRight: 16,
+	},
+	selectedCountContainer: {
+		padding: 12,
+		borderRadius: 8,
+		marginBottom: 8,
+	},
+	selectionAlert: {
+		fontWeight: "bold",
+		fontSize: 16,
+		marginBottom: 4,
+	},
+	divider: {
+		marginVertical: 12,
 	},
 });
 

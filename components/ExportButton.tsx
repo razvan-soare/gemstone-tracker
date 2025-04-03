@@ -1,19 +1,24 @@
+import { useGemstones } from "@/hooks/useGemstones";
+import { GemstoneFilter } from "@/hooks/useGemstonesByDate";
+import { Tables } from "@/lib/database.types";
+import { exportToNumbers } from "@/lib/exportToNumbers";
+import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { FAB, Snackbar } from "react-native-paper";
-import { useGemstones } from "@/hooks/useGemstones";
-import { exportToNumbers } from "@/lib/exportToNumbers";
 import ExportDialog, { ExportFilters } from "./ExportDialog";
-import { startOfDay, endOfDay, isWithinInterval } from "date-fns";
-import { Tables } from "@/lib/database.types";
-import { GemstoneFilter } from "@/hooks/useGemstonesByDate";
 
 type ExportButtonProps = {
 	style?: object;
 	filter?: GemstoneFilter;
+	selectedGemstoneIds?: string[];
 };
 
-const ExportButton = ({ style, filter = "all" }: ExportButtonProps) => {
+const ExportButton = ({
+	style,
+	filter = "all",
+	selectedGemstoneIds,
+}: ExportButtonProps) => {
 	const [isExporting, setIsExporting] = useState(false);
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -48,10 +53,24 @@ const ExportButton = ({ style, filter = "all" }: ExportButtonProps) => {
 			}
 
 			// Apply filters
-			const filteredGemstones = filterGemstones(allGemstones, filters);
+			let filteredGemstones = allGemstones;
+
+			// If specific gemstones are selected, only export those
+			if (selectedGemstoneIds && selectedGemstoneIds.length > 0) {
+				filteredGemstones = filteredGemstones.filter((gemstone) =>
+					selectedGemstoneIds.includes(gemstone.id),
+				);
+			} else {
+				// Otherwise, use the normal filter logic
+				filteredGemstones = filterGemstones(filteredGemstones, filters);
+			}
 
 			if (filteredGemstones.length === 0) {
-				setSnackbarMessage("No gemstones match the selected filters");
+				const message =
+					selectedGemstoneIds && selectedGemstoneIds.length > 0
+						? "No selected gemstones match the criteria"
+						: "No gemstones match the selected filters";
+				setSnackbarMessage(message);
 				setSnackbarVisible(true);
 				setIsExporting(false);
 				return;
@@ -123,6 +142,7 @@ const ExportButton = ({ style, filter = "all" }: ExportButtonProps) => {
 				initialSoldStatus={
 					filter !== "all" ? (filter === "sold" ? "sold" : "unsold") : "all"
 				}
+				selectedCount={selectedGemstoneIds?.length}
 			/>
 
 			<Snackbar
