@@ -48,9 +48,7 @@ export default function AppLayout() {
 		<AutocompleteDropdownContextProvider>
 			<ActionSheetProvider>
 				<PaperProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
-					<KeyboardSafeView
-						keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
-					>
+					<KeyboardSafeView>
 						<Stack screenOptions={{ headerShown: false }}>
 							<Stack.Screen name="welcome" />
 							<Stack.Screen name="(protected)" />
