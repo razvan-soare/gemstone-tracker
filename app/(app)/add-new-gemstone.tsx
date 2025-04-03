@@ -19,7 +19,8 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
 	Image,
 	ScrollView,
@@ -45,6 +46,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 // Register the English locale
 registerTranslation("en", enGB);
 
+// Key for storing owner preference
+const LAST_SELECTED_OWNER_KEY = "lastSelectedOwner";
+
 type ValidationError = {
 	field: string;
 	message: string;
@@ -61,6 +65,8 @@ export default function AddNewGemstone() {
 		ImagePicker.ImagePickerAsset[]
 	>([]);
 	const [isUploadingImages, setIsUploadingImages] = useState(false);
+	// Flag to track if initial owner loading is complete
+	const [ownerLoaded, setOwnerLoaded] = useState(false);
 
 	const queryClient = useQueryClient();
 
@@ -89,14 +95,69 @@ export default function AddNewGemstone() {
 		sold_at: null as string | null,
 		buyer: "",
 		buyer_address: "",
-		owner: "Nuo",
+		owner: "",
 	});
+
+	// Load the last selected owner when component mounts or owners change
+	useEffect(() => {
+		if (owners.length === 0) return;
+
+		const loadLastSelectedOwner = async () => {
+			try {
+				const savedOwner = await AsyncStorage.getItem(LAST_SELECTED_OWNER_KEY);
+
+				// Check if savedOwner exists in the current organization's owners list
+				const ownerExists =
+					savedOwner && owners.some((owner) => owner.name === savedOwner);
+
+				if (ownerExists) {
+					// Use the saved owner if it exists in the current organization
+					setFormData((prev) => ({
+						...prev,
+						owner: savedOwner,
+					}));
+				} else if (owners.length > 0) {
+					// Otherwise use the first owner as default if available
+					setFormData((prev) => ({
+						...prev,
+						owner: owners[0].name,
+					}));
+
+					// Update the saved preference to the first owner
+					AsyncStorage.setItem(LAST_SELECTED_OWNER_KEY, owners[0].name);
+				}
+			} catch (error) {
+				console.error("Error loading last selected owner:", error);
+
+				// Fallback to first owner on error
+				if (owners.length > 0) {
+					setFormData((prev) => ({
+						...prev,
+						owner: owners[0].name,
+					}));
+				}
+			} finally {
+				setOwnerLoaded(true);
+			}
+		};
+
+		loadLastSelectedOwner();
+	}, [owners]);
 
 	const updateField = (field: string, value?: string | GemTreatmentEnum) => {
 		setFormData((prev) => ({
 			...prev,
 			[field]: value,
 		}));
+
+		// Save owner preference when it changes
+		if (field === "owner" && value) {
+			try {
+				AsyncStorage.setItem(LAST_SELECTED_OWNER_KEY, value as string);
+			} catch (error) {
+				console.error("Error saving owner preference:", error);
+			}
+		}
 	};
 
 	const updateDimension = (dimension: string, value: string) => {
@@ -306,6 +367,8 @@ export default function AddNewGemstone() {
 		);
 	}
 
+	console.log("formData.owner", formData.owner);
+
 	return (
 		<SafeAreaProvider>
 			<ScrollView style={[styles.container, { backgroundColor }]}>
@@ -361,7 +424,8 @@ export default function AddNewGemstone() {
 					<ComboBox
 						allowCustom
 						label="Owner"
-						value={formData.owner || ""}
+						key={`owner-${formData.owner}`}
+						value={formData.owner}
 						options={owners.map((owner) => ({
 							id: owner.name,
 							title: owner.name,
