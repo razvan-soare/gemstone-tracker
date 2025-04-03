@@ -72,7 +72,7 @@ const GemstoneList = ({
 			contentContainerStyle={styles.listContainer}
 			numColumns={columnCount}
 			key={`column-${columnCount}`} // Force re-render when column count changes
-			columnWrapperStyle={styles.columnWrapper}
+			{...(columnCount > 1 ? { columnWrapperStyle: styles.columnWrapper } : {})}
 			onEndReached={() => {
 				if (hasNextPage && !isFetchingNextPage) {
 					onLoadMore();

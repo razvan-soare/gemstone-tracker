@@ -28,11 +28,27 @@ export const useColumnPreference = () => {
 		loadColumnPreference();
 	}, []);
 
+	// Function to refresh column count from AsyncStorage
+	const refreshColumnCount = async () => {
+		try {
+			const storedPreference = await AsyncStorage.getItem(
+				COLUMN_PREFERENCE_KEY,
+			);
+			if (storedPreference !== null) {
+				setColumnCount(parseInt(storedPreference, 10));
+			}
+		} catch (error) {
+			console.error("Error refreshing column preference:", error);
+		}
+	};
+
 	// Save the column preference to AsyncStorage
 	const updateColumnCount = async (count: number) => {
 		try {
-			await AsyncStorage.setItem(COLUMN_PREFERENCE_KEY, count.toString());
+			// Set the state first to ensure immediate UI update
 			setColumnCount(count);
+			// Then persist to storage
+			await AsyncStorage.setItem(COLUMN_PREFERENCE_KEY, count.toString());
 		} catch (error) {
 			console.error("Error saving column preference:", error);
 		}
@@ -41,6 +57,7 @@ export const useColumnPreference = () => {
 	return {
 		columnCount,
 		updateColumnCount,
+		refreshColumnCount,
 		isLoading,
 	};
 };

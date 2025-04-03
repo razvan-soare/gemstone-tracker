@@ -1,7 +1,8 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { FAB } from "react-native-paper";
+import { useFocusEffect } from "expo-router";
 
 import {
 	GemstoneColor,
@@ -28,7 +29,14 @@ export default function Home() {
 	}>({});
 	const { activeOrganization } = useSupabase();
 	const { colorScheme } = useColorScheme();
-	const { columnCount, updateColumnCount } = useColumnPreference();
+	const { columnCount, refreshColumnCount } = useColumnPreference();
+
+	// Refresh column count when screen comes into focus
+	useFocusEffect(
+		useCallback(() => {
+			refreshColumnCount();
+		}, [refreshColumnCount]),
+	);
 
 	const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useGemstones({
