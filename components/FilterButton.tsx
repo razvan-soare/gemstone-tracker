@@ -7,8 +7,9 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Badge, Button, Icon } from "react-native-paper";
 import FilterDrawer from "./FilterDrawer";
+import { useLanguage } from "@/hooks/useLanguage";
 
-type FilterButtonProps = {
+export type FilterButtonProps = {
 	onFiltersChange: (filters: {
 		shape?: GemstoneShape;
 		color?: GemstoneColor;
@@ -21,13 +22,28 @@ type FilterButtonProps = {
 		sold?: boolean;
 		owner?: GemstoneOwner;
 	};
+	filterTitle?: string;
+	resetLabel?: string;
+	shapeLabel?: string;
+	colorLabel?: string;
+	sizeLabel?: string;
+	ownerLabel?: string;
+	soldLabel?: string;
 };
 
 export default function FilterButton({
 	onFiltersChange,
 	filters,
+	filterTitle = "Filters",
+	resetLabel,
+	shapeLabel,
+	colorLabel,
+	sizeLabel,
+	ownerLabel,
+	soldLabel,
 }: FilterButtonProps) {
 	const [visible, setVisible] = useState(false);
+	const { t } = useLanguage();
 
 	const showModal = () => setVisible(true);
 	const hideModal = () => setVisible(false);
@@ -53,6 +69,13 @@ export default function FilterButton({
 				onDismiss={hideModal}
 				filters={filters}
 				onApplyFilters={onFiltersChange}
+				title={filterTitle}
+				resetLabel={resetLabel}
+				shapeLabel={shapeLabel}
+				colorLabel={colorLabel}
+				sizeLabel={sizeLabel}
+				ownerLabel={ownerLabel}
+				soldLabel={soldLabel}
 			/>
 		</>
 	);

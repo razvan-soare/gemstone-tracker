@@ -10,6 +10,7 @@ import {
 import { P } from "@/components/ui/typography";
 import { useDeleteGemstone } from "@/hooks/useDeleteGemstone";
 import { useGemstone } from "@/hooks/useGemstone";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
@@ -92,6 +93,7 @@ const getGemTreatmentEnum = (gemType: string | null): GemTreatmentEnum => {
 };
 
 export default function GemstoneDetail() {
+	const { t } = useLanguage();
 	const { showActionSheetWithOptions } = useActionSheet();
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { data: gemstone, isLoading } = useGemstone(id);
@@ -168,7 +170,11 @@ export default function GemstoneDetail() {
 	};
 
 	const onOpenAddPicture = () => {
-		const options = ["Take picture", "Upload picture", "Cancel"];
+		const options = [
+			t("gemstones.takePicture"),
+			t("gemstones.uploadPicture"),
+			t("common.cancel"),
+		];
 		const cancelButtonIndex = 2;
 
 		showActionSheetWithOptions(

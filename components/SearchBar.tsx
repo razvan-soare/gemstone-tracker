@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Searchbar } from "react-native-paper";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type SearchBarProps = {
 	searchQuery: string;
@@ -7,10 +8,12 @@ type SearchBarProps = {
 };
 
 const SearchBar = ({ searchQuery, setSearchQuery }: SearchBarProps) => {
+	const { t } = useLanguage();
+
 	return (
 		<View style={styles.searchContainer}>
 			<Searchbar
-				placeholder="Search gemstones..."
+				placeholder={t("gemstones.search")}
 				onChangeText={setSearchQuery}
 				value={searchQuery}
 				style={styles.searchBar}

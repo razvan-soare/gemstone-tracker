@@ -1,4 +1,5 @@
 import { Currency, CurrencySymbols } from "@/app/types/gemstone";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Tables } from "@/lib/database.types";
 import { getDefaultStoneImage } from "@/lib/imageUtils";
 import { router } from "expo-router";
@@ -26,6 +27,8 @@ const GemstoneCard = ({
 }: {
 	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
 }) => {
+	const { t } = useLanguage();
+
 	return (
 		<Pressable
 			onPress={() => router.push(`/(app)/gemstone/${gemstone.id}`)}
@@ -52,7 +55,7 @@ const GemstoneCard = ({
 						{gemstone.sold && (
 							<View className="absolute top-2.5 right-2.5 bg-red-500 px-2 py-1 rounded">
 								<P className="text-white font-semibold whitespace-nowrap">
-									SOLD
+									{t("gemstones.sold")}
 								</P>
 							</View>
 						)}
@@ -88,12 +91,13 @@ const GemstoneCard = ({
 
 						<View className="justify-between">
 							<P className="text-green-500 font-semibold">
-								Buy: {gemstone.buy_price?.toFixed(2) || "0.00"}{" "}
+								{t("gemstones.buy")}: {gemstone.buy_price?.toFixed(2) || "0.00"}{" "}
 								{getCurrencySymbol(gemstone.buy_currency)}
 							</P>
 
 							<P className="text-red-500 font-semibold">
-								Sell: {gemstone.sell_price?.toFixed(2) || "0.00"}{" "}
+								{t("gemstones.sell")}:{" "}
+								{gemstone.sell_price?.toFixed(2) || "0.00"}{" "}
 								{getCurrencySymbol(gemstone.sell_currency)}
 							</P>
 						</View>

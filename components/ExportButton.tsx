@@ -1,5 +1,6 @@
 import { useGemstones } from "@/hooks/useGemstones";
 import { GemstoneFilter } from "@/hooks/useGemstonesByDate";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Tables } from "@/lib/database.types";
 import { exportToNumbers } from "@/lib/exportToNumbers";
 import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
@@ -23,6 +24,7 @@ const ExportButton = ({
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
 	const [dialogVisible, setDialogVisible] = useState(false);
+	const { t } = useLanguage();
 
 	// Fetch all gemstones for export
 	const { data } = useGemstones({});
@@ -46,7 +48,7 @@ const ExportButton = ({
 			const allGemstones = data?.pages.flatMap((page) => page.items) || [];
 
 			if (allGemstones.length === 0) {
-				setSnackbarMessage("No gemstones to export");
+				setSnackbarMessage(t("gemstones.noGemstonesToExport"));
 				setSnackbarVisible(true);
 				setIsExporting(false);
 				return;
@@ -68,8 +70,8 @@ const ExportButton = ({
 			if (filteredGemstones.length === 0) {
 				const message =
 					selectedGemstoneIds && selectedGemstoneIds.length > 0
-						? "No selected gemstones match the criteria"
-						: "No gemstones match the selected filters";
+						? t("gemstones.noSelectedGemstonesMatchCriteria")
+						: t("gemstones.noGemstonesMatchFilters");
 				setSnackbarMessage(message);
 				setSnackbarVisible(true);
 				setIsExporting(false);
@@ -84,7 +86,7 @@ const ExportButton = ({
 			setSnackbarVisible(true);
 		} catch (error) {
 			console.error("Export error:", error);
-			setSnackbarMessage("Export failed");
+			setSnackbarMessage(t("gemstones.exportFailed"));
 			setSnackbarVisible(true);
 		} finally {
 			setIsExporting(false);
@@ -133,6 +135,7 @@ const ExportButton = ({
 				onPress={handleExportPress}
 				loading={isExporting}
 				disabled={isExporting}
+				accessibilityLabel={t("buyList.export")}
 			/>
 
 			<ExportDialog
@@ -150,7 +153,7 @@ const ExportButton = ({
 				onDismiss={() => setSnackbarVisible(false)}
 				duration={3000}
 				action={{
-					label: "Close",
+					label: t("common.close"),
 					onPress: () => setSnackbarVisible(false),
 				}}
 			>

@@ -10,6 +10,7 @@ import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Alert } from "@/components/ui/alert";
 
 const formSchema = z
@@ -41,6 +42,7 @@ const formSchema = z
 
 export default function SignUp() {
 	const { signUp } = useSupabase();
+	const { t } = useLanguage();
 	const [verificationSent, setVerificationSent] = useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -65,7 +67,7 @@ export default function SignUp() {
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start">Register</H1>
+				<H1 className="self-start">{t("auth.signUp")}</H1>
 
 				{verificationSent ? (
 					<Alert
@@ -81,8 +83,8 @@ export default function SignUp() {
 								name="email"
 								render={({ field }) => (
 									<FormInput
-										label="Email"
-										placeholder="Email"
+										label={t("auth.email")}
+										placeholder={t("auth.email")}
 										autoCapitalize="none"
 										autoComplete="email"
 										autoCorrect={false}
@@ -96,8 +98,8 @@ export default function SignUp() {
 								name="password"
 								render={({ field }) => (
 									<FormInput
-										label="Password"
-										placeholder="Password"
+										label={t("auth.password")}
+										placeholder={t("auth.password")}
 										autoCapitalize="none"
 										autoCorrect={false}
 										secureTextEntry
@@ -110,8 +112,8 @@ export default function SignUp() {
 								name="confirmPassword"
 								render={({ field }) => (
 									<FormInput
-										label="Confirm Password"
-										placeholder="Confirm password"
+										label={t("auth.confirmPassword")}
+										placeholder={t("auth.confirmPassword")}
 										autoCapitalize="none"
 										autoCorrect={false}
 										secureTextEntry
@@ -130,7 +132,7 @@ export default function SignUp() {
 					onPress={() => setVerificationSent(false)}
 					className="web:m-4"
 				>
-					<Text>Back to Register</Text>
+					<Text>{t("common.back")}</Text>
 				</Button>
 			) : (
 				<Button
@@ -143,7 +145,7 @@ export default function SignUp() {
 					{form.formState.isSubmitting ? (
 						<ActivityIndicator size="small" />
 					) : (
-						<Text>Register</Text>
+						<Text>{t("auth.signUp")}</Text>
 					)}
 				</Button>
 			)}

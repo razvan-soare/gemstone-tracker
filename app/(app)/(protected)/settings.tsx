@@ -14,6 +14,7 @@ import { H2, H3, Muted } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useColumnPreference } from "@/hooks/useColumnPreference";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useOrganizationMemberships } from "@/hooks/useOrganizationMemberships";
 import { useColorScheme } from "@/lib/useColorScheme";
 import Constants from "expo-constants";
@@ -29,6 +30,8 @@ export default function Settings() {
 	} = useSupabase();
 	const { colorScheme, toggleColorScheme } = useColorScheme();
 	const { columnCount, updateColumnCount } = useColumnPreference();
+	const { t, currentLanguage, changeLanguage, availableLanguages } =
+		useLanguage();
 
 	const [showDevOptions, setShowDevOptions] = useState(false);
 	const [devTapCount, setDevTapCount] = useState(0);
@@ -57,15 +60,15 @@ export default function Settings() {
 			>
 				<View className="gap-y-4">
 					<View className="w-full items-center justify-center py-4">
-						<H2>Settings</H2>
+						<H2>{t("settings.title")}</H2>
 					</View>
 
 					{userOrganizations.length > 0 && (
 						<View className="gap-y-2">
-							<H3>Organization</H3>
+							<H3>{t("settings.organization.title")}</H3>
 							<View>
 								<Dropdown
-									label="Select Organization"
+									label={t("settings.organization.select")}
 									mode="outlined"
 									hideMenuHeader
 									menuContentStyle={{ top: 60 }}
@@ -87,19 +90,19 @@ export default function Settings() {
 								variant="outline"
 								onPress={() => router.push("/(app)/organizations")}
 							>
-								<Text>Manage Organizations</Text>
+								<Text>{t("settings.organization.manage")}</Text>
 							</Button>
 						</View>
 					)}
 
 					<View className="gap-y-2">
-						<H3>App Preferences</H3>
-						<Muted>Customize the app's appearance and layout</Muted>
+						<H3>{t("settings.appPreferences")}</H3>
+						<Muted>{t("settings.customizeAppearance")}</Muted>
 
 						<View className="flex-row flex-wrap gap-2 mt-2">
 							<View className="flex-1 min-w-[120px]">
 								<Dropdown
-									label="Theme"
+									label={t("settings.theme.title")}
 									mode="outlined"
 									hideMenuHeader
 									menuContentStyle={{ top: 60 }}
@@ -111,15 +114,15 @@ export default function Settings() {
 										}
 									}}
 									options={[
-										{ label: "Light Mode", value: "light" },
-										{ label: "Dark Mode", value: "dark" },
+										{ label: t("settings.theme.light"), value: "light" },
+										{ label: t("settings.theme.dark"), value: "dark" },
 									]}
 								/>
 							</View>
 
 							<View className="flex-1 min-w-[120px]">
 								<Dropdown
-									label="Columns"
+									label={t("settings.columns.title")}
 									mode="outlined"
 									hideMenuHeader
 									menuContentStyle={{ top: 60 }}
@@ -131,8 +134,26 @@ export default function Settings() {
 										}
 									}}
 									options={[1, 2, 3, 4, 5].map((count) => ({
-										label: `${count} Column${count > 1 ? "s" : ""}`,
+										label: `${count} ${t(count > 1 ? "settings.columns.columns" : "settings.columns.column")}`,
 										value: count.toString(),
+									}))}
+								/>
+							</View>
+
+							<View className="flex-1 min-w-[120px]">
+								<Dropdown
+									label={t("settings.language.title")}
+									mode="outlined"
+									hideMenuHeader
+									menuContentStyle={{ top: 60 }}
+									value={currentLanguage}
+									onSelect={(value) => {
+										if (!value) return;
+										changeLanguage(value as "en" | "zh");
+									}}
+									options={availableLanguages.map((lang) => ({
+										label: lang.name,
+										value: lang.code,
 									}))}
 								/>
 							</View>
@@ -140,22 +161,22 @@ export default function Settings() {
 					</View>
 
 					<View className="gap-y-2">
-						<H3>Account</H3>
-						<Muted>Sign out and return to the welcome screen.</Muted>
+						<H3>{t("settings.account.title")}</H3>
+						<Muted>{t("settings.account.signOutDescription")}</Muted>
 						<Button
 							className="w-full"
 							size="default"
 							variant="destructive"
 							onPress={signOut}
 						>
-							<Text>Sign Out</Text>
+							<Text>{t("auth.signOut")}</Text>
 						</Button>
 					</View>
 				</View>
 
 				{/* App Info Section */}
 				<View className="gap-y-2 mt-4">
-					<H3>App Info</H3>
+					<H3>{t("settings.appInfo.title")}</H3>
 
 					{/* Version number that can be tapped to reveal developer options */}
 					<Pressable
@@ -176,7 +197,8 @@ export default function Settings() {
 						}}
 					>
 						<Text className="text-sm text-gray-500">
-							Build: {Constants.expoConfig?.ios?.buildNumber || "Unknown"}
+							{t("settings.appInfo.build")}:{" "}
+							{Constants.expoConfig?.ios?.buildNumber || "Unknown"}
 						</Text>
 					</Pressable>
 				</View>
@@ -184,8 +206,8 @@ export default function Settings() {
 				{/* Developer Options - Only shown after activating */}
 				{showDevOptions && (
 					<View className="gap-y-2 mt-4 border-t border-gray-200 pt-4">
-						<H3>Developer Options</H3>
-						<Muted>Tools for debugging and development</Muted>
+						<H3>{t("settings.developer.title")}</H3>
+						<Muted>{t("settings.developer.description")}</Muted>
 
 						<Button
 							className="w-full mt-2"
@@ -193,7 +215,7 @@ export default function Settings() {
 							variant="outline"
 							onPress={() => router.push("/debug")}
 						>
-							<Text>Debug Tools</Text>
+							<Text>{t("settings.developer.debugTools")}</Text>
 						</Button>
 
 						<Button
@@ -202,7 +224,7 @@ export default function Settings() {
 							variant="outline"
 							onPress={() => setShowDevOptions(false)}
 						>
-							<Text>Hide Developer Options</Text>
+							<Text>{t("settings.developer.hideOptions")}</Text>
 						</Button>
 					</View>
 				)}

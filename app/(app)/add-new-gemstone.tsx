@@ -10,6 +10,7 @@ import { H3, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useOrganizationColors } from "@/hooks/useOrganizationColors";
 import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
@@ -55,6 +56,7 @@ type ValidationError = {
 };
 
 export default function AddNewGemstone() {
+	const { t } = useLanguage();
 	const { activeOrganization } = useSupabase();
 	const createGemstone = useCreateGemstone();
 	const [error, setError] = useState<ValidationError | null>(null);
@@ -190,21 +192,21 @@ export default function AddNewGemstone() {
 		if (!activeOrganization) {
 			return {
 				field: "organization",
-				message: "No organization found. Please join an organization first.",
+				message: t("gemstones.noOrganization"),
 			};
 		}
 
 		if (!formData.name.trim()) {
 			return {
 				field: "name",
-				message: "Stone type is required",
+				message: t("gemstones.stoneType") + " " + t("common.error"),
 			};
 		}
 
 		if (formData.weight && isNaN(parseFloat(formData.weight))) {
 			return {
 				field: "weight",
-				message: "Weight must be a valid number",
+				message: t("gemstones.weight") + " " + t("common.error"),
 			};
 		}
 
@@ -215,7 +217,7 @@ export default function AddNewGemstone() {
 		) {
 			return {
 				field: "quantity",
-				message: "Quantity must be at least 1",
+				message: t("gemstones.quantityPieces") + " " + t("common.error"),
 			};
 		}
 
@@ -314,7 +316,7 @@ export default function AddNewGemstone() {
 			const { status } =
 				await ImagePicker.requestMediaLibraryPermissionsAsync();
 			if (status !== "granted") {
-				alert("We need your permission to access your media library");
+				alert(t("gemstones.permissionNeeded.mediaLibrary"));
 				return;
 			}
 
@@ -337,7 +339,7 @@ export default function AddNewGemstone() {
 		try {
 			const { status } = await ImagePicker.requestCameraPermissionsAsync();
 			if (status !== "granted") {
-				alert("We need your permission to access your camera");
+				alert(t("gemstones.permissionNeeded.camera"));
 				return;
 			}
 
@@ -365,7 +367,7 @@ export default function AddNewGemstone() {
 		return (
 			<SafeAreaProvider>
 				<View style={styles.container}>
-					<H3>No organization found. Please join an organization first.</H3>
+					<H3>{t("gemstones.noOrganization")}</H3>
 				</View>
 			</SafeAreaProvider>
 		);
@@ -800,7 +802,7 @@ export default function AddNewGemstone() {
 				duration={Infinity}
 				style={styles.uploadingSnackbar}
 			>
-				Uploading images in background...
+				{t("gemstones.uploadingImages")}
 			</Snackbar>
 		</SafeAreaProvider>
 	);

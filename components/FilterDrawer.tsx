@@ -7,6 +7,7 @@ import {
 import { colors } from "@/constants/colors";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useLanguage } from "@/hooks/useLanguage";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import {
@@ -20,7 +21,7 @@ import {
 } from "react-native-paper";
 import { ComboBox } from "./ui/combobox";
 
-type FilterDrawerProps = {
+export type FilterDrawerProps = {
 	visible: boolean;
 	onDismiss: () => void;
 	filters: {
@@ -51,6 +52,7 @@ export default function FilterDrawer({
 	const textColor =
 		colorScheme === "dark" ? colors.dark.foreground : colors.light.foreground;
 	const { owners, addOwner } = useOrganizationOwners();
+	const { t } = useLanguage();
 
 	// We no longer need tempFilters since we apply directly
 	// Instead, we'll work directly with the filters from props
@@ -138,9 +140,9 @@ export default function FilterDrawer({
 						variant="titleLarge"
 						style={[styles.title, { color: textColor }]}
 					>
-						Filters
+						{t("gemstones.filters")}
 					</Text>
-					<Button onPress={handleReset}>Reset</Button>
+					<Button onPress={handleReset}>{t("gemstones.resetFilters")}</Button>
 				</View>
 
 				<Divider />
@@ -153,7 +155,7 @@ export default function FilterDrawer({
 							onClose={() => removeFilter("shape")}
 							style={styles.filterChip}
 						>
-							Shape: {currentFilters.shape}
+							{t("gemstones.shape")}: {currentFilters.shape}
 						</Chip>
 					)}
 					{currentFilters.color && (
@@ -162,7 +164,7 @@ export default function FilterDrawer({
 							onClose={() => removeFilter("color")}
 							style={styles.filterChip}
 						>
-							Color: {currentFilters.color}
+							{t("gemstones.color")}: {currentFilters.color}
 						</Chip>
 					)}
 					{currentFilters.size && (
@@ -171,7 +173,7 @@ export default function FilterDrawer({
 							onClose={() => removeFilter("size")}
 							style={styles.filterChip}
 						>
-							Size: {currentFilters.size}
+							{t("gemstones.size")}: {currentFilters.size}
 						</Chip>
 					)}
 					{currentFilters.owner && (
@@ -180,7 +182,7 @@ export default function FilterDrawer({
 							onClose={() => removeFilter("owner")}
 							style={styles.filterChip}
 						>
-							Owner: {currentFilters.owner}
+							{t("gemstones.owner")}: {currentFilters.owner}
 						</Chip>
 					)}
 					{currentFilters.sold === true && (
@@ -189,7 +191,7 @@ export default function FilterDrawer({
 							onClose={() => removeFilter("sold")}
 							style={styles.filterChip}
 						>
-							Sold Only
+							{t("gemstones.soldOnly")}
 						</Chip>
 					)}
 				</View>
@@ -197,8 +199,8 @@ export default function FilterDrawer({
 				<ScrollView style={styles.scrollView}>
 					<View style={styles.dropdownContainer}>
 						<ComboBox
-							label="Shape"
-							placeholder="Select Shape"
+							label={t("gemstones.shape")}
+							placeholder={t("gemstones.selectShape")}
 							value={currentFilters.shape || ""}
 							options={shapeOptions}
 							onChange={(value) =>
@@ -210,8 +212,8 @@ export default function FilterDrawer({
 
 					<View style={styles.dropdownContainer}>
 						<ComboBox
-							label="Color"
-							placeholder="Select Color"
+							label={t("gemstones.color")}
+							placeholder={t("gemstones.selectColor")}
 							value={currentFilters.color || ""}
 							options={colorOptions}
 							onChange={(value) =>
@@ -223,8 +225,8 @@ export default function FilterDrawer({
 
 					<View style={styles.dropdownContainer}>
 						<ComboBox
-							label="Size"
-							placeholder="Select Size"
+							label={t("gemstones.size")}
+							placeholder={t("gemstones.selectSize")}
 							value={currentFilters.size || ""}
 							options={sizeOptions}
 							onChange={(value) => updateFilter("size", value as GemstoneSize)}
@@ -234,8 +236,8 @@ export default function FilterDrawer({
 
 					<View style={styles.dropdownContainer}>
 						<ComboBox
-							label="Owner"
-							placeholder="Select Owner"
+							label={t("gemstones.owner")}
+							placeholder={t("gemstones.selectOwner")}
 							value={currentFilters.owner || ""}
 							options={ownerOptions}
 							onChange={(value) =>

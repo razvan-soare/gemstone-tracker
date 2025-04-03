@@ -7,6 +7,12 @@ import { Slot } from "expo-router";
 import { useEffect, useState } from "react";
 import { UpdateRequiredModal } from "@/components/UpdateRequiredModal";
 import { SplashScreen } from "expo-router";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import "../lib/i18n"; // Import i18n configuration
+import { I18nextProvider } from "react-i18next";
+import i18n from "../lib/i18n";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -68,7 +74,15 @@ export default function AppLayout() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<SupabaseProvider>
-				<Slot />
+				<I18nextProvider i18n={i18n}>
+					<SafeAreaProvider>
+						<GestureHandlerRootView style={{ flex: 1 }}>
+							<ActionSheetProvider>
+								<Slot />
+							</ActionSheetProvider>
+						</GestureHandlerRootView>
+					</SafeAreaProvider>
+				</I18nextProvider>
 			</SupabaseProvider>
 		</QueryClientProvider>
 	);

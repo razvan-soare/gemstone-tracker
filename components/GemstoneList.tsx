@@ -1,4 +1,5 @@
 import { Tables } from "@/lib/database.types";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
 	ActivityIndicator,
 	Dimensions,
@@ -26,6 +27,7 @@ const GemstoneList = ({
 	isFetchingNextPage,
 	columnCount = 2,
 }: GemstoneListProps) => {
+	const { t } = useLanguage();
 	const windowWidth = Dimensions.get("window").width;
 	const padding = 16;
 	const spacing = 16;
@@ -39,6 +41,7 @@ const GemstoneList = ({
 		return (
 			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" />
+				<Text style={styles.loadingText}>{t("common.loading")}</Text>
 			</View>
 		);
 	}
@@ -90,7 +93,7 @@ const GemstoneList = ({
 			onEndReachedThreshold={0.5}
 			ListEmptyComponent={() => (
 				<View style={styles.emptyContainer}>
-					<Text>No gemstones found</Text>
+					<Text>{t("gemstones.noGemstones")}</Text>
 				</View>
 			)}
 			ListFooterComponent={renderFooter}
@@ -106,6 +109,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+	},
+	loadingText: {
+		marginTop: 10,
+		color: "#666",
 	},
 	emptyContainer: {
 		flex: 1,

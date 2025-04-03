@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { P } from "@/components/ui/typography";
+import { useLanguage } from "@/hooks/useLanguage";
 
 import {
 	GemstoneColor,
@@ -23,6 +24,8 @@ export const GemstoneHeader: React.FC<GemstoneHeaderProps> = ({
 	color,
 	gemType,
 }) => {
+	const { t } = useLanguage();
+
 	return (
 		<View style={styles.container}>
 			<P style={styles.name}>{name}</P>
