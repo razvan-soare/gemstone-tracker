@@ -386,7 +386,7 @@ export default function AddNewGemstone() {
 				/>
 
 				<TextInput
-					label="Weight (carats)"
+					label="Weight (ct)"
 					mode="outlined"
 					defaultValue={formData.weight}
 					onChangeText={(value) => handleNumericInput(value, "weight")}

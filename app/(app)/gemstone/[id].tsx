@@ -636,7 +636,7 @@ export default function GemstoneDetail() {
 									</View>
 
 									<TextInput
-										label="Weight (carats)"
+										label="Weight (ct)"
 										mode="outlined"
 										value={String(formData.weight || "")}
 										onChangeText={(value) => {
@@ -972,14 +972,14 @@ export default function GemstoneDetail() {
 												onPress={() =>
 													handleEditField(
 														"weight",
-														"Weight (carats)",
+														"Weight (ct)",
 														"number",
 														gemstone.weight,
 													)
 												}
 											>
 												<P style={styles.tableCellValue}>
-													{gemstone.weight} carats
+													{gemstone.weight} ct
 												</P>
 											</TouchableOpacity>
 										</View>
