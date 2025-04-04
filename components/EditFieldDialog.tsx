@@ -9,10 +9,11 @@ import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTyp
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import { useOrganizationShapes } from "@/hooks/useOrganizationShapes";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, Dialog, Portal, TextInput } from "react-native-paper";
+import { StyleSheet, View, Platform } from "react-native";
+import { Button, Dialog, Portal, Text, TextInput } from "react-native-paper";
 import { DatePickerInput } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Define field types for different input components
 type FieldType =
@@ -127,7 +128,7 @@ export const EditFieldDialog = ({
 				return (
 					<TextInput
 						label={field.label}
-						value={value || ""}
+						defaultValue={value || ""}
 						onChangeText={setValue}
 						mode="outlined"
 						style={styles.input}
@@ -137,7 +138,7 @@ export const EditFieldDialog = ({
 				return (
 					<TextInput
 						label={field.label}
-						value={value?.toString() || ""}
+						defaultValue={value?.toString() || ""}
 						onChangeText={(val) => {
 							// Only allow numbers and decimal points
 							const cleaned = val.replace(/[^0-9.]/g, "");
@@ -156,15 +157,18 @@ export const EditFieldDialog = ({
 				);
 			case "date":
 				return (
-					<DatePickerInput
-						locale="en"
-						label={field.label}
-						value={dateValue}
-						onChange={(date) => setDateValue(date)}
-						inputMode="start"
-						mode="outlined"
-						style={styles.input}
-					/>
+					<View style={styles.priceContainer} key={field.label}>
+						<DatePickerInput
+							locale="en"
+							label={field.label}
+							value={dateValue}
+							onChange={(date) => setDateValue(date)}
+							inputMode="start"
+							mode="outlined"
+							style={styles.input}
+							presentationStyle="pageSheet"
+						/>
+					</View>
 				);
 			case "currency":
 			case "buy_price":
@@ -290,7 +294,7 @@ export const EditFieldDialog = ({
 				return (
 					<TextInput
 						label={field.label}
-						value={value?.toString() || ""}
+						defaultValue={value?.toString() || ""}
 						onChangeText={setValue}
 						mode="outlined"
 						style={styles.input}
@@ -321,7 +325,9 @@ export const EditFieldDialog = ({
 	return (
 		<Portal>
 			<Dialog visible={visible} onDismiss={onDismiss}>
-				<Dialog.Title>{`Edit ${field.label}`}</Dialog.Title>
+				<Dialog.Title
+					style={styles.dialogTitle}
+				>{`Edit ${field.label}`}</Dialog.Title>
 				<Dialog.Content>
 					<View style={styles.container}>{renderFieldInput()}</View>
 				</Dialog.Content>
@@ -338,8 +344,12 @@ const styles = StyleSheet.create({
 	container: {
 		minWidth: 250,
 	},
+	dialogTitle: {
+		marginBottom: 16, // Add spacing between title and content
+	},
 	input: {
 		marginBottom: 5,
+		marginTop: Platform.OS === "ios" ? 8 : 0, // Add extra top margin on iOS
 	},
 	priceContainer: {
 		flexDirection: "row",
