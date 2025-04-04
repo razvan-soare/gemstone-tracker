@@ -1,8 +1,8 @@
 import { supabase } from "@/config/supabase";
 import { CreateGemstoneInputType } from "@/hooks/useCreateGemstone";
+import { useCreateOrganization } from "@/hooks/useCreateOrganization";
 import { useOrganizationMemberships } from "@/hooks/useOrganizationMemberships";
 import type { Tables } from "@/lib/database.types";
-import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
@@ -90,6 +90,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const { data: organizationMemberships } = useOrganizationMemberships(session);
 	const [activeOrganization, setActiveOrganization] =
 		useState<Tables<"organizations"> | null>(null);
+	const createOrganization = useCreateOrganization();
 
 	// Derive userOrganizations from organizationMemberships
 	const userOrganizations = useMemo(() => {
@@ -291,14 +292,10 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				}
 			} else {
 				// User doesn't have an organization, create a new one
-				const organization = await createOrganizationWithDefaults(
-					supabase,
-					{
-						name: props.organizationName,
-						user_id: user.id,
-					},
-					queryClient,
-				);
+				const organization = await createOrganization.mutateAsync({
+					name: props.organizationName,
+					userId: user.id,
+				});
 
 				if (!organization) {
 					throw new Error("Failed to create organization");
@@ -376,14 +373,10 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				? `${email.split("@")[0]}'s Organization`
 				: "My Organization";
 
-			const organization = await createOrganizationWithDefaults(
-				supabase,
-				{
-					name: orgName,
-					user_id: userId,
-				},
-				queryClient,
-			);
+			const organization = await createOrganization.mutateAsync({
+				name: orgName,
+				userId: userId,
+			});
 
 			return organization;
 		} catch (error) {

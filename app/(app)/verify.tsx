@@ -9,7 +9,7 @@ import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { H2 } from "@/components/ui/typography";
 import { supabase } from "@/config/supabase";
-import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
+import { useCreateOrganization } from "@/hooks/useCreateOrganization";
 
 export default function VerifyAccount() {
 	const local = useLocalSearchParams();
@@ -17,6 +17,7 @@ export default function VerifyAccount() {
 	const [orgCreated, setOrgCreated] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const queryClient = useQueryClient();
+	const createOrganization = useCreateOrganization();
 
 	const { access_token, refresh_token } = useMemo(() => {
 		const params = new URLSearchParams(local["#"] as string);
@@ -34,7 +35,7 @@ export default function VerifyAccount() {
 
 	useEffect(() => {
 		// Create organization for the user if they're verified
-		const createOrganization = async () => {
+		const createOrgForUser = async () => {
 			if (!isVerified || !access_token) return;
 
 			try {
@@ -68,14 +69,10 @@ export default function VerifyAccount() {
 				}
 
 				// Create a new organization with default values
-				const organization = await createOrganizationWithDefaults(
-					supabase,
-					{
-						name: `${user.email?.split("@")[0]}'s Organization`,
-						user_id: user.id,
-					},
-					queryClient,
-				);
+				const organization = await createOrganization.mutateAsync({
+					name: `${user.email?.split("@")[0]}'s Organization`,
+					userId: user.id,
+				});
 
 				if (!organization) throw new Error("Failed to create organization");
 
@@ -88,8 +85,8 @@ export default function VerifyAccount() {
 			}
 		};
 
-		createOrganization();
-	}, [isVerified, access_token, queryClient]);
+		createOrgForUser();
+	}, [isVerified, access_token, queryClient, createOrganization]);
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>

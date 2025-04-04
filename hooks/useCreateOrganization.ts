@@ -119,9 +119,13 @@ export const useCreateOrganization = () => {
       return organization as Tables<"organizations">;
     },
     onSuccess: () => {
-      // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["organization_members"] });
-      queryClient.invalidateQueries({ queryKey: ["user-organizations"] });
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-gemstone-types"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-colors"] });
+      queryClient.invalidateQueries({ queryKey: ["organization-shapes"] });
+      queryClient.invalidateQueries({ queryKey: ["gemstone"] });
+      queryClient.invalidateQueries({ queryKey: ["gemstones"] });
     },
   });
 }; 

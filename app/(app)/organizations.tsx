@@ -1,29 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Text } from "@/components/ui/text";
-import { H3, Muted } from "@/components/ui/typography";
-import { useSupabase } from "@/context/supabase-provider";
-import { useDialog } from "@/hooks/useDialog";
-import {
-	useOrganizationMemberships,
-	useUpdateOrganization,
-} from "@/hooks/useOrganizationMemberships";
-import { useState } from "react";
-import {
-	View,
-	StyleSheet,
-	ToastAndroid,
-	Platform,
-	Pressable,
-} from "react-native";
-import { List, Modal, Portal, TextInput, Snackbar } from "react-native-paper";
-import { Pencil, Trash2 } from "lucide-react-native";
-import { Dropdown } from "react-native-paper-dropdown";
-import { createOrganizationWithDefaults } from "@/utils/organization/createOrganizationDefaults";
 import { ColorsDialog } from "@/components/ColorsDialog";
+import { DeleteOrganizationDialog } from "@/components/DeleteOrganizationDialog";
 import { GemstoneTypesDialog } from "@/components/GemstoneTypesDialog";
 import { OwnersDialog } from "@/components/OwnersDialog";
 import { ShapesDialog } from "@/components/ShapesDialog";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { H3, Muted } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
+import { useSupabase } from "@/context/supabase-provider";
+import { useCreateOrganization } from "@/hooks/useCreateOrganization";
+import { useDialog } from "@/hooks/useDialog";
 import {
 	useAcceptInvitation,
 	useCheckPendingInvitations,
@@ -32,12 +18,20 @@ import {
 	useDeleteInvitation,
 	useOrganizationInvitations,
 } from "@/hooks/useInvitations";
+import { useUpdateOrganization } from "@/hooks/useOrganizationMemberships";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { useCreateOrganization } from "@/hooks/useCreateOrganization";
-import { supabase } from "@/config/supabase";
 import { useQueryClient } from "@tanstack/react-query";
-import { DeleteOrganizationDialog } from "@/components/DeleteOrganizationDialog";
+import { Pencil, Trash2 } from "lucide-react-native";
+import { useState } from "react";
+import {
+	Platform,
+	Pressable,
+	StyleSheet,
+	ToastAndroid,
+	View,
+} from "react-native";
+import { List, Modal, Portal, Snackbar, TextInput } from "react-native-paper";
 
 export default function Organizations() {
 	const [orgName, setOrgName] = useState("");
@@ -64,14 +58,13 @@ export default function Organizations() {
 	const queryClient = useQueryClient();
 	const updateOrganization = useUpdateOrganization();
 	const createOrganization = useCreateOrganization();
-	const { colorScheme, toggleColorScheme } = useColorScheme();
+	const { colorScheme } = useColorScheme();
 	const {
 		activeOrganization,
 		userOrganizations,
 		onSelectOrganization,
 		updateActiveOrganization,
 		user,
-		session,
 	} = useSupabase();
 	const {
 		open: orgNameDialogOpen,
@@ -79,16 +72,6 @@ export default function Organizations() {
 		onClose: closeOrgNameDialog,
 		key: orgNameDialogKey,
 	} = useDialog();
-
-	// Get organization memberships to check if user is owner
-	const { data: organizationMemberships = [] } =
-		useOrganizationMemberships(session);
-	const isOrgOwner = organizationMemberships.some(
-		(membership) =>
-			membership.organization_id === activeOrganization?.id &&
-			membership.user_id === user?.id &&
-			membership.role === "owner",
-	);
 
 	// Get pending invitations for the active organization
 	const { data: orgPendingInvitations = [], refetch: refetchInvitations } =
@@ -207,14 +190,10 @@ export default function Organizations() {
 		try {
 			setNewOrgError("");
 
-			const newOrg = await createOrganizationWithDefaults(
-				supabase,
-				{
-					name: newOrgName,
-					user_id: user.id,
-				},
-				queryClient,
-			);
+			const newOrg = await createOrganization.mutateAsync({
+				name: newOrgName,
+				userId: user.id,
+			});
 
 			if (newOrg) {
 				await onSelectOrganization(newOrg.id);
