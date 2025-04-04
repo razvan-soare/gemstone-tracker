@@ -1,7 +1,7 @@
 ---
 description: This rule governs UI component creation and styling across the project. It should be applied whenever: (1) Creating new UI components, (2) Modifying existing components, (3) Applying styles to components, (4) Selecting components for use in the application. The rule ensures consistent styling approach using NativeWind/TailwindCSS and proper component selection process. It's particularly important for maintaining UI consistency and optimizing for Expo compatibility.
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Styling and Component Selection Guidelines
@@ -13,6 +13,17 @@ alwaysApply: false
 - If a suitable component is not found in the components folder, use React Native Paper
 - Avoid using StyleSheet from React Native when possible
 - Prioritize components with Expo compatibility
+- ALWAYS use Tailwind CSS classes (className prop) for styling components instead of StyleSheet
+- NEVER create or use StyleSheet.create() for styling components
+- Convert all inline styles to equivalent Tailwind classes
+- Use style prop only when absolutely necessary for dynamic values that cannot be expressed in Tailwind
+- Maintain proper flex container hierarchies with Tailwind's flex classes
+- Ensure proper height handling with h-full and flex-1 classes for containers
+- When components don't support className (like some third-party components), use minimal inline styles only for those specific components
+- When migrating existing StyleSheet code, convert ALL styles to Tailwind equivalents
+- Position elements at the bottom of containers using mt-auto instead of position absolute
+- Use proper Tailwind spacing and sizing classes instead of fixed pixel values
+
 
 ## Examples
 

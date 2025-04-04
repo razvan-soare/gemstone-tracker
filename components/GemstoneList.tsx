@@ -63,6 +63,7 @@ const GemstoneList = ({
 						marginRight: index % columnCount !== columnCount - 1 ? spacing : 0,
 						marginBottom: spacing,
 						flex: 1,
+						maxWidth: columnWidth,
 					}}
 				>
 					<GemstoneCard gemstone={item} />
@@ -71,8 +72,16 @@ const GemstoneList = ({
 			keyExtractor={(item) => item.id}
 			contentContainerStyle={styles.listContainer}
 			numColumns={columnCount}
-			key={`column-${columnCount}`} // Force re-render when column count changes
-			{...(columnCount > 1 ? { columnWrapperStyle: styles.columnWrapper } : {})}
+			key={`column-${columnCount}`}
+			{...(columnCount > 1
+				? {
+						columnWrapperStyle: {
+							...styles.columnWrapper,
+							justifyContent:
+								gemstones.length < columnCount ? "flex-start" : "space-between",
+						},
+					}
+				: {})}
 			onEndReached={() => {
 				if (hasNextPage && !isFetchingNextPage) {
 					onLoadMore();

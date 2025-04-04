@@ -51,7 +51,9 @@ const GemstoneCard = ({
 						/>
 						{gemstone.sold && (
 							<View className="absolute top-2.5 right-2.5 bg-red-500 px-2 py-1 rounded">
-								<P className="text-white font-semibold">SOLD</P>
+								<P className="text-white font-semibold whitespace-nowrap">
+									SOLD
+								</P>
 							</View>
 						)}
 					</View>
