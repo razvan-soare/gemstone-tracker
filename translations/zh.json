@@ -39,6 +39,9 @@
 		"welcomeBack": "欢迎回来",
 		"welcome": "欢迎使用宝石追踪器"
 	},
+	"buttons": {
+		"done": "完成"
+	},
 	"settings": {
 		"title": "设置",
 		"appPreferences": "应用偏好",
@@ -104,6 +107,7 @@
 		"size": "大小",
 		"owner": "所有者",
 		"soldOnly": "仅售出",
+		"showSoldOnly": "仅显示已售出的宝石",
 		"selectShape": "选择形状",
 		"selectColor": "选择颜色",
 		"selectSize": "选择大小",

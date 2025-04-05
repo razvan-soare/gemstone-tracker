@@ -39,6 +39,9 @@
 		"welcomeBack": "Welcome Back",
 		"welcome": "Welcome to Gemstone Tracker"
 	},
+	"buttons": {
+		"done": "Done"
+	},
 	"settings": {
 		"title": "Settings",
 		"appPreferences": "App Preferences",
@@ -104,6 +107,7 @@
 		"size": "Size",
 		"owner": "Owner",
 		"soldOnly": "Sold Only",
+		"showSoldOnly": "Show only sold gemstones",
 		"selectShape": "Select Shape",
 		"selectColor": "Select Color",
 		"selectSize": "Select Size",
