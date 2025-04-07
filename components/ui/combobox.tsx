@@ -102,24 +102,8 @@ export const ComboBox = ({
 		}
 	};
 
-	// Handle blur event
 	const handleBlur = () => {
-		if (allowCustom && inputText) {
-			// Create a new item based on the input text
-			const newItem: AutocompleteDropdownItem = {
-				id: inputText,
-				title: inputText,
-			};
-
-			// Update the selected item
-			setSelectedItem(newItem);
-
-			// Call handleChange to update the parent component
-			handleChange(inputText);
-
-			// Force a refresh of the component to ensure the selected value is displayed
-			setKeyValue((prev) => prev + 1);
-		}
+		setInputText(selectedItem?.title || "");
 	};
 
 	// Custom EmptyResultView component
