@@ -5,10 +5,11 @@ import {
 	GemstoneSize,
 } from "@/app/types/gemstone";
 import { colors } from "@/constants/colors";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import { useColorScheme } from "@/lib/useColorScheme";
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import {
 	Button,
 	Chip,
@@ -20,7 +21,7 @@ import {
 } from "react-native-paper";
 import { ComboBox } from "./ui/combobox";
 
-type FilterDrawerProps = {
+export type FilterDrawerProps = {
 	visible: boolean;
 	onDismiss: () => void;
 	filters: {
@@ -51,6 +52,7 @@ export default function FilterDrawer({
 	const textColor =
 		colorScheme === "dark" ? colors.dark.foreground : colors.light.foreground;
 	const { owners, addOwner } = useOrganizationOwners();
+	const { t } = useLanguage();
 
 	// We no longer need tempFilters since we apply directly
 	// Instead, we'll work directly with the filters from props
@@ -129,201 +131,156 @@ export default function FilterDrawer({
 				visible={visible}
 				onDismiss={onDismiss}
 				contentContainerStyle={[
-					styles.modalContent,
-					{ backgroundColor: backgroundColor },
+					{
+						backgroundColor: backgroundColor,
+						margin: 20,
+						borderRadius: 8,
+						height: "80%",
+						width: "90%",
+						alignSelf: "center",
+					},
 				]}
 			>
-				<View style={styles.header}>
+				<View className="flex-row justify-between items-center p-4">
 					<Text
 						variant="titleLarge"
-						style={[styles.title, { color: textColor }]}
+						className="font-bold"
+						style={{ color: textColor }}
 					>
-						Filters
+						{t("gemstones.filters")}
 					</Text>
-					<Button onPress={handleReset}>Reset</Button>
+					<Button onPress={handleReset}>{t("gemstones.resetFilters")}</Button>
 				</View>
 
 				<Divider />
 
 				{/* Active filters */}
-				<View style={styles.activeFiltersContainer}>
+				<View className="flex gap-2 p-4 flex-wrap">
 					{currentFilters.shape && (
 						<Chip
 							mode="outlined"
 							onClose={() => removeFilter("shape")}
-							style={styles.filterChip}
+							className="mr-2 mb-2"
 						>
-							Shape: {currentFilters.shape}
+							{t("gemstones.shape")}: {currentFilters.shape}
 						</Chip>
 					)}
 					{currentFilters.color && (
 						<Chip
 							mode="outlined"
 							onClose={() => removeFilter("color")}
-							style={styles.filterChip}
+							className="mr-2 mb-2"
 						>
-							Color: {currentFilters.color}
+							{t("gemstones.color")}: {currentFilters.color}
 						</Chip>
 					)}
 					{currentFilters.size && (
 						<Chip
 							mode="outlined"
 							onClose={() => removeFilter("size")}
-							style={styles.filterChip}
+							className="mr-2 mb-2"
 						>
-							Size: {currentFilters.size}
+							{t("gemstones.size")}: {currentFilters.size}
 						</Chip>
 					)}
 					{currentFilters.owner && (
 						<Chip
 							mode="outlined"
 							onClose={() => removeFilter("owner")}
-							style={styles.filterChip}
+							className="mr-2 mb-2"
 						>
-							Owner: {currentFilters.owner}
+							{t("gemstones.owner")}: {currentFilters.owner}
 						</Chip>
 					)}
 					{currentFilters.sold === true && (
 						<Chip
 							mode="outlined"
 							onClose={() => removeFilter("sold")}
-							style={styles.filterChip}
+							className="mr-2 mb-2"
 						>
-							Sold Only
+							{t("gemstones.soldOnly")}
 						</Chip>
 					)}
 				</View>
 
-				<ScrollView style={styles.scrollView}>
-					<View style={styles.dropdownContainer}>
-						<ComboBox
-							label="Shape"
-							placeholder="Select Shape"
-							value={currentFilters.shape || ""}
-							options={shapeOptions}
-							onChange={(value) =>
-								updateFilter("shape", value as GemstoneShape)
-							}
-							allowCustom
-						/>
-					</View>
-
-					<View style={styles.dropdownContainer}>
-						<ComboBox
-							label="Color"
-							placeholder="Select Color"
-							value={currentFilters.color || ""}
-							options={colorOptions}
-							onChange={(value) =>
-								updateFilter("color", value as GemstoneColor)
-							}
-							allowCustom
-						/>
-					</View>
-
-					<View style={styles.dropdownContainer}>
-						<ComboBox
-							label="Size"
-							placeholder="Select Size"
-							value={currentFilters.size || ""}
-							options={sizeOptions}
-							onChange={(value) => updateFilter("size", value as GemstoneSize)}
-							allowCustom
-						/>
-					</View>
-
-					<View style={styles.dropdownContainer}>
-						<ComboBox
-							label="Owner"
-							placeholder="Select Owner"
-							value={currentFilters.owner || ""}
-							options={ownerOptions}
-							onChange={(value) =>
-								updateFilter("owner", value as GemstoneOwner)
-							}
-							allowCustom
-							onCreateNewOption={async (value) => {
-								await addOwner.mutateAsync(value);
-							}}
-						/>
-					</View>
-
-					<View style={styles.switchContainer}>
-						<View style={styles.switchRow}>
-							<Text>Show only sold gemstones</Text>
-							<Switch
-								value={currentFilters.sold === true}
-								onValueChange={(value) =>
-									updateFilter("sold", value ? true : undefined)
+				<ScrollView className="flex-1 p-4">
+					<View className="flex gap-2">
+						<View>
+							<ComboBox
+								label={t("gemstones.shape")}
+								placeholder={t("gemstones.selectShape")}
+								value={currentFilters.shape || ""}
+								options={shapeOptions}
+								onChange={(value) =>
+									updateFilter("shape", value as GemstoneShape)
 								}
+								allowCustom
 							/>
+						</View>
+
+						<View>
+							<ComboBox
+								label={t("gemstones.color")}
+								placeholder={t("gemstones.selectColor")}
+								value={currentFilters.color || ""}
+								options={colorOptions}
+								onChange={(value) =>
+									updateFilter("color", value as GemstoneColor)
+								}
+								allowCustom
+							/>
+						</View>
+
+						<View>
+							<ComboBox
+								label={t("gemstones.size")}
+								placeholder={t("gemstones.selectSize")}
+								value={currentFilters.size || ""}
+								options={sizeOptions}
+								onChange={(value) =>
+									updateFilter("size", value as GemstoneSize)
+								}
+								allowCustom
+							/>
+						</View>
+
+						<View>
+							<ComboBox
+								label={t("gemstones.owner")}
+								placeholder={t("gemstones.selectOwner")}
+								value={currentFilters.owner || ""}
+								options={ownerOptions}
+								onChange={(value) =>
+									updateFilter("owner", value as GemstoneOwner)
+								}
+								allowCustom
+								onCreateNewOption={async (value) => {
+									await addOwner.mutateAsync(value);
+								}}
+							/>
+						</View>
+
+						<View className="flex gap-2">
+							<View className="flex-row justify-between items-center my-2">
+								<Text>{t("gemstones.showSoldOnly")}</Text>
+								<Switch
+									value={currentFilters.sold === true}
+									onValueChange={(value) =>
+										updateFilter("sold", value ? true : undefined)
+									}
+								/>
+							</View>
 						</View>
 					</View>
 				</ScrollView>
 
 				<Divider />
-				<View style={styles.footer}>
-					<Button
-						mode="contained"
-						onPress={onDismiss}
-						style={styles.doneButton}
-					>
-						Done
+				<View className="p-4 items-end">
+					<Button mode="contained" onPress={onDismiss} className="w-[100px]">
+						{t("buttons.done")}
 					</Button>
 				</View>
 			</Modal>
 		</Portal>
 	);
 }
-
-const styles = StyleSheet.create({
-	modalContent: {
-		margin: 20,
-		borderRadius: 8,
-		height: "80%",
-		width: "90%",
-		alignSelf: "center",
-	},
-	header: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		padding: 16,
-	},
-	title: {
-		fontWeight: "bold",
-	},
-	activeFiltersContainer: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		padding: 8,
-		gap: 8,
-	},
-	filterChip: {
-		marginRight: 8,
-		marginBottom: 8,
-	},
-	scrollView: {
-		flex: 1,
-		padding: 16,
-	},
-	dropdownContainer: {
-		marginBottom: 16,
-	},
-	switchContainer: {
-		marginTop: 8,
-	},
-	switchRow: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		marginVertical: 8,
-	},
-	footer: {
-		padding: 16,
-		alignItems: "flex-end",
-	},
-	doneButton: {
-		width: 100,
-	},
-});

@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Linking, Platform } from "react-native";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
 	Dialog,
 	DialogContent,
@@ -17,6 +18,8 @@ export function UpdateRequiredModal({
 	currentVersion,
 	minVersion,
 }: UpdateRequiredModalProps) {
+	const { t } = useLanguage();
+
 	const handleUpdate = () => {
 		// Open the app store based on platform
 		if (Platform.OS === "ios") {
@@ -33,25 +36,26 @@ export function UpdateRequiredModal({
 		<Dialog open={true}>
 			<DialogContent className="mx-auto my-auto max-w-[90%] rounded-lg">
 				<DialogTitle className="text-xl font-semibold text-center">
-					Update Required
+					{t("update.requiredTitle")}
 				</DialogTitle>
 				<DialogDescription className="text-center text-muted-foreground">
-					A new version of the app is required to continue.
+					{t("update.requiredDescription")}
 				</DialogDescription>
 				<View className="py-4 flex flex-col items-center">
 					<Text className="text-center mb-2">
-						Your current version:{" "}
+						{t("update.currentVersion")}:{" "}
 						<Text className="font-bold">{currentVersion}</Text>
 					</Text>
 					<Text className="text-center mb-6">
-						Required version: <Text className="font-bold">{minVersion}</Text>
+						{t("update.requiredVersion")}:{" "}
+						<Text className="font-bold">{minVersion}</Text>
 					</Text>
 					<View
 						className="bg-primary px-6 py-3 rounded-md"
 						onTouchEnd={handleUpdate}
 					>
 						<Text className="text-primary-foreground font-medium text-center">
-							Update Now
+							{t("update.updateNow")}
 						</Text>
 					</View>
 				</View>

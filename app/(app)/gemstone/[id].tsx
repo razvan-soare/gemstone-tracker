@@ -10,6 +10,7 @@ import {
 import { P } from "@/components/ui/typography";
 import { useDeleteGemstone } from "@/hooks/useDeleteGemstone";
 import { useGemstone } from "@/hooks/useGemstone";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
@@ -92,6 +93,7 @@ const getGemTreatmentEnum = (gemType: string | null): GemTreatmentEnum => {
 };
 
 export default function GemstoneDetail() {
+	const { t } = useLanguage();
 	const { showActionSheetWithOptions } = useActionSheet();
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { data: gemstone, isLoading } = useGemstone(id);
@@ -168,7 +170,11 @@ export default function GemstoneDetail() {
 	};
 
 	const onOpenAddPicture = () => {
-		const options = ["Take picture", "Upload picture", "Cancel"];
+		const options = [
+			t("gemstones.takePicture"),
+			t("gemstones.uploadPicture"),
+			t("common.cancel"),
+		];
 		const cancelButtonIndex = 2;
 
 		showActionSheetWithOptions(
@@ -196,6 +202,7 @@ export default function GemstoneDetail() {
 		return (
 			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" />
+				<P style={{ marginTop: 10 }}>{t("gemstones.loading")}</P>
 			</View>
 		);
 	}
@@ -232,7 +239,7 @@ export default function GemstoneDetail() {
 			});
 			setIsEditing(false);
 		} catch (error) {
-			console.error("Error updating gemstone:", error);
+			console.error(t("gemstones.errorUpdating"), error);
 		}
 	};
 
@@ -300,7 +307,7 @@ export default function GemstoneDetail() {
 			await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
 			await queryClient.invalidateQueries({ queryKey: ["gemstones"] });
 		} catch (error) {
-			console.error("Error updating gemstone sell price:", error);
+			console.error(t("gemstones.errorUpdating"), error);
 		}
 	};
 
@@ -362,7 +369,7 @@ export default function GemstoneDetail() {
 			// Refresh data
 			await queryClient.invalidateQueries({ queryKey: ["gemstone"] });
 		} catch (error) {
-			console.error(`Error updating ${currentField.name}:`, error);
+			console.error(t("gemstones.errorUpdating"), error);
 		}
 	};
 
@@ -375,7 +382,7 @@ export default function GemstoneDetail() {
 			await deleteGemstone.mutateAsync(id);
 			setDeleteDialogVisible(false);
 		} catch (error) {
-			console.error("Error deleting gemstone:", error);
+			console.error(t("gemstones.errorUpdating"), error);
 		}
 	};
 
@@ -384,7 +391,7 @@ export default function GemstoneDetail() {
 			<PaperProvider>
 				<Stack.Screen
 					options={{
-						title: gemstone?.name || "Gemstone Details",
+						title: gemstone?.name || t("gemstones.details"),
 						headerRight: () => {
 							if (isEditing) {
 								return (
@@ -461,7 +468,7 @@ export default function GemstoneDetail() {
 								<View style={styles.prominentSoldBadge}>
 									<View className="bg-red-600 px-4 py-2 rounded-lg shadow-lg transform rotate-45">
 										<P className="text-white font-bold text-base text-center">
-											SOLD
+											{t("gemstones.sold")}
 										</P>
 									</View>
 								</View>
@@ -479,7 +486,7 @@ export default function GemstoneDetail() {
 								<>
 									<View style={styles.input}>
 										<ComboBox
-											label="Stone type"
+											label={t("gemstones.stoneType")}
 											value={formData.name || ""}
 											options={Object.values(GemstoneType).map((type) => ({
 												id: type,
@@ -563,7 +570,7 @@ export default function GemstoneDetail() {
 										</View>
 									</View>
 									<TextInput
-										label="Bill number"
+										label={t("gemstones.billNumber")}
 										mode="outlined"
 										value={formData.bill_number || ""}
 										onChangeText={(value) =>
@@ -574,7 +581,7 @@ export default function GemstoneDetail() {
 
 									<View style={styles.input}>
 										<ComboBox
-											label="Shape"
+											label={t("gemstones.shape")}
 											allowCustom={true}
 											value={formData.shape || ""}
 											options={shapes.map((shape) => ({
@@ -595,7 +602,7 @@ export default function GemstoneDetail() {
 
 									<View style={styles.input}>
 										<ComboBox
-											label="Color"
+											label={t("gemstones.color")}
 											allowCustom={true}
 											value={formData.color || ""}
 											options={organizationColors.map((color) => ({
@@ -616,7 +623,7 @@ export default function GemstoneDetail() {
 
 									<View style={styles.input}>
 										<ComboBox
-											label="Owner"
+											label={t("gemstones.owner")}
 											value={formData.owner || ""}
 											options={owners.map((owner) => ({
 												id: owner.name,
@@ -636,7 +643,7 @@ export default function GemstoneDetail() {
 									</View>
 
 									<TextInput
-										label="Weight (ct)"
+										label={t("gemstones.weightCt")}
 										mode="outlined"
 										value={String(formData.weight || "")}
 										onChangeText={(value) => {
@@ -654,7 +661,7 @@ export default function GemstoneDetail() {
 									/>
 
 									<TextInput
-										label="Quantity (pieces)"
+										label={t("gemstones.quantityPieces")}
 										mode="outlined"
 										value={String(formData.quantity || "1")}
 										onChangeText={(value) => {
@@ -674,7 +681,7 @@ export default function GemstoneDetail() {
 
 									<View style={styles.priceContainer}>
 										<TextInput
-											label="Buy price"
+											label={t("gemstones.buyPrice")}
 											mode="outlined"
 											value={String(formData.buy_price || "")}
 											onChangeText={(value) =>
@@ -688,7 +695,7 @@ export default function GemstoneDetail() {
 										/>
 										<View style={styles.currencyDropdown}>
 											<Dropdown
-												label="Currency"
+												label={t("gemstones.currency")}
 												mode="outlined"
 												hideMenuHeader
 												menuContentStyle={{ top: -40 }}
@@ -708,7 +715,7 @@ export default function GemstoneDetail() {
 									</View>
 									<View style={styles.priceContainer}>
 										<TextInput
-											label="Sell price"
+											label={t("gemstones.sellPrice")}
 											mode="outlined"
 											value={String(formData.sell_price || "")}
 											onChangeText={(value) =>
@@ -722,7 +729,7 @@ export default function GemstoneDetail() {
 										/>
 										<View style={styles.currencyDropdown}>
 											<Dropdown
-												label="Currency"
+												label={t("gemstones.currency")}
 												mode="outlined"
 												hideMenuHeader
 												menuContentStyle={{ top: -40 }}
@@ -743,7 +750,7 @@ export default function GemstoneDetail() {
 									<View style={styles.input}>
 										<DatePickerInput
 											locale="en"
-											label="Purchase date"
+											label={t("gemstones.purchaseDate")}
 											value={(() => {
 												const dateValue = formData.purchase_date
 													? new Date(formData.purchase_date)
@@ -783,7 +790,7 @@ export default function GemstoneDetail() {
 									<View style={styles.input}>
 										<DatePickerInput
 											locale="en"
-											label="Sold date"
+											label={t("gemstones.soldDate")}
 											value={
 												formData.sold_at
 													? new Date(formData.sold_at)
@@ -821,7 +828,7 @@ export default function GemstoneDetail() {
 									</View>
 
 									<TextInput
-										label="Buyer"
+										label={t("gemstones.buyer")}
 										mode="outlined"
 										value={formData.buyer || ""}
 										onChangeText={(value) =>
@@ -830,7 +837,7 @@ export default function GemstoneDetail() {
 										style={styles.input}
 									/>
 									<TextInput
-										label="Buyer Address"
+										label={t("gemstones.buyerAddress")}
 										mode="outlined"
 										value={formData.buyer_address || ""}
 										onChangeText={(value) =>
@@ -843,7 +850,7 @@ export default function GemstoneDetail() {
 									/>
 
 									<TextInput
-										label="Comments"
+										label={t("gemstones.comments")}
 										mode="outlined"
 										value={formData.comment || ""}
 										onChangeText={(value) =>
@@ -864,20 +871,22 @@ export default function GemstoneDetail() {
 									/>
 
 									<View style={styles.tableHeader}>
-										<P style={styles.tableHeaderText}>Property</P>
-										<P style={styles.tableHeaderText}>Value</P>
+										<P style={styles.tableHeaderText}>
+											{t("gemstones.property")}
+										</P>
+										<P style={styles.tableHeaderText}>{t("gemstones.value")}</P>
 									</View>
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Name</P>
+											<P style={styles.tableCellLabel}>{t("gemstones.name")}</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"name",
-														"Stone Type",
+														t("gemstones.stoneType"),
 														"name",
 														gemstone.name,
 													)
@@ -890,14 +899,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Bill number</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.billNumber")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"bill_number",
-														"Bill Number",
+														t("gemstones.billNumber"),
 														"text",
 														gemstone.bill_number,
 													)
@@ -912,14 +923,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Owner</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.owner")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"owner",
-														"Owner",
+														t("gemstones.owner"),
 														"owner",
 														gemstone.owner,
 													)
@@ -934,21 +947,23 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Weight</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.weight")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"weight",
-														"Weight (ct)",
+														t("gemstones.weightCt"),
 														"number",
 														gemstone.weight,
 													)
 												}
 											>
 												<P style={styles.tableCellValue}>
-													{gemstone.weight} ct
+													{gemstone.weight} {t("gemstones.ct")}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -956,21 +971,23 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Quantity</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.quantity")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"quantity",
-														"Quantity (pieces)",
+														t("gemstones.quantityPieces"),
 														"number",
 														gemstone.quantity,
 													)
 												}
 											>
 												<P style={styles.tableCellValue}>
-													{gemstone.quantity || "1"} pieces
+													{gemstone.quantity || "1"} {t("gemstones.pieces")}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -978,14 +995,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Buy price</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.buyPrice")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"buy_price",
-														"Buy Price",
+														t("gemstones.buyPrice"),
 														"buy_price",
 														gemstone.buy_price,
 													)
@@ -1001,14 +1020,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Sell price</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.sellPrice")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"sell_price",
-														"Sell Price",
+														t("gemstones.sellPrice"),
 														"sell_price",
 														gemstone.sell_price,
 													)
@@ -1024,14 +1045,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Purchase date</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.purchaseDate")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"purchase_date",
-														"Purchase Date",
+														t("gemstones.purchaseDate"),
 														"date",
 														gemstone.purchase_date,
 													)
@@ -1040,7 +1063,7 @@ export default function GemstoneDetail() {
 												<P style={styles.tableCellValue}>
 													{gemstone.purchase_date
 														? formatDate(gemstone.purchase_date)
-														: "N/A"}
+														: t("gemstones.na")}
 												</P>
 											</TouchableOpacity>
 										</View>
@@ -1049,14 +1072,16 @@ export default function GemstoneDetail() {
 									{gemstone.sold_at && (
 										<View style={styles.tableRow}>
 											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Sold At</P>
+												<P style={styles.tableCellLabel}>
+													{t("gemstones.soldAt")}
+												</P>
 											</View>
 											<View style={styles.tableCell}>
 												<TouchableOpacity
 													onPress={() =>
 														handleEditField(
 															"sold_at",
-															"Sold At",
+															t("gemstones.soldAt"),
 															"date",
 															gemstone.sold_at,
 														)
@@ -1072,14 +1097,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Shape</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.shape")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"shape",
-														"Shape",
+														t("gemstones.shape"),
 														"shape",
 														gemstone.shape,
 													)
@@ -1094,14 +1121,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Color</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.color")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"color",
-														"Color",
+														t("gemstones.color"),
 														"color",
 														gemstone.color,
 													)
@@ -1116,14 +1145,16 @@ export default function GemstoneDetail() {
 
 									<View style={styles.tableRow}>
 										<View style={styles.tableCell}>
-											<P style={styles.tableCellLabel}>Gem Treatment</P>
+											<P style={styles.tableCellLabel}>
+												{t("gemstones.gemTreatment")}
+											</P>
 										</View>
 										<View style={styles.tableCell}>
 											<TouchableOpacity
 												onPress={() =>
 													handleEditField(
 														"gem_treatment",
-														"Gem Treatment",
+														t("gemstones.gemTreatment"),
 														"gem_treatment",
 														gemstone.gem_treatment,
 													)
@@ -1143,14 +1174,16 @@ export default function GemstoneDetail() {
 									{gemstone.buyer && (
 										<View style={styles.tableRow}>
 											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Buyer</P>
+												<P style={styles.tableCellLabel}>
+													{t("gemstones.buyer")}
+												</P>
 											</View>
 											<View style={styles.tableCell}>
 												<TouchableOpacity
 													onPress={() =>
 														handleEditField(
 															"buyer",
-															"Buyer",
+															t("gemstones.buyer"),
 															"text",
 															gemstone.buyer,
 														)
@@ -1165,14 +1198,16 @@ export default function GemstoneDetail() {
 									{gemstone.buyer_address && (
 										<View style={styles.tableRow}>
 											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Buyer Address</P>
+												<P style={styles.tableCellLabel}>
+													{t("gemstones.buyerAddress")}
+												</P>
 											</View>
 											<View style={styles.tableCell}>
 												<TouchableOpacity
 													onPress={() =>
 														handleEditField(
 															"buyer_address",
-															"Buyer Address",
+															t("gemstones.buyerAddress"),
 															"text",
 															gemstone.buyer_address,
 														)
@@ -1189,14 +1224,16 @@ export default function GemstoneDetail() {
 									{gemstone.comment && (
 										<View style={styles.tableRow}>
 											<View style={styles.tableCell}>
-												<P style={styles.tableCellLabel}>Comments</P>
+												<P style={styles.tableCellLabel}>
+													{t("gemstones.comments")}
+												</P>
 											</View>
 											<View style={styles.tableCell}>
 												<TouchableOpacity
 													onPress={() =>
 														handleEditField(
 															"comment",
-															"Comments",
+															t("gemstones.comments"),
 															"text",
 															gemstone.comment,
 														)
@@ -1231,11 +1268,11 @@ export default function GemstoneDetail() {
 						onDismiss={() => setSellDialogVisible(false)}
 						style={{ backgroundColor: "#f2f2f2" }}
 					>
-						<Dialog.Title>Sell Gemstone</Dialog.Title>
+						<Dialog.Title>{t("gemstones.sellGemstone")}</Dialog.Title>
 						<Dialog.Content>
 							<View style={styles.priceContainer}>
 								<TextInput
-									label="Sell Price"
+									label={t("gemstones.sellPrice")}
 									defaultValue={sellPrice}
 									onChangeText={setSellPrice}
 									keyboardType="decimal-pad"
@@ -1244,7 +1281,7 @@ export default function GemstoneDetail() {
 								/>
 								<View style={styles.currencyDropdown}>
 									<Dropdown
-										label="Currency"
+										label={t("gemstones.currency")}
 										mode="outlined"
 										hideMenuHeader
 										menuContentStyle={{ top: 60 }}
@@ -1259,21 +1296,21 @@ export default function GemstoneDetail() {
 							</View>
 
 							<TextInput
-								label="Buyer"
+								label={t("gemstones.buyer")}
 								defaultValue={buyer}
 								onChangeText={setBuyer}
 								mode="outlined"
 								style={{ marginBottom: 10 }}
 							/>
 							<TextInput
-								label="Buyer Address"
+								label={t("gemstones.buyerAddress")}
 								defaultValue={buyerAddress}
 								onChangeText={setBuyerAddress}
 								mode="outlined"
 								style={{ marginBottom: 10 }}
 							/>
 							<TextInput
-								label="Comment"
+								label={t("gemstones.comment")}
 								defaultValue={sellComment}
 								onChangeText={setSellComment}
 								mode="outlined"
@@ -1284,13 +1321,13 @@ export default function GemstoneDetail() {
 						</Dialog.Content>
 						<Dialog.Actions>
 							<Button onPress={() => setSellDialogVisible(false)}>
-								Cancel
+								{t("common.cancel")}
 							</Button>
 							<Button
 								onPress={handleSellConfirm}
 								loading={updateGemstone.isPending}
 							>
-								Confirm
+								{t("common.confirm")}
 							</Button>
 						</Dialog.Actions>
 					</Dialog>
@@ -1309,17 +1346,14 @@ export default function GemstoneDetail() {
 						<Dialog.Title
 							style={{ color: colorScheme === "dark" ? "white" : "black" }}
 						>
-							Delete Gemstone
+							{t("gemstones.deleteGemstone")}
 						</Dialog.Title>
 						<Dialog.Content>
-							<P>
-								Are you sure you want to delete this gemstone? This action
-								cannot be undone.
-							</P>
+							<P>{t("gemstones.deleteConfirmation")}</P>
 						</Dialog.Content>
 						<Dialog.Actions>
 							<Button onPress={() => setDeleteDialogVisible(false)}>
-								Cancel
+								{t("common.cancel")}
 							</Button>
 							<Button
 								mode="contained"
@@ -1328,7 +1362,7 @@ export default function GemstoneDetail() {
 								onPress={handleDeleteConfirm}
 								loading={deleteGemstone.isPending}
 							>
-								Delete
+								{t("common.delete")}
 							</Button>
 						</Dialog.Actions>
 					</Dialog>
@@ -1341,12 +1375,14 @@ export default function GemstoneDetail() {
 							style={styles.fab}
 							onPress={onOpenAddPicture}
 							loading={uploading}
+							accessibilityLabel={t("gemstones.addImage")}
 						/>
 						<FAB
 							icon="currency-usd"
 							style={styles.fabSell}
 							onPress={onSellStone}
 							loading={updateGemstone.isPending}
+							accessibilityLabel={t("gemstones.sellAction")}
 						/>
 					</>
 				)}

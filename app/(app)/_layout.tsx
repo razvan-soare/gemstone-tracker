@@ -7,6 +7,7 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { PaperProvider, MD3LightTheme, MD3DarkTheme } from "react-native-paper";
 import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 import { KeyboardSafeView } from "@/components/keyboard-safe-view";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const unstable_settings = {
 	initialRouteName: "(root)",
@@ -14,6 +15,7 @@ export const unstable_settings = {
 
 export default function AppLayout() {
 	const { colorScheme } = useColorScheme();
+	const { t } = useLanguage();
 
 	// Create custom themes that match our color palette
 	const lightTheme = {
@@ -61,7 +63,7 @@ export default function AppLayout() {
 									presentation: "card",
 									headerShown: true,
 									title: "",
-									headerBackTitle: "Back",
+									headerBackTitle: t("common.back"),
 									headerStyle: {
 										backgroundColor:
 											colorScheme === "dark"
@@ -80,7 +82,7 @@ export default function AppLayout() {
 								options={{
 									presentation: "modal",
 									headerShown: true,
-									headerTitle: "Register",
+									headerTitle: t("auth.signUp"),
 									headerStyle: {
 										backgroundColor:
 											colorScheme === "dark"
@@ -99,7 +101,7 @@ export default function AppLayout() {
 								options={{
 									presentation: "modal",
 									headerShown: true,
-									headerTitle: "Login",
+									headerTitle: t("auth.signIn"),
 									headerStyle: {
 										backgroundColor:
 											colorScheme === "dark"
@@ -117,9 +119,9 @@ export default function AppLayout() {
 							<Stack.Screen
 								name="add-new-gemstone"
 								options={{
-									headerBackTitle: "Back",
+									headerBackTitle: t("common.back"),
 									headerShown: true,
-									headerTitle: "Add new gemstone",
+									headerTitle: t("gemstones.addGemstone"),
 									headerStyle: {
 										backgroundColor:
 											colorScheme === "dark"
@@ -136,9 +138,9 @@ export default function AppLayout() {
 							<Stack.Screen
 								name="organizations"
 								options={{
-									headerBackTitle: "Back",
+									headerBackTitle: t("common.back"),
 									headerShown: true,
-									headerTitle: "Organizations",
+									headerTitle: t("navigation.organizations"),
 									headerStyle: {
 										backgroundColor:
 											colorScheme === "dark"

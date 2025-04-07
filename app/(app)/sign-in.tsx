@@ -13,6 +13,7 @@ import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/config/supabase";
 
 const formSchema = z.object({
@@ -27,6 +28,7 @@ export default function SignIn() {
 	const { signInWithPassword } = useSupabase();
 	const [devTapCount, setDevTapCount] = useState(0);
 	const router = useRouter();
+	const { t } = useLanguage();
 	const [loginError, setLoginError] = useState<string | null>(null);
 	const [minVersion, setMinVersion] = useState<string | null>(null);
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -70,7 +72,7 @@ export default function SignIn() {
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start ">Login</H1>
+				<H1 className="self-start ">{t("auth.signIn")}</H1>
 
 				<Form {...form}>
 					<View className="gap-4">
@@ -79,8 +81,8 @@ export default function SignIn() {
 							name="email"
 							render={({ field }) => (
 								<FormInput
-									label="Email"
-									placeholder="Email"
+									label={t("auth.email")}
+									placeholder={t("auth.email")}
 									autoCapitalize="none"
 									autoComplete="email"
 									autoCorrect={false}
@@ -94,8 +96,8 @@ export default function SignIn() {
 							name="password"
 							render={({ field }) => (
 								<FormInput
-									label="Password"
-									placeholder="Password"
+									label={t("auth.password")}
+									placeholder={t("auth.password")}
 									autoCapitalize="none"
 									autoCorrect={false}
 									secureTextEntry
@@ -120,7 +122,7 @@ export default function SignIn() {
 					{form.formState.isSubmitting ? (
 						<ActivityIndicator size="small" />
 					) : (
-						<Text>Login</Text>
+						<Text>{t("auth.signIn")}</Text>
 					)}
 				</Button>
 				<Pressable onPress={handleBuildNumberPress}>

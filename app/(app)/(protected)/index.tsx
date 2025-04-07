@@ -1,8 +1,7 @@
-import { router } from "expo-router";
-import { useState, useCallback } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { FAB } from "react-native-paper";
-import { useFocusEffect } from "expo-router";
 
 import {
 	GemstoneColor,
@@ -17,6 +16,7 @@ import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useColumnPreference } from "@/hooks/useColumnPreference";
 import { useGemstones } from "@/hooks/useGemstones";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function Home() {
@@ -30,6 +30,7 @@ export default function Home() {
 	const { activeOrganization } = useSupabase();
 	const { colorScheme } = useColorScheme();
 	const { columnCount, refreshColumnCount } = useColumnPreference();
+	const { t } = useLanguage();
 
 	// Refresh column count when screen comes into focus
 	useFocusEffect(

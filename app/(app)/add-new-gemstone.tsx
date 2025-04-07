@@ -10,6 +10,7 @@ import { H3, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { useCreateGemstone } from "@/hooks/useCreateGemstone";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useOrganizationColors } from "@/hooks/useOrganizationColors";
 import { useOrganizationGemstoneTypes } from "@/hooks/useOrganizationGemstoneTypes";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
@@ -55,6 +56,7 @@ type ValidationError = {
 };
 
 export default function AddNewGemstone() {
+	const { t } = useLanguage();
 	const { activeOrganization } = useSupabase();
 	const createGemstone = useCreateGemstone();
 	const [error, setError] = useState<ValidationError | null>(null);
@@ -190,21 +192,21 @@ export default function AddNewGemstone() {
 		if (!activeOrganization) {
 			return {
 				field: "organization",
-				message: "No organization found. Please join an organization first.",
+				message: t("gemstones.noOrganization"),
 			};
 		}
 
 		if (!formData.name.trim()) {
 			return {
 				field: "name",
-				message: "Stone type is required",
+				message: t("gemstones.stoneType") + " " + t("common.error"),
 			};
 		}
 
 		if (formData.weight && isNaN(parseFloat(formData.weight))) {
 			return {
 				field: "weight",
-				message: "Weight must be a valid number",
+				message: t("gemstones.weight") + " " + t("common.error"),
 			};
 		}
 
@@ -215,7 +217,7 @@ export default function AddNewGemstone() {
 		) {
 			return {
 				field: "quantity",
-				message: "Quantity must be at least 1",
+				message: t("gemstones.quantityPieces") + " " + t("common.error"),
 			};
 		}
 
@@ -314,7 +316,7 @@ export default function AddNewGemstone() {
 			const { status } =
 				await ImagePicker.requestMediaLibraryPermissionsAsync();
 			if (status !== "granted") {
-				alert("We need your permission to access your media library");
+				alert(t("gemstones.permissionNeeded.mediaLibrary"));
 				return;
 			}
 
@@ -337,7 +339,7 @@ export default function AddNewGemstone() {
 		try {
 			const { status } = await ImagePicker.requestCameraPermissionsAsync();
 			if (status !== "granted") {
-				alert("We need your permission to access your camera");
+				alert(t("gemstones.permissionNeeded.camera"));
 				return;
 			}
 
@@ -365,7 +367,7 @@ export default function AddNewGemstone() {
 		return (
 			<SafeAreaProvider>
 				<View style={styles.container}>
-					<H3>No organization found. Please join an organization first.</H3>
+					<H3>{t("gemstones.noOrganization")}</H3>
 				</View>
 			</SafeAreaProvider>
 		);
@@ -470,7 +472,7 @@ export default function AddNewGemstone() {
 
 					<View style={styles.quantityContainer}>
 						<TextInput
-							label="Quantity (pieces)"
+							label={t("gemstones.quantityPieces")}
 							mode="outlined"
 							defaultValue={formData.quantity}
 							onChangeText={(value) => {
@@ -560,7 +562,7 @@ export default function AddNewGemstone() {
 
 					<View style={styles.dimensionsContainer}>
 						<TextInput
-							label="Length"
+							label={t("gemstones.length")}
 							mode="outlined"
 							value={formData.dimensions.length}
 							onChangeText={(value) => handleDimensionInput(value, "length")}
@@ -568,7 +570,7 @@ export default function AddNewGemstone() {
 							style={styles.dimensionInput}
 						/>
 						<TextInput
-							label="Width"
+							label={t("gemstones.width")}
 							mode="outlined"
 							value={formData.dimensions.width}
 							onChangeText={(value) => handleDimensionInput(value, "width")}
@@ -576,7 +578,7 @@ export default function AddNewGemstone() {
 							style={styles.dimensionInput}
 						/>
 						<TextInput
-							label="Height"
+							label={t("gemstones.height")}
 							mode="outlined"
 							value={formData.dimensions.height}
 							onChangeText={(value) => handleDimensionInput(value, "height")}
@@ -586,7 +588,7 @@ export default function AddNewGemstone() {
 					</View>
 					<View style={styles.priceContainer}>
 						<TextInput
-							label="Buy price"
+							label={t("gemstones.buyPrice")}
 							mode="outlined"
 							defaultValue={formData.buy_price.toString()}
 							onChangeText={(value) => updateField("buy_price", value)}
@@ -598,7 +600,7 @@ export default function AddNewGemstone() {
 						/>
 						<View style={styles.currencyDropdown}>
 							<Dropdown
-								label="Currency"
+								label={t("gemstones.currency")}
 								mode="outlined"
 								hideMenuHeader
 								menuContentStyle={{ top: 60 }}
@@ -614,7 +616,7 @@ export default function AddNewGemstone() {
 
 					<View style={styles.priceContainer}>
 						<TextInput
-							label="Sell price"
+							label={t("gemstones.sellPrice")}
 							mode="outlined"
 							defaultValue={formData.sell_price.toString()}
 							onChangeText={(value) => updateField("sell_price", value)}
@@ -626,7 +628,7 @@ export default function AddNewGemstone() {
 						/>
 						<View style={styles.currencyDropdown}>
 							<Dropdown
-								label="Currency"
+								label={t("gemstones.currency")}
 								mode="outlined"
 								hideMenuHeader
 								menuContentStyle={{ top: 60 }}
@@ -641,7 +643,7 @@ export default function AddNewGemstone() {
 					</View>
 
 					<TextInput
-						label="Buyer"
+						label={t("gemstones.buyer")}
 						mode="outlined"
 						defaultValue={formData.buyer}
 						onChangeText={(value) => updateField("buyer", value)}
@@ -653,7 +655,7 @@ export default function AddNewGemstone() {
 					/>
 
 					<TextInput
-						label="Buyer Address"
+						label={t("gemstones.buyerAddress")}
 						mode="outlined"
 						defaultValue={formData.buyer_address}
 						onChangeText={(value) => updateField("buyer_address", value)}
@@ -800,7 +802,7 @@ export default function AddNewGemstone() {
 				duration={Infinity}
 				style={styles.uploadingSnackbar}
 			>
-				Uploading images in background...
+				{t("gemstones.uploadingImages")}
 			</Snackbar>
 		</SafeAreaProvider>
 	);

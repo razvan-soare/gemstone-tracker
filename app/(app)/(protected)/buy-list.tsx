@@ -15,6 +15,7 @@ import ExportButton from "@/components/ExportButton";
 import { H2, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
@@ -51,6 +52,7 @@ const GemstoneItem = ({
 }: GemstoneItemProps) => {
 	const buyCurrencySymbol = getCurrencySymbol(gemstone.buy_currency);
 	const sellCurrencySymbol = getCurrencySymbol(gemstone.sell_currency);
+	const { t } = useLanguage();
 
 	const handlePress = () => {
 		router.push(`/(app)/gemstone/${gemstone.id}`);
@@ -80,7 +82,7 @@ const GemstoneItem = ({
 							<View className="relative w-15 h-15 overflow-visible justify-center items-center">
 								<View className="bg-red-600 px-2 py-1 rounded shadow-md transform rotate-45">
 									<P className="text-white font-bold text-xs text-center">
-										SOLD
+										{t("gemstones.sold")}
 									</P>
 								</View>
 							</View>
@@ -124,6 +126,7 @@ const GemstoneListView = ({
 	setSelectedGemstones: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
 	const { data: groupedGemstones, isLoading } = useGemstonesByDate(filter);
+	const { t } = useLanguage();
 
 	const handleToggleSelect = useCallback(
 		(gemstoneId: string) => {
@@ -163,6 +166,7 @@ const GemstoneListView = ({
 		return (
 			<View style={styles.loadingContainer}>
 				<ActivityIndicator size="large" />
+				<Text style={styles.loadingText}>{t("common.loading")}</Text>
 			</View>
 		);
 	}
@@ -204,7 +208,7 @@ const GemstoneListView = ({
 				stickySectionHeadersEnabled={true}
 				ListEmptyComponent={() => (
 					<View style={styles.emptyContainer}>
-						<Text>No gemstones found</Text>
+						<Text>{t("gemstones.noGemstones")}</Text>
 					</View>
 				)}
 			/>
@@ -216,6 +220,7 @@ export default function BuyList() {
 	const { colorScheme } = useColorScheme();
 	const [activeTab, setActiveTab] = useState<GemstoneFilter>("all");
 	const [selectedGemstones, setSelectedGemstones] = useState<string[]>([]);
+	const { t } = useLanguage();
 
 	useEffect(() => {
 		setSelectedGemstones([]);
@@ -233,7 +238,7 @@ export default function BuyList() {
 			/>
 
 			<View className="w-full items-center justify-center py-4">
-				<H2>Gemstone History</H2>
+				<H2>{t("buyList.title")}</H2>
 			</View>
 
 			<View style={styles.segmentedButtonContainer}>
@@ -243,15 +248,15 @@ export default function BuyList() {
 					buttons={[
 						{
 							value: "all",
-							label: "All",
+							label: t("buyList.all"),
 						},
 						{
 							value: "stock",
-							label: "Stock",
+							label: t("buyList.stock"),
 						},
 						{
 							value: "sold",
-							label: "Sold",
+							label: t("buyList.sold"),
 						},
 					]}
 				/>
@@ -295,6 +300,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+	},
+	loadingText: {
+		marginTop: 10,
+		color: "#666",
 	},
 	listContent: {
 		paddingBottom: 20,
