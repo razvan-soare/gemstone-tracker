@@ -14,7 +14,8 @@
 		"search": "搜索",
 		"add": "添加",
 		"remove": "移除",
-		"close": "关闭"
+		"close": "关闭",
+		"confirm": "确认"
 	},
 	"navigation": {
 		"home": "首页",
@@ -162,7 +163,26 @@
 			"mediaLibrary": "我们需要您的许可才能访问您的媒体库"
 		},
 		"editGemstone": "编辑宝石",
-		"historyGemstone": "宝石历史"
+		"historyGemstone": "宝石历史",
+		"quantity": "数量",
+		"property": "属性",
+		"value": "值",
+		"ct": "克拉",
+		"pieces": "件",
+		"na": "不适用",
+		"sellGemstone": "出售宝石",
+		"deleteGemstone": "删除宝石",
+		"deleteConfirmation": "您确定要删除此宝石吗？此操作无法撤销。",
+		"weightCt": "重量（克拉）",
+		"soldAt": "售出时间",
+		"gemTreatment": "宝石处理",
+		"soldDate": "售出日期",
+		"comment": "备注",
+
+		"loading": "正在加载宝石...",
+		"addImage": "添加图片",
+		"sellAction": "出售",
+		"errorUpdating": "更新宝石时出错"
 	},
 	"buyList": {
 		"title": "购买清单",

@@ -14,7 +14,8 @@
 		"search": "Search",
 		"add": "Add",
 		"remove": "Remove",
-		"close": "Close"
+		"close": "Close",
+		"confirm": "Confirm"
 	},
 	"navigation": {
 		"home": "Home",
@@ -162,7 +163,26 @@
 			"mediaLibrary": "We need your permission to access your media library"
 		},
 		"editGemstone": "Edit Gemstone",
-		"historyGemstone": "Gemstone History"
+		"historyGemstone": "Gemstone History",
+		"quantity": "Quantity",
+		"property": "Property",
+		"value": "Value",
+		"ct": "ct",
+		"pieces": "pieces",
+		"na": "N/A",
+		"sellGemstone": "Sell Gemstone",
+		"deleteGemstone": "Delete Gemstone",
+		"deleteConfirmation": "Are you sure you want to delete this gemstone? This action cannot be undone.",
+		"weightCt": "Weight (ct)",
+		"soldAt": "Sold At",
+		"gemTreatment": "Gem Treatment",
+		"soldDate": "Sold Date",
+		"comment": "Comment",
+
+		"loading": "Loading gemstone...",
+		"addImage": "Add Image",
+		"sellAction": "Sell",
+		"errorUpdating": "Error updating gemstone"
 	},
 	"buyList": {
 		"title": "Buy List",

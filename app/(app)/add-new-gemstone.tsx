@@ -472,7 +472,7 @@ export default function AddNewGemstone() {
 
 					<View style={styles.quantityContainer}>
 						<TextInput
-							label="Quantity (pieces)"
+							label={t("gemstones.quantityPieces")}
 							mode="outlined"
 							defaultValue={formData.quantity}
 							onChangeText={(value) => {
@@ -562,7 +562,7 @@ export default function AddNewGemstone() {
 
 					<View style={styles.dimensionsContainer}>
 						<TextInput
-							label="Length"
+							label={t("gemstones.length")}
 							mode="outlined"
 							value={formData.dimensions.length}
 							onChangeText={(value) => handleDimensionInput(value, "length")}
@@ -570,7 +570,7 @@ export default function AddNewGemstone() {
 							style={styles.dimensionInput}
 						/>
 						<TextInput
-							label="Width"
+							label={t("gemstones.width")}
 							mode="outlined"
 							value={formData.dimensions.width}
 							onChangeText={(value) => handleDimensionInput(value, "width")}
@@ -578,7 +578,7 @@ export default function AddNewGemstone() {
 							style={styles.dimensionInput}
 						/>
 						<TextInput
-							label="Height"
+							label={t("gemstones.height")}
 							mode="outlined"
 							value={formData.dimensions.height}
 							onChangeText={(value) => handleDimensionInput(value, "height")}
@@ -588,7 +588,7 @@ export default function AddNewGemstone() {
 					</View>
 					<View style={styles.priceContainer}>
 						<TextInput
-							label="Buy price"
+							label={t("gemstones.buyPrice")}
 							mode="outlined"
 							defaultValue={formData.buy_price.toString()}
 							onChangeText={(value) => updateField("buy_price", value)}
@@ -600,7 +600,7 @@ export default function AddNewGemstone() {
 						/>
 						<View style={styles.currencyDropdown}>
 							<Dropdown
-								label="Currency"
+								label={t("gemstones.currency")}
 								mode="outlined"
 								hideMenuHeader
 								menuContentStyle={{ top: 60 }}
@@ -616,7 +616,7 @@ export default function AddNewGemstone() {
 
 					<View style={styles.priceContainer}>
 						<TextInput
-							label="Sell price"
+							label={t("gemstones.sellPrice")}
 							mode="outlined"
 							defaultValue={formData.sell_price.toString()}
 							onChangeText={(value) => updateField("sell_price", value)}
@@ -628,7 +628,7 @@ export default function AddNewGemstone() {
 						/>
 						<View style={styles.currencyDropdown}>
 							<Dropdown
-								label="Currency"
+								label={t("gemstones.currency")}
 								mode="outlined"
 								hideMenuHeader
 								menuContentStyle={{ top: 60 }}
@@ -643,7 +643,7 @@ export default function AddNewGemstone() {
 					</View>
 
 					<TextInput
-						label="Buyer"
+						label={t("gemstones.buyer")}
 						mode="outlined"
 						defaultValue={formData.buyer}
 						onChangeText={(value) => updateField("buyer", value)}
@@ -655,7 +655,7 @@ export default function AddNewGemstone() {
 					/>
 
 					<TextInput
-						label="Buyer Address"
+						label={t("gemstones.buyerAddress")}
 						mode="outlined"
 						defaultValue={formData.buyer_address}
 						onChangeText={(value) => updateField("buyer_address", value)}
