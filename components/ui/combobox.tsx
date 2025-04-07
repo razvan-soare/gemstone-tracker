@@ -1,7 +1,13 @@
 import { cn } from "@/lib/utils";
 import * as React from "react";
 import { useEffect } from "react";
-import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import {
+	Button,
+	Text,
+	TouchableOpacity,
+	useColorScheme,
+	View,
+} from "react-native";
 import {
 	AutocompleteDropdown,
 	AutocompleteDropdownItem,
@@ -76,9 +82,7 @@ export const ComboBox = ({
 		) {
 			newOptions = [{ id: value, title: value }, ...newOptions];
 		}
-
-		setDisplayOptions(newOptions);
-	}, [value, options]);
+	}, [value, options, inputText, allowCustom]);
 
 	// Handle change with option creation
 	const handleChange = async (selectedValue: string) => {
@@ -137,6 +141,9 @@ export const ComboBox = ({
 		);
 	}, [inputText, allowCustom, colors, handleChange]);
 
+	const isNewValue =
+		inputText && !options.some((option) => option.title === inputText);
+
 	return (
 		<View className={cn("w-full", className)}>
 			{label && (
@@ -150,6 +157,24 @@ export const ComboBox = ({
 			<AutocompleteDropdown
 				key={keyValue}
 				initialValue={selectedItem}
+				RightIconComponent={
+					isNewValue ? (
+						<View className="bg-gray-500 rounded-full px-2 py-1">
+							<TouchableOpacity
+								onPress={() => {
+									const newItem: AutocompleteDropdownItem = {
+										id: inputText,
+										title: inputText,
+									};
+									setSelectedItem(newItem);
+									handleChange(inputText);
+								}}
+							>
+								<Text className="text-white">+</Text>
+							</TouchableOpacity>
+						</View>
+					) : undefined
+				}
 				clearOnFocus={false}
 				closeOnBlur={true}
 				closeOnSubmit={false}
