@@ -39,8 +39,6 @@ export const useCreateOrganization = () => {
           organization_id: organization.id,
           user_id: userId,
           role: "owner",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
         });
 
       if (memberError) {
