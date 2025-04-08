@@ -12,7 +12,7 @@
 		"generate:types:local": "supabase gen types typescript --local > lib/database.types.ts",
 		"web:build": "expo export -p web",
 		"ios:build": "dotenv -e .env.production eas build --platform ios --profile production",
-		"ios:deploy": "yarn version:patch && dotenv -e .env.production eas build --profile production --platform ios --submit",
+		"ios:deploy": "yarn version:patch && dotenv -e .env.production eas build --platform ios --profile production --auto-submit",
 		"android:build": "dotenv -e .env.production eas build --platform android --profile production",
 		"update:preview": "dotenv -e .env.production eas update --branch preview --message \"Update preview\"",
 		"update:production": "dotenv -e .env.production eas update --branch production --message \"Update production\"",
