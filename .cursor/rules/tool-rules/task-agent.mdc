@@ -1,0 +1,90 @@
+---
+description: This rule governs the process of breaking down and managing tasks. It should be applied whenever: (1) The user asks to complete a complex task, (2) The user requests a series of related changes, (3) The task requires multiple steps or file changes, or (4) Any task that would benefit from explicit planning and tracking. The rule ensures structured task management, clear progress tracking, and step-by-step implementation. It's particularly important for maintaining organized workflow, facilitating effective task completion, and ensuring no steps are missed during implementation.
+globs: 
+alwaysApply: false
+---
+
+# Task Management Process
+
+## Critical Rules
+
+- Create `.ai/currentTask.md` to reference the currently pending task
+- For each task, create `.ai/[task_name].md` with a task summary and TODO list of all steps
+- Each task file must include a status header: `need_review` / `in_progress` / `completed` / `partial`
+- Always ask for user review of the task plan before starting implementation
+- Only proceed with implementation after explicit user approval
+- Work on one subtask at a time in sequential order
+- After each iteration, update the task file to mark completed subtasks
+- Check `.ai/currentTask.md` between iterations to confirm the current active task
+- Create directories if they don't exist before creating task files
+
+## Examples
+
+<example>
+User: "Can you implement a login system with email verification?"
+
+AI: "I'll create a task plan for implementing a login system with email verification."
+
+*Creates .ai directory if it doesn't exist*
+*Creates .ai/currentTask.md with reference to "login-system-implementation"*
+*Creates .ai/login-system-implementation.md with:*
+
+```md
+# Login System Implementation
+Status: need_review
+
+## Task Summary
+Implement a complete login system with email verification functionality.
+
+## Todo List
+- [ ] Set up user authentication routes
+- [ ] Create user model with email field
+- [ ] Implement registration form
+- [ ] Add email verification service
+- [ ] Create email templates
+- [ ] Implement login functionality
+- [ ] Add password reset capability
+- [ ] Secure routes with authentication middleware
+```
+
+AI: "I've created a task plan for implementing the login system with email verification. Please review the plan in .ai/login-system-implementation.md before I begin implementation."
+
+*After user approves*
+
+AI: "Starting implementation with the first subtask: Set up user authentication routes."
+
+*After completing first subtask*
+
+*Updates .ai/login-system-implementation.md:*
+```md
+# Login System Implementation
+Status: in_progress
+
+## Task Summary
+Implement a complete login system with email verification functionality.
+
+## Todo List
+- [x] Set up user authentication routes
+- [ ] Create user model with email field
+- [ ] Implement registration form
+- [ ] Add email verification service
+- [ ] Create email templates
+- [ ] Implement login functionality
+- [ ] Add password reset capability
+- [ ] Secure routes with authentication middleware
+```
+
+AI: "I've completed setting up the user authentication routes. Moving on to creating the user model with email field."
+</example>
+
+<example type="invalid">
+User: "Can you implement a login system with email verification?"
+
+AI: *Immediately starts implementing the login system without creating a task plan*
+
+AI: "I've added the authentication code, now I'll work on the email verification, and then add the password reset functionality."
+
+*Makes multiple changes across files without tracking progress*
+
+AI: "I think I'm done with the implementation. Let me know if you need any changes."
+</example> 

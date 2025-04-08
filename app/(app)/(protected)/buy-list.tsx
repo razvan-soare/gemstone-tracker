@@ -8,28 +8,31 @@ import {
 	TouchableOpacity,
 	View,
 } from "react-native";
-import { List, SegmentedButtons, Surface, Text } from "react-native-paper";
+import {
+	List,
+	SegmentedButtons,
+	Surface,
+	Text,
+	Snackbar,
+} from "react-native-paper";
 
 import { Currency, CurrencySymbols } from "@/app/types/gemstone";
 import ExportButton from "@/components/ExportButton";
+import FloatingActionButton from "@/components/FloatingActionButton";
+import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog";
+import ExportDialog, { ExportFilters } from "@/components/ExportDialog";
 import { H2, P } from "@/components/ui/typography";
 import { colors } from "@/constants/colors";
 import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { supabase } from "@/config/supabase";
 import { router } from "expo-router";
 import { CheckIcon, ChevronRight } from "lucide-react-native";
-
-type GemstoneItemProps = {
-	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
-	backgroundColor: string;
-	isSelected: boolean;
-	onToggleSelect: (
-		gemstoneId: string,
-		forceEnterSelectionMode?: boolean,
-	) => void;
-};
+import { exportToNumbers } from "@/lib/exportToNumbers";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSupabase } from "@/context/supabase-provider";
 
 // Helper function to safely get currency symbol
 const getCurrencySymbol = (currencyCode: string | null): string => {
@@ -42,6 +45,16 @@ const getCurrencySymbol = (currencyCode: string | null): string => {
 	}
 
 	return "$"; // Default fallback
+};
+
+type GemstoneItemProps = {
+	gemstone: Tables<"stones"> & { images: Tables<"images">[] };
+	backgroundColor: string;
+	isSelected: boolean;
+	onToggleSelect: (
+		gemstoneId: string,
+		forceEnterSelectionMode?: boolean,
+	) => void;
 };
 
 const GemstoneItem = ({
@@ -220,7 +233,13 @@ export default function BuyList() {
 	const { colorScheme } = useColorScheme();
 	const [activeTab, setActiveTab] = useState<GemstoneFilter>("all");
 	const [selectedGemstones, setSelectedGemstones] = useState<string[]>([]);
+	const [exportDialogVisible, setExportDialogVisible] = useState(false);
+	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
+	const [snackbarMessage, setSnackbarMessage] = useState("");
 	const { t } = useLanguage();
+	const queryClient = useQueryClient();
+	const { activeOrganization } = useSupabase();
 
 	useEffect(() => {
 		setSelectedGemstones([]);
@@ -230,6 +249,84 @@ export default function BuyList() {
 		colorScheme === "dark" ? colors.dark.background : colors.light.background;
 
 	const itemBackgroundColor = colorScheme === "dark" ? "#2c2c2c" : "#ffffff";
+
+	const handleExport = () => {
+		setExportDialogVisible(true);
+	};
+
+	const handleDelete = () => {
+		setDeleteDialogVisible(true);
+	};
+
+	const showSnackbar = (message: string) => {
+		setSnackbarMessage(message);
+		setSnackbarVisible(true);
+	};
+
+	const handleConfirmDelete = async () => {
+		try {
+			// First, delete all images associated with the selected gemstones
+			const { error: imagesError } = await supabase
+				.from("images")
+				.delete()
+				.in("stone_id", selectedGemstones);
+
+			if (imagesError) throw imagesError;
+
+			// Then delete the gemstones
+			const { error: stonesError } = await supabase
+				.from("stones")
+				.delete()
+				.in("id", selectedGemstones);
+
+			if (stonesError) throw stonesError;
+
+			// Clear selection after successful deletion
+			setSelectedGemstones([]);
+			setDeleteDialogVisible(false);
+			showSnackbar(
+				`Successfully deleted ${selectedGemstones.length} gemstone(s)`,
+			);
+
+			// Invalidate all relevant queries
+			queryClient.invalidateQueries({
+				queryKey: ["gemstones", activeOrganization],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["gemstones-by-date", activeOrganization?.id],
+				exact: false,
+			});
+		} catch (error) {
+			console.error("Error deleting gemstones:", error);
+			showSnackbar("Failed to delete gemstones. Please try again.");
+		}
+	};
+
+	const handleConfirmExport = async (filters: ExportFilters) => {
+		try {
+			// Get all selected gemstones
+			const { data: selectedGemstoneData, error } = await supabase
+				.from("stones")
+				.select("*, images(*)")
+				.in("id", selectedGemstones);
+
+			if (error) throw error;
+
+			if (!selectedGemstoneData || selectedGemstoneData.length === 0) {
+				showSnackbar("No gemstones found to export.");
+				return;
+			}
+
+			// Export the selected gemstones
+			const result = await exportToNumbers(selectedGemstoneData, filters);
+
+			setExportDialogVisible(false);
+			showSnackbar(result.message);
+		} catch (error) {
+			console.error("Error exporting gemstones:", error);
+			showSnackbar("Failed to export gemstones. Please try again.");
+		}
+	};
 
 	return (
 		<SafeAreaView style={[styles.container, { backgroundColor }]}>
@@ -269,25 +366,45 @@ export default function BuyList() {
 				selectedGemstones={selectedGemstones}
 				setSelectedGemstones={setSelectedGemstones}
 			/>
-			{/* Selection Count Indicator */}
-			{selectedGemstones.length > 0 && (
-				<TouchableOpacity
-					style={styles.selectionCountButton}
-					onPress={() => setSelectedGemstones([])}
-				>
-					<Text style={styles.selectionCountText}>
-						{selectedGemstones.length} selected
-					</Text>
-				</TouchableOpacity>
-			)}
-			{/* Export Button */}
-			<ExportButton
-				style={styles.exportFab}
-				filter={activeTab}
-				selectedGemstoneIds={
-					selectedGemstones.length > 0 ? selectedGemstones : undefined
-				}
+
+			<FloatingActionButton
+				selectedCount={selectedGemstones.length}
+				onExport={handleExport}
+				onDelete={handleDelete}
 			/>
+
+			<ExportDialog
+				visible={exportDialogVisible}
+				onDismiss={() => setExportDialogVisible(false)}
+				onConfirm={handleConfirmExport}
+				initialSoldStatus={
+					activeTab !== "all"
+						? activeTab === "sold"
+							? "sold"
+							: "unsold"
+						: "all"
+				}
+				selectedCount={selectedGemstones.length}
+			/>
+
+			<DeleteConfirmationDialog
+				visible={deleteDialogVisible}
+				onDismiss={() => setDeleteDialogVisible(false)}
+				onConfirm={handleConfirmDelete}
+				count={selectedGemstones.length}
+			/>
+
+			<Snackbar
+				visible={snackbarVisible}
+				onDismiss={() => setSnackbarVisible(false)}
+				duration={3000}
+				action={{
+					label: t("common.close"),
+					onPress: () => setSnackbarVisible(false),
+				}}
+			>
+				{snackbarMessage}
+			</Snackbar>
 		</SafeAreaView>
 	);
 }
@@ -338,41 +455,5 @@ const styles = StyleSheet.create({
 	segmentedButtonContainer: {
 		paddingHorizontal: 16,
 		marginBottom: 16,
-	},
-	exportFab: {
-		position: "absolute",
-		margin: 16,
-		right: 0,
-		bottom: 0, // Position above the add button
-		borderRadius: 100,
-	},
-	selectionControls: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		paddingHorizontal: 16,
-		paddingVertical: 8,
-	},
-	selectionCount: {
-		fontWeight: "bold",
-	},
-	selectionCountButton: {
-		position: "absolute",
-		backgroundColor: "#ff6b00",
-		paddingHorizontal: 12,
-		paddingVertical: 6,
-		borderRadius: 20,
-		right: 16,
-		bottom: 80,
-		zIndex: 100,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	selectionCountText: {
-		color: "white",
-		fontWeight: "bold",
 	},
 });
