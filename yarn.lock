@@ -7356,9 +7356,9 @@ react-native-autocomplete-dropdown@^4.4.0:
     react-native-size-matters "^0.4.2"
 
 react-native-blasted-image@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/react-native-blasted-image/-/react-native-blasted-image-1.1.1.tgz#590bb3b7093e0bfb1c12a1bd8e23592ce31e3696"
-  integrity sha512-Erh4JGBz4K/FArGDkRiJ6kLIXy3HqlQq31hZdAfaF/tb74Uwmx95YCweprzOM/aq0lAXUCLo7P/0TLqrNJdAkQ==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/react-native-blasted-image/-/react-native-blasted-image-1.1.2.tgz#87d4b8d7a1b2c3ba63fdae6fbe21d45c852fdba9"
+  integrity sha512-B2l8rWEj5sLhNGDNS9s/uqvFTBfQAGFBj15IA7+VxwzVF+BURe7YQzTHfnuPH0egEdY2Z8hqe/rtZxQy2aVcYQ==
 
 react-native-css-interop@0.1.22:
   version "0.1.22"
