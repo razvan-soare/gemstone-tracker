@@ -85,33 +85,50 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 			} else if (formattedText.length === 0) {
 				onChange?.(undefined);
 			}
+
+			const parsedDate = parseDateString(formattedText);
+
+			if (parsedDate) {
+				const jsDate = parsedDate.toJSDate();
+				setSelectedDate(jsDate);
+				setIsInvalid(false);
+				onChange?.(jsDate);
+			}
 		},
 		[formatDateString, onChange],
 	);
 
-	const handleBlur = () => {
-		if (!dateString) return;
+	const parseDateString = (input: string): DateTime | null => {
+		if (!input) return null;
 
-		// Try parsing with full date format first
-		let parsedDate = DateTime.fromFormat(dateString, DATE_FORMAT);
+		let parsedDate = DateTime.fromFormat(input, DATE_FORMAT);
 
-		// If invalid, try parsing with two-digit year format
 		if (!parsedDate.isValid) {
 			const twoDigitYearFormat = "dd-MM-yy";
-			parsedDate = DateTime.fromFormat(dateString, twoDigitYearFormat);
-			console.log("parsedDate", parsedDate, dateString);
-			// If valid with two-digit year, convert to full year
+			parsedDate = DateTime.fromFormat(input, twoDigitYearFormat);
 			if (parsedDate.isValid) {
 				parsedDate = parsedDate;
-				setDateString(parsedDate.toFormat(DATE_FORMAT));
 			}
 		}
 
 		if (!parsedDate.isValid) {
+			return null;
+		}
+
+		return parsedDate;
+	};
+
+	const handleBlur = () => {
+		if (!dateString) return;
+
+		const parsedDate = parseDateString(dateString);
+
+		if (!parsedDate) {
 			setIsInvalid(true);
 			return;
 		}
 
+		setDateString(parsedDate.toFormat(DATE_FORMAT));
 		const jsDate = parsedDate.toJSDate();
 		setIsInvalid(false);
 		setSelectedDate(jsDate);
