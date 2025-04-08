@@ -128,8 +128,6 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 	};
 
 	const handleBlur = () => {
-		if (!dateString) return;
-
 		const parsedDate = parseDateString(dateString);
 
 		if (!parsedDate) {
@@ -144,7 +142,12 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 		onChange?.(utcDate);
 	};
 
-	const showOverlay = useCallback(() => setShow(true), []);
+	const showOverlay = useCallback(() => {
+		setShow(true);
+		setDateString(DateTime.now().toFormat(DATE_FORMAT));
+		setSelectedDate(toUTCNoon(DateTime.now()));
+		onChange?.(toUTCNoon(DateTime.now()));
+	}, []);
 	const hideOverlay = useCallback(() => setShow(false), []);
 
 	return (
