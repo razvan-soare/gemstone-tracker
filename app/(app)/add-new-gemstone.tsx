@@ -43,6 +43,7 @@ import {
 } from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { DatePickerField } from "@/components/DatePickerField";
 
 // Register the English locale
 registerTranslation("en", enGB);
@@ -669,14 +670,14 @@ export default function AddNewGemstone() {
 					/>
 
 					<View style={styles.input}>
-						<DatePickerInput
-							locale="en"
+						<DatePickerField
 							label="Purchase date"
-							value={
+							date={
 								formData.purchase_date
 									? new Date(formData.purchase_date)
 									: undefined
 							}
+							error={error?.field === "purchase_date"}
 							onChange={(date) => {
 								if (date) {
 									// Create a date at noon UTC to avoid timezone issues
@@ -692,20 +693,15 @@ export default function AddNewGemstone() {
 									);
 									setFormData((prev) => ({
 										...prev,
-										sold_at: utcDate.toISOString(),
+										purchase_date: utcDate.toISOString(),
 									}));
 								} else {
 									setFormData((prev) => ({
 										...prev,
-										sold_at: null,
+										purchase_date: "",
 									}));
 								}
 							}}
-							inputMode="start"
-							mode="outlined"
-							presentationStyle="pageSheet"
-							withDateFormatInLabel={false}
-							error={error?.field === "sold_at"}
 						/>
 					</View>
 
