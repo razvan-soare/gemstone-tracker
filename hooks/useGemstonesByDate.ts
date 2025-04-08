@@ -53,7 +53,7 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "all") => {
 				// Use sold_at as the date for sold filter
 				const dateField =
 					filter === "sold" ? gemstone.sold_at : gemstone.purchase_date;
-				const date = dateField ? new Date(dateField) : new Date();
+				const date = dateField ? new Date(dateField) : null
 
 				const formattedDate = formatDateToDisplay(date);
 
@@ -66,14 +66,24 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "all") => {
 					formattedDate,
 				});
 			});
-
+	
 			// Convert to array format for SectionList
-			const groupedGemstones: GroupedGemstones[] = Object.keys(
-				gemstonesByDate,
-			).map((date) => ({
-				title: date,
-				data: gemstonesByDate[date],
-			}));
+			const groupedGemstones: GroupedGemstones[] = Object.keys(gemstonesByDate)
+				.map((date) => {
+					const groupData = gemstonesByDate[date];
+
+					// Sort gemstones inside the group by created_at descending
+					const sortedGroupData = groupData.sort((a, b) => {
+						const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0;
+						const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0;
+						return createdAtB - createdAtA;
+					});
+
+					return {
+						title: date,
+						data: sortedGroupData,
+					};
+				});
 
 			return groupedGemstones;
 		},

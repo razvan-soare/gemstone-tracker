@@ -31,9 +31,15 @@ export const useDeleteGemstone = () => {
 			return data;
 		},
 		onSuccess: () => {
-			// Invalidate relevant queries
+			// Invalidate gemstone list queries
 			queryClient.invalidateQueries({
 				queryKey: ["gemstones", activeOrganization],
+			});
+
+			// Invalidate gemstones-by-date (history page) queries
+			queryClient.invalidateQueries({
+				queryKey: ["gemstones-by-date", activeOrganization?.id],
+				exact: false,
 			});
 
 			// Navigate back to the gemstones list

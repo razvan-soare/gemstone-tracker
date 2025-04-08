@@ -21,12 +21,23 @@ export const useUpdateGemstone = () => {
 			if (error) throw error;
 			return data;
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["gemstone", activeOrganization],
-			});
+		onSuccess: (_data, variables) => {
+			// Invalidate gemstone detail query by ID
+			if (variables?.id) {
+				queryClient.invalidateQueries({
+					queryKey: ["gemstone", variables.id],
+				});
+			}
+
+			// Invalidate gemstone list queries
 			queryClient.invalidateQueries({
 				queryKey: ["gemstones", activeOrganization],
+			});
+
+			// Invalidate gemstones-by-date (history page) queries
+			queryClient.invalidateQueries({
+				queryKey: ["gemstones-by-date", activeOrganization?.id],
+				exact: false,
 			});
 		},
 	});

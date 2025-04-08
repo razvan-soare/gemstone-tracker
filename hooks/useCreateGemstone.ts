@@ -8,7 +8,7 @@ export type CreateGemstoneInputType = Omit<
 >;
 
 export function useCreateGemstone() {
-	const { createGemstone } = useSupabase();
+	const { createGemstone, activeOrganization } = useSupabase();
 	const queryClient = useQueryClient();
 
 	return useMutation({
@@ -16,6 +16,12 @@ export function useCreateGemstone() {
 		onSuccess: () => {
 			// Invalidate and refetch gemstones query
 			queryClient.invalidateQueries({ queryKey: ["gemstones"] });
+
+			// Invalidate gemstones-by-date (history page) queries
+			queryClient.invalidateQueries({
+				queryKey: ["gemstones-by-date", activeOrganization?.id],
+				exact: false,
+			});
 		},
 	});
 }
