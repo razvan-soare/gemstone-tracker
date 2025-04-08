@@ -77,7 +77,7 @@
 		"react-native": "0.76.1",
 		"react-native-autocomplete-dropdown": "^4.4.0",
 		"react-native-blasted-image": "^1.1.1",
-		"react-native-gesture-handler": "~2.20.2",
+		"react-native-gesture-handler": "~2.25.0",
 		"react-native-paper": "^5.13.1",
 		"react-native-paper-dates": "^0.22.34",
 		"react-native-paper-dropdown": "^2.3.1",
