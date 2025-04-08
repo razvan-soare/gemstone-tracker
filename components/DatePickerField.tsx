@@ -14,9 +14,16 @@ interface DatePickerField2Props {
 	label?: string;
 	error?: boolean;
 	className?: string;
+	autoFocus?: boolean;
 }
 
 const DATE_FORMAT = "dd-MM-yyyy";
+
+const toUTCNoon = (dateTime: DateTime): Date => {
+	return new Date(
+		Date.UTC(dateTime.year, dateTime.month - 1, dateTime.day, 12, 0, 0),
+	);
+};
 
 export const DatePickerField: React.FC<DatePickerField2Props> = ({
 	date,
@@ -24,6 +31,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 	label,
 	error,
 	className,
+	autoFocus = false,
 }) => {
 	const [dateString, setDateString] = useState(
 		date ? DateTime.fromJSDate(date).toFormat(DATE_FORMAT) : "",
@@ -38,9 +46,10 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 
 			const luxonDate = DateTime.fromJSDate(newDate);
 			setDateString(luxonDate.toFormat(DATE_FORMAT));
-			setSelectedDate(newDate);
+			const utcDate = toUTCNoon(luxonDate);
+			setSelectedDate(utcDate);
 			setIsInvalid(false);
-			onChange?.(newDate);
+			onChange?.(utcDate);
 
 			if (Platform.OS === "android") {
 				setShow(false);
@@ -78,7 +87,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 					const jsDate = parsedDate.toJSDate();
 					setSelectedDate(jsDate);
 					setIsInvalid(false);
-					onChange?.(jsDate);
+					onChange?.(toUTCNoon(DateTime.fromJSDate(jsDate)));
 				} else {
 					setIsInvalid(true);
 				}
@@ -92,7 +101,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 				const jsDate = parsedDate.toJSDate();
 				setSelectedDate(jsDate);
 				setIsInvalid(false);
-				onChange?.(jsDate);
+				onChange?.(toUTCNoon(DateTime.fromJSDate(jsDate)));
 			}
 		},
 		[formatDateString, onChange],
@@ -129,10 +138,10 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 		}
 
 		setDateString(parsedDate.toFormat(DATE_FORMAT));
-		const jsDate = parsedDate.toJSDate();
+		const utcDate = toUTCNoon(parsedDate);
 		setIsInvalid(false);
-		setSelectedDate(jsDate);
-		onChange?.(jsDate);
+		setSelectedDate(utcDate);
+		onChange?.(utcDate);
 	};
 
 	const showOverlay = useCallback(() => setShow(true), []);
@@ -150,6 +159,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 						placeholder="DD-MM-YYYY"
 						error={error || isInvalid}
 						keyboardType="numeric"
+						autoFocus={autoFocus}
 						onBlur={() => handleBlur()}
 						maxLength={10}
 						clearButtonMode="always"

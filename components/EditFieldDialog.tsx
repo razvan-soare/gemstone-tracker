@@ -159,6 +159,7 @@ export const EditFieldDialog = ({
 				return (
 					<View style={styles.priceContainer} key={field.label}>
 						<DatePickerField
+							autoFocus={true}
 							label={field.label}
 							date={dateValue}
 							onChange={(date) => setDateValue(date)}
