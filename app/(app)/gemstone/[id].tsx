@@ -47,19 +47,14 @@ import {
 	Portal,
 	TextInput,
 } from "react-native-paper";
-import { DatePickerInput } from "react-native-paper-dates";
+import { DatePickerField } from "@/components/DatePickerField";
+import { formatDateToDisplay } from "@/lib/utils";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Helper function to format dates consistently
-const formatDate = (dateString: string) => {
-	const date = new Date(dateString);
-	// Create a date object that ignores timezone
-	return new Date(
-		date.getUTCFullYear(),
-		date.getUTCMonth(),
-		date.getUTCDate(),
-	).toLocaleDateString();
+const formatDate = (dateInput: string | Date | null | undefined) => {
+	return formatDateToDisplay(dateInput);
 };
 
 // Helper function to safely get currency symbol
@@ -748,10 +743,9 @@ export default function GemstoneDetail() {
 										</View>
 									</View>
 									<View style={styles.input}>
-										<DatePickerInput
-											locale="en"
+										<DatePickerField
 											label={t("gemstones.purchaseDate")}
-											value={(() => {
+											date={(() => {
 												const dateValue = formData.purchase_date
 													? new Date(formData.purchase_date)
 													: undefined;
@@ -759,7 +753,6 @@ export default function GemstoneDetail() {
 											})()}
 											onChange={(date) => {
 												if (date) {
-													// Create a date at noon UTC to avoid timezone issues
 													const utcDate = new Date(
 														Date.UTC(
 															date.getFullYear(),
@@ -781,17 +774,12 @@ export default function GemstoneDetail() {
 													}));
 												}
 											}}
-											inputMode="start"
-											mode="outlined"
-											presentationStyle="pageSheet"
-											withDateFormatInLabel={false}
 										/>
 									</View>
 									<View style={styles.input}>
-										<DatePickerInput
-											locale="en"
+										<DatePickerField
 											label={t("gemstones.soldDate")}
-											value={
+											date={
 												formData.sold_at
 													? new Date(formData.sold_at)
 													: undefined
@@ -820,10 +808,6 @@ export default function GemstoneDetail() {
 													}));
 												}
 											}}
-											inputMode="start"
-											mode="outlined"
-											presentationStyle="pageSheet"
-											withDateFormatInLabel={false}
 										/>
 									</View>
 

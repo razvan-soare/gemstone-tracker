@@ -11,7 +11,7 @@ import { useOrganizationShapes } from "@/hooks/useOrganizationShapes";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Platform } from "react-native";
 import { Button, Dialog, Portal, Text, TextInput } from "react-native-paper";
-import { DatePickerInput } from "react-native-paper-dates";
+import { DatePickerField } from "@/components/DatePickerField";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -158,15 +158,10 @@ export const EditFieldDialog = ({
 			case "date":
 				return (
 					<View style={styles.priceContainer} key={field.label}>
-						<DatePickerInput
-							locale="en"
+						<DatePickerField
 							label={field.label}
-							value={dateValue}
+							date={dateValue}
 							onChange={(date) => setDateValue(date)}
-							inputMode="start"
-							mode="outlined"
-							style={styles.input}
-							presentationStyle="pageSheet"
 						/>
 					</View>
 				);

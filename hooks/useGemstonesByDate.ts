@@ -2,6 +2,7 @@ import { supabase } from "@/config/supabase";
 import { useSupabase } from "@/context/supabase-provider";
 import { Tables } from "@/lib/database.types";
 import { useQuery } from "@tanstack/react-query";
+import { formatDateToDisplay } from "@/lib/utils";
 
 type GemstoneWithDate = Tables<"stones"> & {
 	images: Tables<"images">[];
@@ -54,11 +55,7 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "all") => {
 					filter === "sold" ? gemstone.sold_at : gemstone.purchase_date;
 				const date = dateField ? new Date(dateField) : new Date();
 
-				const formattedDate = date.toLocaleDateString(undefined, {
-					year: "numeric",
-					month: "long",
-					day: "numeric",
-				});
+				const formattedDate = formatDateToDisplay(date);
 
 				if (!gemstonesByDate[formattedDate]) {
 					gemstonesByDate[formattedDate] = [];

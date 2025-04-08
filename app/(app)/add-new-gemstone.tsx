@@ -36,17 +36,11 @@ import {
 	Snackbar,
 	TextInput,
 } from "react-native-paper";
-import {
-	DatePickerInput,
-	enGB,
-	registerTranslation,
-} from "react-native-paper-dates";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { DatePickerField } from "@/components/DatePickerField";
 
 // Register the English locale
-registerTranslation("en", enGB);
 
 // Key for storing owner preference
 const LAST_SELECTED_OWNER_KEY = "lastSelectedOwner";
