@@ -30,7 +30,7 @@ type ExportDialogProps = {
 	selectedCount?: number;
 };
 
-const ExportDialog = ({
+export const ExportDialog = ({
 	visible,
 	onDismiss,
 	onConfirm,
@@ -314,5 +314,3 @@ const styles = StyleSheet.create({
 		marginVertical: 12,
 	},
 });
-
-export default ExportDialog;

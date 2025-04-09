@@ -18,7 +18,7 @@ import {
 
 import { Currency, CurrencySymbols } from "@/app/types/gemstone";
 import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog";
-import ExportDialog, { ExportFilters } from "@/components/ExportDialog";
+import { ExportDialog, ExportFilters } from "@/components/ExportDialog";
 import FloatingActionButton from "@/components/FloatingActionButton";
 import { H2, P } from "@/components/ui/typography";
 import { supabase } from "@/config/supabase";
@@ -32,6 +32,7 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { CheckIcon, ChevronRight } from "lucide-react-native";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Helper function to safely get currency symbol
 const getCurrencySymbol = (currencyCode: string | null): string => {
@@ -230,16 +231,17 @@ const GemstoneListView = ({
 };
 
 export default function BuyList() {
-	const { colorScheme } = useColorScheme();
 	const [activeTab, setActiveTab] = useState<GemstoneFilter>("all");
-	const [selectedGemstones, setSelectedGemstones] = useState<string[]>([]);
-	const [exportDialogVisible, setExportDialogVisible] = useState(false);
 	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-	const [snackbarVisible, setSnackbarVisible] = useState(false);
+	const [exportDialogVisible, setExportDialogVisible] = useState(false);
+	const [selectedGemstones, setSelectedGemstones] = useState<string[]>([]);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
-	const { t } = useLanguage();
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const queryClient = useQueryClient();
 	const { activeOrganization } = useSupabase();
+	const { colorScheme } = useColorScheme();
+	const { owners } = useOrganizationOwners();
+	const { t } = useLanguage();
 
 	useEffect(() => {
 		setSelectedGemstones([]);
@@ -303,6 +305,7 @@ export default function BuyList() {
 	};
 
 	const handleConfirmExport = async (filters: ExportFilters) => {
+		console.log("🟥");
 		try {
 			// Get all selected gemstones
 			const { data: selectedGemstoneData, error } = await supabase
@@ -318,7 +321,11 @@ export default function BuyList() {
 			}
 
 			// Export the selected gemstones
-			const result = await exportToNumbers(selectedGemstoneData, filters);
+			const result = await exportToNumbers({
+				gemstones: selectedGemstoneData,
+				filters,
+				owners,
+			});
 
 			setExportDialogVisible(false);
 			showSnackbar(result.message);

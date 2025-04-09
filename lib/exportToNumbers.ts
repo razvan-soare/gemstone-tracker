@@ -7,17 +7,17 @@ import { Tables } from "./database.types";
 import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Function to export gemstone data to a CSV file (Numbers-compatible)
-export const exportToNumbers = async (
+export const exportToNumbers = async ({
+	gemstones,
+	owners = [],
+	filters
+}:{
 	gemstones: Array<Tables<"stones"> & { images: Tables<"images">[] }>,
 	filters?: ExportFilters,
+	owners?: Array<{ name: string; id: string }>,}
 ) => {
-	try {
-		// First, get all unique owners from the gemstones
-		const uniqueOwners = Array.from(
-			new Set(gemstones.map((gemstone) => gemstone.owner).filter(Boolean))
-		).sort();
-		const { owners } = useOrganizationOwners()
 
+	try {
 		// Create the header with dynamic owner columns
 		const header = [
 			"Date",
@@ -95,7 +95,7 @@ export const exportToNumbers = async (
 		const csvContent = [header, ...rows].join("\n");
 
 		// Generate filename with current date and filter information
-		let fileName = `gemstone_export_${format(new Date(), "dd/MM/yyyy")}`;
+		let fileName = `gemstone_export_${format(new Date(), "yyyyMMdd")}`;
 
 		// Add filter information to filename if available
 		if (filters) {
