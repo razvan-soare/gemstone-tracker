@@ -50,6 +50,7 @@ export const useOrganizationOwners = () => {
       const { data, error } = await supabase
         .from("stones")
         .select("owner")
+        .is("deleted_at", null)
         .eq("organization_id", activeOrganization.id);
 
       if (error) {

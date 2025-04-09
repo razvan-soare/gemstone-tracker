@@ -23,7 +23,8 @@
 		"buyList": "Buy List",
 		"gemstones": "Gemstones",
 		"organizations": "Organizations",
-		"profile": "Profile"
+		"profile": "Profile",
+		"trashBin": "Trash Bin"
 	},
 	"auth": {
 		"signIn": "Sign In",

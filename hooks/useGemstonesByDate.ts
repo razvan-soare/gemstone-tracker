@@ -25,6 +25,7 @@ export const useGemstonesByDate = (filter: GemstoneFilter = "all") => {
 			let query = supabase
 				.from("stones")
 				.select("*, images:images(*)")
+				.is("deleted_at", null)
 				.eq("organization_id", activeOrganization?.id || "");
 
 			// Apply filter based on sold status

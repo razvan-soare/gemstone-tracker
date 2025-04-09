@@ -230,6 +230,7 @@ export const uploadFiles = async ({
 	const { data: stone } = await supabase
 		.from("stones")
 		.select("*")
+		.is("deleted_at", null)
 		.eq("id", gemstoneId)
 		.single();
 

@@ -10,6 +10,7 @@ export const useGemstone = (id: string) => {
 			const { data, error } = await supabase
 				.from("stones")
 				.select("*,images:images(*)")
+				.is("deleted_at", null)
 				.eq("id", id)
 				.eq("organization_id", activeOrganization?.id || "")
 				.single();

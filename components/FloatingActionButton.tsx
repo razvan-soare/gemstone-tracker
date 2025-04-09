@@ -7,12 +7,14 @@ type FloatingActionButtonProps = {
 	selectedCount: number;
 	onExport: () => void;
 	onDelete: () => void;
+	onAdd: () => void;
 };
 
 const FloatingActionButton = ({
 	selectedCount,
 	onExport,
 	onDelete,
+	onAdd,
 }: FloatingActionButtonProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const { t } = useLanguage();
@@ -26,6 +28,11 @@ const FloatingActionButton = ({
 		icon: "file-export",
 		label: t("buyList.export"),
 		onPress: onExport,
+	});
+	actions.push({
+		icon: "plus",
+		label: t("common.add"),
+		onPress: onAdd,
 	});
 
 	// Show delete action only when items are selected
@@ -50,7 +57,9 @@ const FloatingActionButton = ({
 				}
 			}}
 			style={styles.fab}
-			// fabStyle={styles.fab}
+			fabStyle={{
+				borderRadius: 100,
+			}}
 		/>
 	);
 };

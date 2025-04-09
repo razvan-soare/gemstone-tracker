@@ -154,6 +154,25 @@ export default function AppLayout() {
 									gestureEnabled: true,
 								}}
 							/>
+							<Stack.Screen
+								name="trash-bin"
+								options={{
+									headerBackTitle: t("common.back"),
+									headerShown: true,
+									headerTitle: t("navigation.trashBin"),
+									headerStyle: {
+										backgroundColor:
+											colorScheme === "dark"
+												? colors.dark.background
+												: colors.light.background,
+									},
+									headerTintColor:
+										colorScheme === "dark"
+											? colors.dark.foreground
+											: colors.light.foreground,
+									gestureEnabled: true,
+								}}
+							/>
 						</Stack>
 					</KeyboardSafeView>
 				</PaperProvider>

@@ -50,6 +50,7 @@ export const useOrganizationGemstoneTypes = () => {
       const { data, error } = await supabase
         .from("stones")
         .select("name, gem_type_id")
+        .is("deleted_at", null)
         .eq("organization_id", activeOrganization.id);
 
       if (error) {

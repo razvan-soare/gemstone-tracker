@@ -23,7 +23,8 @@
 		"buyList": "购买清单",
 		"gemstones": "宝石",
 		"organizations": "组织",
-		"profile": "个人资料"
+		"profile": "个人资料",
+		"trashBin": "回收站"
 	},
 	"auth": {
 		"signIn": "登录",

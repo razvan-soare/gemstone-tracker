@@ -50,6 +50,7 @@ export const useOrganizationShapes = () => {
       const { data, error } = await supabase
         .from("stones")
         .select("shape_id, shape, organization_shapes(id, name)")
+        .is("deleted_at", null)
         .eq("organization_id", activeOrganization.id);
 
       if (error) {

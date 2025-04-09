@@ -50,6 +50,7 @@ export const useGemstones = (filters: GemstoneFilters = {}) => {
 				.select("*, images:images(*)", {
 					count: "exact",
 				})
+				.is("deleted_at", null)
 				.eq("organization_id", activeOrganization?.id || "")
 				.order("created_at", { ascending: false })
 				.range(

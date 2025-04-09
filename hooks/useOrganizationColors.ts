@@ -50,6 +50,7 @@ export const useOrganizationColors = () => {
       const { data, error } = await supabase
         .from("stones")
         .select("color_id, color, organization_colors(id, name)")
+        .is("deleted_at", null)
         .eq("organization_id", activeOrganization.id);
 
       if (error) {

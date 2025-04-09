@@ -26,13 +26,14 @@ import { colors } from "@/constants/colors";
 import { useSupabase } from "@/context/supabase-provider";
 import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import { Tables } from "@/lib/database.types";
 import { exportToNumbers } from "@/lib/exportToNumbers";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { Feather } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { CheckIcon, ChevronRight } from "lucide-react-native";
-import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Helper function to safely get currency symbol
 const getCurrencySymbol = (currencyCode: string | null): string => {
@@ -267,23 +268,22 @@ export default function BuyList() {
 
 	const handleConfirmDelete = async () => {
 		try {
-			// First, delete all images associated with the selected gemstones
-			const { error: imagesError } = await supabase
-				.from("images")
-				.delete()
-				.in("stone_id", selectedGemstones);
+			const { data: userData, error: userError } =
+				await supabase.auth.getUser();
+			if (userError) throw userError;
+			const userId = userData?.user?.id;
 
-			if (imagesError) throw imagesError;
-
-			// Then delete the gemstones
 			const { error: stonesError } = await supabase
 				.from("stones")
-				.delete()
+				.update({
+					deleted_at: new Date().toISOString(),
+					deleted_by: userId,
+				} as any)
 				.in("id", selectedGemstones);
 
 			if (stonesError) throw stonesError;
 
-			// Clear selection after successful deletion
+			// Clear selection after successful soft delete
 			setSelectedGemstones([]);
 			setDeleteDialogVisible(false);
 			showSnackbar(
@@ -305,7 +305,6 @@ export default function BuyList() {
 	};
 
 	const handleConfirmExport = async (filters: ExportFilters) => {
-		console.log("🟥");
 		try {
 			// Get all selected gemstones
 			const { data: selectedGemstoneData, error } = await supabase
@@ -343,6 +342,17 @@ export default function BuyList() {
 
 			<View className="w-full items-center justify-center py-4">
 				<H2>{t("buyList.title")}</H2>
+				<TouchableOpacity
+					onPress={() => router.push("/trash-bin")}
+					style={{
+						position: "absolute",
+						right: 20,
+						top: "50%",
+						transform: [{ translateY: -12 }],
+					}}
+				>
+					<Feather name="trash-2" size={24} color="black" />
+				</TouchableOpacity>
 			</View>
 
 			<View style={styles.segmentedButtonContainer}>
@@ -378,6 +388,7 @@ export default function BuyList() {
 				selectedCount={selectedGemstones.length}
 				onExport={handleExport}
 				onDelete={handleDelete}
+				onAdd={() => router.push("/(app)/add-new-gemstone")}
 			/>
 
 			<ExportDialog
