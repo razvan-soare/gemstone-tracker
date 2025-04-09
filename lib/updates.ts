@@ -165,7 +165,7 @@ export async function checkMinimumVersion(): Promise<{
 		}
 
 		const minVersion = data?.min_version;
-
+		
 		if (!minVersion) {
 			return { needsUpdate: false, currentVersion, minVersion: null };
 		}

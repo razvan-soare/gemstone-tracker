@@ -1,13 +1,8 @@
-import React from "react";
-import { View, Text, Linking, Platform } from "react-native";
 import { useLanguage } from "@/hooks/useLanguage";
-import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogDescription,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import React from "react";
+import { Linking, Platform, Text, View } from "react-native";
+import { P } from "./ui/typography";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface UpdateRequiredModalProps {
 	currentVersion: string;
@@ -19,12 +14,11 @@ export function UpdateRequiredModal({
 	minVersion,
 }: UpdateRequiredModalProps) {
 	const { t } = useLanguage();
-
 	const handleUpdate = () => {
 		// Open the app store based on platform
 		if (Platform.OS === "ios") {
 			// Replace with your actual iOS App Store ID
-			Linking.openURL("https://apps.apple.com/app/id[YOUR_APP_ID]");
+			Linking.openURL("https://apps.apple.com/app/id6742846901");
 		} else if (Platform.OS === "android") {
 			Linking.openURL(
 				"https://play.google.com/store/apps/details?id=com.razvansoare.gemtracker",
@@ -33,14 +27,14 @@ export function UpdateRequiredModal({
 	};
 
 	return (
-		<Dialog open={true}>
-			<DialogContent className="mx-auto my-auto max-w-[90%] rounded-lg">
-				<DialogTitle className="text-xl font-semibold text-center">
+		<SafeAreaView className="flex-1 bg-background">
+			<View className="mx-auto my-auto max-w-[90%] rounded-lg">
+				<P className="text-xl font-semibold text-center">
 					{t("update.requiredTitle")}
-				</DialogTitle>
-				<DialogDescription className="text-center text-muted-foreground">
+				</P>
+				<P className="text-center text-muted-foreground">
 					{t("update.requiredDescription")}
-				</DialogDescription>
+				</P>
 				<View className="py-4 flex flex-col items-center">
 					<Text className="text-center mb-2">
 						{t("update.currentVersion")}:{" "}
@@ -59,7 +53,7 @@ export function UpdateRequiredModal({
 						</Text>
 					</View>
 				</View>
-			</DialogContent>
-		</Dialog>
+			</View>
+		</SafeAreaView>
 	);
 }
