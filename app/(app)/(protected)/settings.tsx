@@ -139,7 +139,8 @@ export default function Settings() {
 									}))}
 								/>
 							</View>
-
+						</View>
+						<View className="flex-row flex-wrap gap-2 mt-2">
 							<View className="flex-1 min-w-[120px]">
 								<Dropdown
 									label={t("settings.language.title")}
