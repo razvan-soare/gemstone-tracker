@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 import { DateTime } from "luxon";
 
-const DISPLAY_DATE_FORMAT = "dd-MM-yyyy";
+const DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 
 export function formatDateToDisplay(
 	dateInput: Date | string | null | undefined,

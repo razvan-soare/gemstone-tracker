@@ -17,7 +17,7 @@ interface DatePickerField2Props {
 	autoFocus?: boolean;
 }
 
-const DATE_FORMAT = "dd-MM-yyyy";
+const DATE_FORMAT = "dd/MM/yyyy";
 
 const toUTCNoon = (dateTime: DateTime): Date => {
 	return new Date(
@@ -62,13 +62,13 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 		// Remove all non-numeric characters
 		const numbers = input.replace(/\D/g, "");
 
-		// Format the string as DD-MM-YYYY
+		// Format the string as DD/MM/YYYY
 		if (numbers.length <= 2) {
 			return numbers;
 		} else if (numbers.length <= 4) {
-			return `${numbers.slice(0, 2)}-${numbers.slice(2)}`;
+			return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
 		} else {
-			return `${numbers.slice(0, 2)}-${numbers.slice(2, 4)}-${numbers.slice(4, 8)}`;
+			return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
 		}
 	}, []);
 
@@ -79,7 +79,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 			setDateString(formattedText);
 			setIsInvalid(false);
 
-			// Only attempt to parse if we have a complete date (DD-MM-YYYY)
+			// Only attempt to parse if we have a complete date (DD/MM/YYYY)
 			if (formattedText.length === 10) {
 				const parsedDate = DateTime.fromFormat(formattedText, DATE_FORMAT);
 
@@ -113,7 +113,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 		let parsedDate = DateTime.fromFormat(input, DATE_FORMAT);
 
 		if (!parsedDate.isValid) {
-			const twoDigitYearFormat = "dd-MM-yy";
+			const twoDigitYearFormat = "dd/MM/yy";
 			parsedDate = DateTime.fromFormat(input, twoDigitYearFormat);
 			if (parsedDate.isValid) {
 				parsedDate = parsedDate;
@@ -159,7 +159,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 						label={label || "Date"}
 						value={dateString}
 						onChangeText={handleTextChange}
-						placeholder="DD-MM-YYYY"
+						placeholder="DD/MM/YYYY"
 						error={error || isInvalid}
 						keyboardType="numeric"
 						autoFocus={autoFocus}

@@ -4,6 +4,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 import { Tables } from "./database.types";
+import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 
 // Function to export gemstone data to a CSV file (Numbers-compatible)
 export const exportToNumbers = async (
@@ -15,6 +16,7 @@ export const exportToNumbers = async (
 		const uniqueOwners = Array.from(
 			new Set(gemstones.map((gemstone) => gemstone.owner).filter(Boolean))
 		).sort();
+		const { owners } = useOrganizationOwners()
 
 		// Create the header with dynamic owner columns
 		const header = [
@@ -28,14 +30,14 @@ export const exportToNumbers = async (
 			"Buy Price",
 			"Comment",
 			// Add a column for each unique owner
-			...uniqueOwners.map((owner) => `${owner} Buy Price`),
+			...owners.map((owner) => `${owner.name}`),
 		].join(",");
 
 		// Format the data rows
 		const rows = gemstones.map((gemstone) => {
 			// Format date
 			const date = gemstone.date ? new Date(gemstone.date) : new Date();
-			const formattedDate = format(date, "yyyy-MM-dd");
+			const formattedDate = format(date, "dd/MM/yyyy");
 
 			// Format stone name and color
 			const stoneNameColor = `${gemstone.name}${
@@ -53,8 +55,8 @@ export const exportToNumbers = async (
 				: "";
 
 			// Create owner columns - only the matching owner gets the buy price
-			const ownerValues = uniqueOwners.map((owner) =>
-				gemstone.owner === owner ? buyPrice : ""
+			const ownerValues = owners.map((owner) =>
+				gemstone.owner?.toLowerCase() === owner.name.toLowerCase() ? buyPrice : ""
 			);
 
 			// Create the row
@@ -93,7 +95,7 @@ export const exportToNumbers = async (
 		const csvContent = [header, ...rows].join("\n");
 
 		// Generate filename with current date and filter information
-		let fileName = `gemstone_export_${format(new Date(), "yyyy-MM-dd")}`;
+		let fileName = `gemstone_export_${format(new Date(), "dd/MM/yyyy")}`;
 
 		// Add filter information to filename if available
 		if (filters) {
