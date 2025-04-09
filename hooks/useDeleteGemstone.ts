@@ -3,9 +3,9 @@ import { useSupabase } from "@/context/supabase-provider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
-export const useDeleteGemstone = (userId: string) => {
+export const useDeleteGemstone = () => {
 	const queryClient = useQueryClient();
-	const { activeOrganization } = useSupabase();
+	const { activeOrganization, user } = useSupabase();
 	const router = useRouter();
 
 	return useMutation({
@@ -15,7 +15,7 @@ export const useDeleteGemstone = (userId: string) => {
 			// Then delete the gemstone
 			const { data, error } = await supabase
 				.from("stones")
-				.update({ deleted_at: new Date().toISOString(), deleted_by: userId } as any)
+				.update({ deleted_at: new Date().toISOString(), deleted_by: user?.id } as any)
 				.eq("id", id)
 				.eq("organization_id", activeOrganization?.id || "")
 				.select()

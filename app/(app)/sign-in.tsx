@@ -14,7 +14,6 @@ import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useSupabase } from "@/context/supabase-provider";
 import { useLanguage } from "@/hooks/useLanguage";
-import { supabase } from "@/config/supabase";
 
 const formSchema = z.object({
 	email: z.string().email("Please enter a valid email address."),
@@ -30,7 +29,6 @@ export default function SignIn() {
 	const router = useRouter();
 	const { t } = useLanguage();
 	const [loginError, setLoginError] = useState<string | null>(null);
-	const [minVersion, setMinVersion] = useState<string | null>(null);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {

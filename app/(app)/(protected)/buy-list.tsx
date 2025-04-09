@@ -239,7 +239,7 @@ export default function BuyList() {
 	const [snackbarMessage, setSnackbarMessage] = useState("");
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const queryClient = useQueryClient();
-	const { activeOrganization } = useSupabase();
+	const { activeOrganization, user } = useSupabase();
 	const { colorScheme } = useColorScheme();
 	const { owners } = useOrganizationOwners();
 	const { t } = useLanguage();
@@ -268,16 +268,11 @@ export default function BuyList() {
 
 	const handleConfirmDelete = async () => {
 		try {
-			const { data: userData, error: userError } =
-				await supabase.auth.getUser();
-			if (userError) throw userError;
-			const userId = userData?.user?.id;
-
 			const { error: stonesError } = await supabase
 				.from("stones")
 				.update({
 					deleted_at: new Date().toISOString(),
-					deleted_by: userId,
+					deleted_by: user?.id,
 				} as any)
 				.in("id", selectedGemstones);
 

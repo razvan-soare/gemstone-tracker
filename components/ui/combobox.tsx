@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Text, useColorScheme, View } from "react-native";
 import { AutocompleteDropdown } from "react-native-autocomplete-dropdown";
+import { P } from "./typography";
 
 export type ComboBoxOption = {
 	id: string;
@@ -17,6 +18,8 @@ export type ComboBoxProps = {
 	className?: string;
 	allowCustom?: boolean;
 	onCreateNewOption?: (value: string) => Promise<void>;
+	selectTextOnFocus?: boolean;
+	autoFocus?: boolean;
 };
 
 export const ComboBox = ({
@@ -28,22 +31,22 @@ export const ComboBox = ({
 	className,
 	allowCustom = false,
 	onCreateNewOption,
+	selectTextOnFocus = false,
+	autoFocus = false,
 }: ComboBoxProps) => {
+	const [error, setError] = useState<string | null>(null);
 	const colorScheme = useColorScheme();
 	const isDark = colorScheme === "dark";
 	const [inputText, setInputText] = useState("");
 	const [displayOptions, setDisplayOptions] =
 		useState<ComboBoxOption[]>(options);
-	const [filteredOptions, setFilteredOptions] = useState<
-		{
-			id: string;
-			title: string;
-		}[]
-	>(options);
+	const [filteredOptions, setFilteredOptions] =
+		useState<ComboBoxOption[]>(options);
 
 	useEffect(() => {
 		if (options && options.length !== displayOptions.length) {
 			setDisplayOptions(options);
+			handleTextChange(inputText);
 		}
 	}, [options]);
 
@@ -63,6 +66,7 @@ export const ComboBox = ({
 
 	const handleTextChange = (q: string) => {
 		setInputText(q);
+		setError(null);
 		const filterToken = q.toLowerCase();
 
 		const suggestions = options
@@ -91,10 +95,17 @@ export const ComboBox = ({
 				closeOnSubmit={false}
 				textInputProps={{
 					placeholder,
+					autoFocus,
+					selectTextOnFocus,
 					placeholderTextColor: colors.placeholderText,
 					style: {
 						color: colors.text,
 					},
+				}}
+				onBlur={() => {
+					if (inputText && !value) {
+						setError("Please select a value");
+					}
 				}}
 				inputContainerStyle={{
 					backgroundColor: colors.background,
@@ -111,7 +122,6 @@ export const ComboBox = ({
 				onChangeText={handleTextChange}
 				onSelectItem={(item) => {
 					if (item) {
-						console.log("Selected item:", item);
 						if (item.id === "-1") {
 							// Handle the custom option creation
 							if (onCreateNewOption) {
@@ -143,6 +153,9 @@ export const ComboBox = ({
 					})),
 				]}
 			/>
+			{error && (
+				<P className="mt-1 text-sm font-medium text-red-500">{error}</P>
+			)}
 		</View>
 	);
 };

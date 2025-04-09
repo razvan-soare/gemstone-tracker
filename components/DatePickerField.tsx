@@ -1,5 +1,5 @@
 import { Platform, View } from "react-native";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { DateTime } from "luxon";
 import { Dialog, Portal, TextInput } from "react-native-paper";
@@ -33,6 +33,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 	className,
 	autoFocus = false,
 }) => {
+	const textInputRef = useRef(null);
 	const [dateString, setDateString] = useState(
 		date ? DateTime.fromJSDate(date).toFormat(DATE_FORMAT) : "",
 	);
@@ -163,6 +164,7 @@ export const DatePickerField: React.FC<DatePickerField2Props> = ({
 						error={error || isInvalid}
 						keyboardType="numeric"
 						autoFocus={autoFocus}
+						selectTextOnFocus
 						onBlur={() => handleBlur()}
 						maxLength={10}
 						clearButtonMode="always"

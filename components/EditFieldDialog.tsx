@@ -132,6 +132,7 @@ export const EditFieldDialog = ({
 						onChangeText={setValue}
 						mode="outlined"
 						style={styles.input}
+						autoFocus
 					/>
 				);
 			case "number":
@@ -139,6 +140,7 @@ export const EditFieldDialog = ({
 					<TextInput
 						label={field.label}
 						defaultValue={value?.toString() || ""}
+						autoFocus
 						onChangeText={(val) => {
 							// Only allow numbers and decimal points
 							const cleaned = val.replace(/[^0-9.]/g, "");
@@ -159,7 +161,7 @@ export const EditFieldDialog = ({
 				return (
 					<View style={styles.priceContainer} key={field.label}>
 						<DatePickerField
-							autoFocus={true}
+							autoFocus
 							label={field.label}
 							date={dateValue}
 							onChange={(date) => setDateValue(date)}
@@ -176,6 +178,7 @@ export const EditFieldDialog = ({
 							mode="outlined"
 							defaultValue={priceValue || ""}
 							autoFocus
+							selectTextOnFocus
 							onChangeText={(val) => {
 								// Only allow numbers and decimal points
 								const cleaned = val.replace(/[^0-9.]/g, "");
@@ -217,6 +220,8 @@ export const EditFieldDialog = ({
 							title: shape.name,
 						}))}
 						onChange={setValue}
+						autoFocus
+						selectTextOnFocus
 						onCreateNewOption={async (newValue) => {
 							await addShape.mutateAsync(newValue);
 						}}
@@ -233,6 +238,8 @@ export const EditFieldDialog = ({
 							title: color.name,
 						}))}
 						onChange={setValue}
+						autoFocus
+						selectTextOnFocus
 						onCreateNewOption={async (newValue) => {
 							await addColor.mutateAsync(newValue);
 						}}
@@ -249,6 +256,8 @@ export const EditFieldDialog = ({
 							title: owner.name,
 						}))}
 						onChange={setValue}
+						autoFocus
+						selectTextOnFocus
 						onCreateNewOption={async (newValue) => {
 							await addOwner.mutateAsync(newValue);
 						}}
@@ -265,6 +274,8 @@ export const EditFieldDialog = ({
 							title: treatment,
 						}))}
 						onChange={setValue}
+						autoFocus
+						selectTextOnFocus
 						onCreateNewOption={async (newValue) => {
 							await addGemstoneType.mutateAsync(newValue);
 						}}
@@ -281,6 +292,8 @@ export const EditFieldDialog = ({
 							title: type.name,
 						}))}
 						onChange={setValue}
+						autoFocus
+						selectTextOnFocus
 						onCreateNewOption={async (newValue) => {
 							await addGemstoneType.mutateAsync(newValue);
 						}}
@@ -294,6 +307,8 @@ export const EditFieldDialog = ({
 						onChangeText={setValue}
 						mode="outlined"
 						style={styles.input}
+						selectTextOnFocus
+						autoFocus
 					/>
 				);
 		}

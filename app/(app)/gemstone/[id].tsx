@@ -7,7 +7,6 @@ import {
 	GemTreatmentEnum,
 	GemTreatmentLabels,
 } from "@/app/types/gemstone";
-import { DateTime } from "luxon";
 import { P } from "@/components/ui/typography";
 import { useDeleteGemstone } from "@/hooks/useDeleteGemstone";
 import { useGemstone } from "@/hooks/useGemstone";
@@ -15,6 +14,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useUpdateGemstone } from "@/hooks/useUpdateGemstone";
 
 import { GemstoneCarousel } from "@/components/Carousel";
+import { DatePickerField } from "@/components/DatePickerField";
 import { EditFieldDialog } from "@/components/EditFieldDialog";
 import { GemstoneHeader } from "@/components/GemstoneHeader";
 import { ComboBox } from "@/components/ui/combobox";
@@ -26,6 +26,7 @@ import { useOrganizationOwners } from "@/hooks/useOrganizationOwners";
 import { useOrganizationShapes } from "@/hooks/useOrganizationShapes";
 import { Tables } from "@/lib/database.types";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { formatDateToDisplay } from "@/lib/utils";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
@@ -48,8 +49,6 @@ import {
 	Portal,
 	TextInput,
 } from "react-native-paper";
-import { DatePickerField } from "@/components/DatePickerField";
-import { formatDateToDisplay } from "@/lib/utils";
 import { Dropdown } from "react-native-paper-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
