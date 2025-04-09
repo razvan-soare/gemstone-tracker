@@ -11,28 +11,27 @@ import {
 import {
 	List,
 	SegmentedButtons,
+	Snackbar,
 	Surface,
 	Text,
-	Snackbar,
 } from "react-native-paper";
 
 import { Currency, CurrencySymbols } from "@/app/types/gemstone";
-import ExportButton from "@/components/ExportButton";
-import FloatingActionButton from "@/components/FloatingActionButton";
 import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog";
 import ExportDialog, { ExportFilters } from "@/components/ExportDialog";
+import FloatingActionButton from "@/components/FloatingActionButton";
 import { H2, P } from "@/components/ui/typography";
+import { supabase } from "@/config/supabase";
 import { colors } from "@/constants/colors";
+import { useSupabase } from "@/context/supabase-provider";
 import { GemstoneFilter, useGemstonesByDate } from "@/hooks/useGemstonesByDate";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Tables } from "@/lib/database.types";
+import { exportToNumbers } from "@/lib/exportToNumbers";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { supabase } from "@/config/supabase";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { CheckIcon, ChevronRight } from "lucide-react-native";
-import { exportToNumbers } from "@/lib/exportToNumbers";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSupabase } from "@/context/supabase-provider";
 
 // Helper function to safely get currency symbol
 const getCurrencySymbol = (currencyCode: string | null): string => {
@@ -90,32 +89,33 @@ const GemstoneItem = ({
 					</TouchableOpacity>
 				)}
 				right={() => (
-					<View className="flex-row items-center justify-between gap-2">
-						{gemstone.sold && (
-							<View className="relative w-15 h-15 overflow-visible justify-center items-center">
-								<View className="bg-red-600 px-2 py-1 rounded shadow-md transform rotate-45">
-									<P className="text-white font-bold text-xs text-center">
-										{t("gemstones.sold")}
-									</P>
+					<TouchableOpacity onPress={handlePress}>
+						<View className="flex-row items-center justify-between gap-2">
+							{gemstone.sold && (
+								<View className="relative w-15 h-15 overflow-visible justify-center items-center">
+									<View className="bg-red-600 px-2 py-1 rounded shadow-md transform rotate-45">
+										<P className="text-white font-bold text-xs text-center">
+											{t("gemstones.sold")}
+										</P>
+									</View>
 								</View>
+							)}
+
+							<View style={styles.priceContainer}>
+								<P className="text-green-500 font-semibold">
+									{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}{" "}
+									{buyCurrencySymbol}
+								</P>
+								<P className="text-red-500 font-semibold">
+									{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}{" "}
+									{sellCurrencySymbol}
+								</P>
 							</View>
-						)}
-						<View style={styles.priceContainer}>
-							<P className="text-green-500 font-semibold">
-								{gemstone.buy_price ? gemstone.buy_price.toFixed(2) : "N/A"}{" "}
-								{buyCurrencySymbol}
-							</P>
-							<P className="text-red-500 font-semibold">
-								{gemstone.sell_price ? gemstone.sell_price.toFixed(2) : "N/A"}{" "}
-								{sellCurrencySymbol}
-							</P>
-						</View>
-						<View>
-							<TouchableOpacity onPress={handlePress}>
+							<View>
 								<ChevronRight size={20} color="black" />
-							</TouchableOpacity>
+							</View>
 						</View>
-					</View>
+					</TouchableOpacity>
 				)}
 				titleStyle={styles.gemstoneTitle}
 				descriptionStyle={styles.gemstoneDescription}
